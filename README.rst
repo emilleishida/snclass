@@ -24,7 +24,9 @@ To generate the fit and plot from the command line do::
 
 This should generate a plot like this:
 
-`Example fitted light curve using george <https://github.com/COINtoolbox/CosmoABC/blob/emille_dev/CosmoABC/examples/test_distance_mean_std_n.jpeg>`_
+`Example fitted light curve using george <https://github.com/emilleishida/snclass/blob/emille_dev/examples/gp-results.png>`_
+
+
 
 
 Requirements
