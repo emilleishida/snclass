@@ -1,0 +1,45 @@
+snclass - Supernova Photometric Classifier
+==========================================
+
+``snclass`` is a package designed to perform supernova photometric classification.
+
+It works in 3 steps:
+
+#. Convert flux/magnitude measurements in a continuous function using Gaussian process (GP). 
+#. Dimentionality reduction through kernel principal component analysis (kPCA). 
+#. Classification of a purely photometric sample thorough nearst neighbor (NN).  
+
+
+This preliminary version contains only the GP fitting part in the script ``~snclass/bin/fit_lc_george.py``.
+
+In order to run it, use the example user input file ``~snclass/examples/fit_lc_input.dat``.
+
+At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
+(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and plot 24 GP realizations generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
+
+
+To generate the fit and plot from the command line do::
+
+    $ python fit_lc_george.py -i example_input.dat
+
+This should generate a plot like this:
+
+`Example fitted light curve using george <https://github.com/COINtoolbox/CosmoABC/blob/emille_dev/CosmoABC/examples/test_distance_mean_std_n.jpeg>`_
+
+
+Requirements
+************
+
+* Python 2.7
+* numpy >=1.8.2
+* matplotlib >= 1.3.1     
+* argparse >= 1.1
+* george >= 0.2.1
+
+
+License
+********
+
+* GNU General Public License (GPL>=3)
+
+
