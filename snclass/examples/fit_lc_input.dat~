@@ -1,0 +1,23 @@
+path_to_obs	    	= /home/emille/Documents/github/snclass/examples/                          # path to data directory
+path_to_lc              = DES_SN849359.DAT                                                         # path to raw SN light curve
+file_root		=  DES_SN 								   # root common to all files containing SN light curves	
+
+filters		    =  g r i z									   # list of fiters	
+header		    = SNID: SNTYPE: SIM_NON1a:  REDSHIFT_FINAL:	         			   # variables to be retreeted	
+param_list          = VARLIST:									   # identification of list of variables within SN data file	
+mjd_flag            = MJD									   # MJD identification	
+filter_flag         = FLT									   # filter identification	
+photon_flag         = FLUXCAL									   # photon count identification	
+photonerr_flag      = FLUXCALERR								   # photon count error identification	
+quality_flag        = SNR								           # SNR identification
+		  
+epoch_flag	    = OBS:									   # epoch identification	
+type_flag           = SIM_NON1a:								   # type identification	
+sample_flag	    = SNTYPE:									   # sample identification	
+redshift_flag	    = REDSHIFT_FINAL:								   # redshift identification	
+
+quality_cut        = 0.0									   # SNR selection cut
+type_cut	   = None									   # type selection cut	
+sample_cut	   = -9										   # sample selection cut	
+
+
