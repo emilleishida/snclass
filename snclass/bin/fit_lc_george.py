@@ -104,7 +104,7 @@ def main(args):
     lc_data = read_SNANA_lc(user_input)
 
     #set starting point
-    start = [0.0, 0.0] + [0.1, 0.1, 0.1]
+    start = [0.0, 0.0, 0.1, 0.1, 0.1]
  
     # Fit assuming GP.
     print("Fitting GP")
@@ -113,8 +113,10 @@ def main(args):
     yerr = lc_data['r'][:,2]
 
     data = (t, y, yerr)
+    print 'data = ' + str(data)
 
-    sampler = fit_gp(start, data)
+    truth_gp = [0.0, 0.0] + [-1.0, 0.1, 0.4]
+    sampler = fit_gp(truth_gp, data)
 
     # Plot the samples in data space.
     print("Making plots")
