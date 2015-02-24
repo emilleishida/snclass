@@ -10,7 +10,7 @@ import numpy as np
 import george
 from george import kernels
 
-from prepare_LC import read_user_input, read_SNANA_lc
+from snclass.prepare_LC import read_user_input, read_SNANA_lc
 
 
 def model(params, t):
@@ -104,7 +104,7 @@ def main(args):
     lc_data = read_SNANA_lc(user_input)
 
     #set starting point
-    start = [0.0, 0.0, 1.0, 0.1, 1.0]
+    start = [0.0, 0.0] + [0.1, 0.1, 0.1]
  
     # Fit assuming GP.
     print("Fitting GP")
@@ -113,10 +113,8 @@ def main(args):
     yerr = lc_data['r'][:,2]
 
     data = (t, y, yerr)
-    print 'data = ' + str(data)
 
-    truth_gp = [0.0, 0.0] + [0.1, 0.1, 0.1]
-    sampler = fit_gp(truth_gp, data)
+    sampler = fit_gp(start, data)
 
     # Plot the samples in data space.
     print("Making plots")

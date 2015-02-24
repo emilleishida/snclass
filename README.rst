@@ -12,15 +12,32 @@ It works in 3 steps:
 
 This preliminary version contains only the GP fitting part in the script ``~snclass/bin/fit_lc_george.py``.
 
-In order to run it, use the example user input file ``~snclass/examples/fit_lc_input.dat``.
+Installation
+************
+
+In the ``snclass`` directory, do::
+
+    $ python setup.py install
+
+If you do not have root privileges, do::
+
+    $ python setup.py install --user
+
+
+Running
+********
 
 At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
 (you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and plot 24 GP realizations generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
 
+Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  to your current directory.
+
+Do not forget to change the variable ``path_to_obs`` so it points to the directory where the data is being stored.
 
 To generate the fit and plot from the command line do::
 
-    $ python fit_lc_george.py -i example_input.dat
+    $ fit_lc_george.py -i example_input.dat
+
 
 This should generate a plot like this:
 
