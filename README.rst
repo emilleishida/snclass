@@ -19,7 +19,7 @@ In the ``snclass`` directory, do::
 
     $ python setup.py install
 
-If you do not have root permissions, do::
+If you do not have root privileges, do::
 
     $ python setup.py install --user
 
