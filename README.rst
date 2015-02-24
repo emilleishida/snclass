@@ -28,7 +28,7 @@ Running
 ********
 
 At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
-(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and plot 24 GP realizations generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
+(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and plot 24 GP realizations, for the r-band light curve, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
 
 Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  to your current directory.
 
