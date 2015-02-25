@@ -1,0 +1,11 @@
+README.rst
+setup.py
+snclass/__init__.py
+snclass/prepare_LC.py
+snclass.egg-info/PKG-INFO
+snclass.egg-info/SOURCES.txt
+snclass.egg-info/dependency_links.txt
+snclass.egg-info/not-zip-safe
+snclass.egg-info/requires.txt
+snclass.egg-info/top_level.txt
+snclass/bin/fit_lc_george.py
