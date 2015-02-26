@@ -93,14 +93,14 @@ def fit_gp(initial, data, nwalkers=32):
     p0, _, _ = sampler.run_mcmc(p0, 1000)
 
     return sampler
-def mean_gp(t, y, yerr):
-    gp = george.GP( kernels.Matern32Kernel(tau))
+"""
+def mean_gp(gp, t, y, yerr):
     gp.compute(t, yerr)
     x=np.linspace(min(t), max(t), 500)
     mu, cov = gp.predict(y, x)
     std=np.sqrt(np.diag(cov))
     return x, mu, std
-
+"""
 def main(args):
 
     #read_user_input
@@ -112,6 +112,7 @@ def main(args):
     #set starting point
     start = [0.0, 0.0, 0.1, 0.1, 0.1]
  
+    #gp = george.GP( kernels.Matern32Kernel(200))
     # Fit assuming GP.
     print("Fitting GP")
     t = lc_data['r'][:,0]
@@ -123,13 +124,13 @@ def main(args):
 
     truth_gp = [0.0, 0.0] + [-1.0, 0.1, 0.4]
     sampler = fit_gp(truth_gp, data)
-
+   
     # Plot the samples in data space.
     print("Making plots")
     samples = sampler.flatchain
     x = np.linspace(min(t) - 1.0, max(t) + 1.0, 500)
-    xarr, mean, std=mean_gp(t, y, yerr)
-    print "Mean gp is:" mean
+    xarr=np.linspace(min(t), max(t), 500)#, mean, std=mean_gp(gp, t, y, yerr)
+    #print "Mean gp is:", mean
     plt.figure()
     plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
     for s in samples[np.random.randint(len(samples), size=24)]:
@@ -137,7 +138,7 @@ def main(args):
         gp.compute(t, yerr)
         m = gp.sample_conditional(y - model(s[2:], t), x) + model(s[2:], x)
         plt.plot(x, m, color="#4682b4", alpha=0.3)
-    plt.plot(xarr, mean, 'r:', linewidth=2)
+    plt.plot(xarr, gp.predict(y, xarr)[0], 'r:', linewidth=2)
     plt.ylabel("FLUXCAL")
     plt.xlabel("MJD")
     plt.xlim(min(t) - 1.0, max(t) + 1.0)

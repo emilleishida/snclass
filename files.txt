@@ -1,0 +1,12 @@
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/dependency_links.txt
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/not-zip-safe
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/PKG-INFO
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/requires.txt
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/SOURCES.txt
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/top_level.txt
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/EGG-INFO/scripts/fit_lc_george.py
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/snclass/__init__.py
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/snclass/__init__.pyc
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/snclass/prepare_LC.py
+/Users/lapguest/anaconda/lib/python2.7/site-packages/snclass-0.0.1-py2.7.egg/snclass/prepare_LC.pyc
+/Users/lapguest/anaconda/bin/fit_lc_george.py
