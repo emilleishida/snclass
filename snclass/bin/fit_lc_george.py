@@ -52,6 +52,8 @@ def lnprob_ind(p, t, y, invar):
 
 def lnlike_gp(p, t, y, yerr):
     a, tau = np.exp(p[:2])
+    kernel=a * kernels.Matern32Kernel(tau)
+    
     gp = george.GP(a * kernels.Matern32Kernel(tau))
     gp.compute(t, yerr)
     return gp.lnlikelihood(y - model(p[2:], t))
@@ -75,20 +77,20 @@ def lnprob_gp(p, t, y, yerr):
 
 def fit_gp(initial, data, nwalkers=32):
     ndim = len(initial)
-    p0 = [np.array(initial) + 1e-8 * np.random.randn(ndim)
-          for i in xrange(nwalkers)]
+    p0 = [np.array(initial) + 1e-4 * np.random.randn(ndim)
+          for i in range(nwalkers)]
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_gp, args=data)
-
+    
     print("Running burn-in")
     p0, lnp, _ = sampler.run_mcmc(p0, 500)
     sampler.reset()
-
+    """
     print("Running second burn-in")
     p = p0[np.argmax(lnp)]
-    p0 = [p + 1e-8 * np.random.randn(ndim) for i in xrange(nwalkers)]
+    p0 = [p + 1e-4 * np.random.randn(ndim) for i in range(nwalkers)]
     p0, _, _ = sampler.run_mcmc(p0, 500)
     sampler.reset()
-
+    """
     print("Running production")
     p0, _, _ = sampler.run_mcmc(p0, 1000)
 
@@ -111,28 +113,32 @@ def main(args):
 
     #set starting point
     start = [0.0, 0.0, 0.1, 0.1, 0.1]
- 
+    
     #gp = george.GP( kernels.Matern32Kernel(200))
     # Fit assuming GP.
     print("Fitting GP")
-    t = lc_data['r'][:,0]
-    y = lc_data['r'][:,1]
-    yerr = lc_data['r'][:,2]
+    t = lc_data['g'][:,0]
+    y = lc_data['g'][:,1]
+    yerr = lc_data['g'][:,2]
 
     data = (t, y, yerr)
     print 'data = ' + str(data)
-
-    truth_gp = [0.0, 0.0] + [-1.0, 0.1, 0.4]
+    plt.figure()
+    plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
+    
+    
+    plt.show()
+    truth_gp = [10.0, 10.0] + [12.0, 13.0, 14.0]
+    #print "The initial MCMC values are", truth_gp
     sampler = fit_gp(truth_gp, data)
-   
+    
     # Plot the samples in data space.
     print("Making plots")
     samples = sampler.flatchain
     x = np.linspace(min(t) - 1.0, max(t) + 1.0, 500)
     xarr=np.linspace(min(t), max(t), 500)#, mean, std=mean_gp(gp, t, y, yerr)
     #print "Mean gp is:", mean
-    plt.figure()
-    plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
+    
     for s in samples[np.random.randint(len(samples), size=24)]:
         gp = george.GP(np.exp(s[0]) * kernels.Matern32Kernel(np.exp(s[1])))
         gp.compute(t, yerr)
