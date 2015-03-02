@@ -127,7 +127,7 @@ def main(args):
     plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
     
     
-    plt.show()
+    
     truth_gp = [10.0, 10.0] + [12.0, 13.0, 14.0]
     #print "The initial MCMC values are", truth_gp
     sampler = fit_gp(truth_gp, data)

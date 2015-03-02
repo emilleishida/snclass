@@ -123,8 +123,11 @@ def main(args):
 
     data = (t, y, yerr)
     print 'data = ' + str(data)
+    plt.figure()
+    plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
     
-    plt.show()
+    
+    
     truth_gp = [10.0, 10.0] + [12.0, 13.0, 14.0]
     #print "The initial MCMC values are", truth_gp
     sampler = fit_gp(truth_gp, data)
@@ -135,8 +138,7 @@ def main(args):
     x = np.linspace(min(t) - 1.0, max(t) + 1.0, 500)
     xarr=np.linspace(min(t), max(t), 500)#, mean, std=mean_gp(gp, t, y, yerr)
     #print "Mean gp is:", mean
-    plt.figure()
-    plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0)
+    
     for s in samples[np.random.randint(len(samples), size=24)]:
         gp = george.GP(np.exp(s[0]) * kernels.Matern32Kernel(np.exp(s[1])))
         gp.compute(t, yerr)
