@@ -28,15 +28,29 @@ Running
 ********
 
 At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
-(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and plot 24 GP realizations, for the r-band light curve, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
+(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and many GP realizations for all available bands, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
 
-Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  to your current directory.
+Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  and the data file ``~snclass/examples/DES_SN849359.DAT''  to your current directory.
 
-Do not forget to change the variable ``path_to_obs`` so it points to the directory where the data is being stored.
+
+Do not forget to change the variables ``path_to_obs`` and  ``samples_dir'' to match your system.
+
+Look carefully through all the options in the sample input file.
+
+This file is documented and should be pretty straight forward to interpret. 
+
 
 To generate the fit and plot from the command line do::
 
-    $ fit_lc_george.py -i example_input.dat
+    $ fit_lc_george.py -i example_input.dat -c 1
+
+This will generate a file with the GP mean, another file with the GP realizations and the corresponding jpeg plot.
+
+The ``-c'' option denotes if you want to calculate all GP realizations or if you only want to read a previous calculated result.
+
+If you only want to take a look at a result you calculated before, do::
+
+    $ fit_lc_george.py -i example_input.dat -c 0
 
 
 This should generate a plot like this:
