@@ -55,7 +55,7 @@ If you only want to take a look at a result you calculated before, do::
 
 This should generate a plot like this:
 
-`Example fitted light curve using george <https://github.com/emilleishida/snclass/blob/emille_dev/examples/gp-results.png>`_
+`Example fitted light curve using george <https://github.com/emilleishida/snclass/blob/master/snclass/examples/gp-results.png>`_
 
 
 
