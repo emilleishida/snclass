@@ -1,4 +1,4 @@
-path_to_obs	    	= /home/emille/Dropbox/meu_KPCA/artigo_type_Ia/data/SIMGEN_PUBLIC_DES/                         # path to data directory
+path_to_obs	    	= ~snclass/examples/                         # path to data directory
 path_to_lc              = DES_SN849359.DAT                                                         # path to raw SN light curve
 file_root		= DES_SN 								   # root common to all files containing SN light curves	
 
