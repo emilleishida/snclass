@@ -33,7 +33,7 @@ At this point the script will read the raw data given in `SNANA <http://das.sdss
 Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  and the data file ``~snclass/examples/DES_SN849359.DAT``  to your current directory.
 
 
-Do not forget to change the variables ``path_to_obs`` and  ``samples_dir'' to match your system.
+Do not forget to change the variables ``path_to_obs`` and  ``samples_dir`` to match your system.
 
 Look carefully through all the options in the sample input file.
 
@@ -46,7 +46,7 @@ To generate the fit and plot from the command line do::
 
 This will generate a file with the GP mean, another file with the GP realizations and the corresponding jpeg plot.
 
-The ``-c'' option denotes if you want to calculate all GP realizations or if you only want to read a previous calculated result.
+The ``-c`` option denotes if you want to calculate all GP realizations or if you only want to read a previous calculated result.
 
 If you only want to take a look at a result you calculated before, do::
 
