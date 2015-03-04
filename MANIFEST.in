@@ -1,0 +1,4 @@
+include README.rst
+include snclass/examples/fit_lc_input.dat
+include snclass/examples/SN_DES849359.DAT 
+include snclass/examples/gp-results.png
