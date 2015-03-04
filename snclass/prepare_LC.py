@@ -23,9 +23,14 @@ def read_user_input(filename):
 
     #store options in params dictionary
     params = dict([(line[0], line[2:line.index('#')])  for line in data1 if len(line) > 1])
+
+    params['GP_fit'] = {}
+    params['realizations'] = {}
+    params['xarr'] = {}
     
     #check if ``observer'' data already exists
     if not os.path.isdir(params['path_to_obs'][0]):
+        print params['path_to_obs'][0]
         raise TypeError('Variable "path_to_obs" is not a valid directory!')            
 
     return params

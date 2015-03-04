@@ -1,4 +1,4 @@
-path_to_obs	    	= /home/emille/Documents/github/snclass/examples/                          # path to data directory
+path_to_obs	    	= /home/emille/Dropbox/meu_KPCA/artigo_type_Ia/data/SIMGEN_PUBLIC_DES/                         # path to data directory
 path_to_lc              = DES_SN849359.DAT                                                         # path to raw SN light curve
 file_root		= DES_SN 								   # root common to all files containing SN light curves	
 
@@ -20,4 +20,8 @@ quality_cut        = 0.0									   # SNR selection cut
 type_cut	   = None									   # type selection cut	
 sample_cut	   = -9										   # sample selection cut	
 
+n_realizations       = 100									   # number of GP realizations to calculate
+samples_dir        = /home/emille/Dropbox/meu_KPCA/github/tests/GP/samples/                        # directory to store GP realizations
 
+screen             = 1                                                                             # hide (0) or show(1) running comments on screen
+save_samples       = 1                                                                             # skip (0) or save(1) GP realizations
