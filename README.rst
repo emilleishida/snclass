@@ -30,7 +30,7 @@ Running
 At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
 (you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and many GP realizations for all available bands, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
 
-Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  and the data file ``~snclass/examples/DES_SN849359.DAT''  to your current directory.
+Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  and the data file ``~snclass/examples/DES_SN849359.DAT``  to your current directory.
 
 
 Do not forget to change the variables ``path_to_obs`` and  ``samples_dir'' to match your system.
