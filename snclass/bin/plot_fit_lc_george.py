@@ -11,7 +11,7 @@ import sys
 import george
 from george import kernels
 
-from snclass.prepare_LC import read_user_input, read_SNANA_lc
+from snclass.util import read_user_input, read_SNANA_lc
 from snclass.fit_lc_george import lnprob2, fit_LC
 
 
