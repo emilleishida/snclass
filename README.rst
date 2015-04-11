@@ -80,7 +80,7 @@ Analogously, in order to construct a list of photometric-only SNe, your user inp
     sample_cut	   = -9			# sample selection cut	
 
 
-The list is created with
+The list is created with::
 
 .. code-block:: python
     import snclass
