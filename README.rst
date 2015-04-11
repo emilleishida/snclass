@@ -1,3 +1,4 @@
+==========================================
 snclass - Supernova Photometric Classifier
 ==========================================
 
@@ -12,6 +13,7 @@ It works in 3 steps:
 
 This preliminary version contains only the GP fitting part in the script ``~snclass/bin/fit_lc_george.py``.
 
+************
 Installation
 ************
 
@@ -23,7 +25,7 @@ If you do not have root privileges, do::
 
     $ python setup.py install --user
 
-
+*****************************************
 Fitting and plotting a single light curve
 *****************************************
 
@@ -57,7 +59,7 @@ This should generate a plot like this:
 
 `Example fitted light curve using george <https://github.com/emilleishida/snclass/blob/master/snclass/examples/gp-results.png>`_
 
-
+*******************
 Identifying samples
 *******************
 
@@ -80,7 +82,7 @@ Analogously, in order to construct a list of photometric-only SNe, your user inp
     sample_cut	   = -9			# sample selection cut	
 
 
-The list is created with::
+The list is created with
 
 .. code-block:: python
     import snclass
@@ -92,7 +94,7 @@ The list of all SNe satisfying your selection cuts will be stored in ``my_sample
 
 
 
-
+************
 Requirements
 ************
 
