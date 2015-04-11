@@ -11,8 +11,6 @@ It works in 3 steps:
 * Classification of a purely photometric sample thorough nearst neighbor (NN).  
 
 
-This preliminary version contains only the GP fitting part in the script ``~snclass/bin/fit_lc_george.py``.
-
 ## Installation
 
 In the ``snclass`` directory, do::
@@ -26,8 +24,8 @@ If you do not have root privileges, do::
 ## Fitting and plotting a single light curve
 
 
-At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
-(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and many GP realizations for all available bands, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
+At this point the script will read the raw data given in [SNANA](http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/) format
+(you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and many GP realizations for all available bands, generated using [george tutorial](https://github.com/dfm/george/blob/master/docs/_code/model.py).
 
 Copy the sample input file  ``~snclass/examples/fit_lc_input.dat``  and the data file ``~snclass/examples/DES_SN849359.DAT``  to your current directory.
 
@@ -80,11 +78,13 @@ Analogously, in order to construct a list of photometric-only SNe, your user inp
 
 The list is created iteractively with 
 
-.. code-block:: python
+```python
     import snclass
 
     user_input = snclass.read_user_input("example_input.dat")
     snclass.choose_sn(user_input, output_file='my_sample.dat')
+```
+
 
 The list of all SNe satisfying your selection cuts will be stored in ``my_sample.dat``.
 
