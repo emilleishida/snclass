@@ -75,7 +75,7 @@ def main(args):
         plt.legend()
         plt.xlim(min(lc_data[fil][:,0]) - 1.0, max(lc_data[fil][:,0]) + 1.0)
 
-    plt.suptitle("George - results with Gaussian process noise model")
+    plt.suptitle("Results with Gaussian process noise model")
     plt.savefig("gp-results.png", dpi=350)
     plt.close()
 
