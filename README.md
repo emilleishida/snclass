@@ -6,16 +6,14 @@ snclass - Supernova Photometric Classifier
 
 It works in 3 steps:
 
-#. Convert flux/magnitude measurements in a continuous function using Gaussian process (GP). 
-#. Dimentionality reduction through kernel principal component analysis (kPCA). 
-#. Classification of a purely photometric sample thorough nearst neighbor (NN).  
+* Convert flux/magnitude measurements in a continuous function using Gaussian process (GP). 
+* Dimentionality reduction through kernel principal component analysis (kPCA). 
+* Classification of a purely photometric sample thorough nearst neighbor (NN).  
 
 
 This preliminary version contains only the GP fitting part in the script ``~snclass/bin/fit_lc_george.py``.
 
-************
-Installation
-************
+## Installation
 
 In the ``snclass`` directory, do::
 
@@ -25,9 +23,8 @@ If you do not have root privileges, do::
 
     $ python setup.py install --user
 
-*****************************************
-Fitting and plotting a single light curve
-*****************************************
+## Fitting and plotting a single light curve
+
 
 At this point the script will read the raw data given in `SNANA <http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/>`_ format
 (you can find an example in ``~snclass/examples/DES_SN849359.DAT``) and many GP realizations for all available bands, generated using `george tutorial <https://github.com/dfm/george/blob/master/docs/_code/model.py>`_.
@@ -59,9 +56,8 @@ This should generate a plot like this:
 
 `Example fitted light curve using george <https://github.com/emilleishida/snclass/blob/master/snclass/examples/gp-results.png>`_
 
-*******************
-Identifying samples
-*******************
+
+## Identifying samples
 
 To create a list of all SNe in the initial pool satisfying some selection cuts, update the corresponding keywords in the user input file. 
 As an example, for the post-SNPCC data, in order to select all the spectroscopically classified SNe, set::
@@ -93,10 +89,8 @@ The list is created iteractively with
 The list of all SNe satisfying your selection cuts will be stored in ``my_sample.dat``.
 
 
+## Requirements
 
-************
-Requirements
-************
 
 * Python 2.7
 * numpy >=1.8.2
