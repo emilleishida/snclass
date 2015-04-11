@@ -19,7 +19,7 @@ setup(name = 'snclass',
                       'matplotlib>=1.3.1',   
                       'george>=0.2.1'          
       ],
-      scripts=['snclass/bin/plot_fit_lc_george.py'],
+      scripts=['snclass/bin/fit_plot_lc_george.py'],
       package_dir= {'snclass': 'snclass', 'examples':'snclass/examples'},
       zip_safe=False,
       classifiers = [

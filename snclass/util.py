@@ -30,80 +30,9 @@ def read_user_input(filename):
     
     #check if ``observer'' data already exists
     if not os.path.isdir(params['path_to_obs'][0]):
-        print params['path_to_obs'][0]
         raise TypeError('Variable "path_to_obs" is not a valid directory!')            
 
     return params
-
-
-
-def choose_sn( params, output_file='snlist.dat' ):
-    """
-    Read through all files within a given directory and 
-    select those satisfying criteria in user input file.
-
-    input:  params (dict)
-
-    output: txt file with the name of objects surviving selections cuts.
-    """  
-
-    #take all file names in data directory
-    filename = os.listdir( params['path_to_obs'][0] )
-
-    #store files for light curves surviving selection cuts
-    final_list = []
-
-    for name in filename:
-
-        if params['file_root'][0] in name:
-
-            #read light curve data
-            op1 = open( params['path_to_obs'][0] + name, 'r')
-            lin1 = op1.readlines()
-            op1.close()
-
-            data1 = [ elem.split() for elem in lin1 ]
-
-            #take header parameters
-            header = {}
-            for line in data1:
-                if len( line ) > 1 and line[0] in params['header']:
-                    header[ line[0] ] = line[1:]
-
-            #check for request SN type
-            if  params['type_cut']  != 'None' :
-                if header[ params['type_flag'][0] ][0] in params['type_cut']:
-                    type_surv = True
-
-                else:
-                    type_surv = False 
-            else:
-                type_surv = True
-                
-            #check for requested SN sample 
-            if params['sample_cut'][0] != 'None': 
-
-                if header[ params['sample_flag'][0] ][0] in params['sample_cut']:
-                    sample_surv = True  
-
-                else:
-                    sample_surv = False
-
-            else:
-                sample_surv = True 
-          
-            #store only if both requirements are satisfied
-            if type_surv == True and sample_surv == True:
-                final_list.append( name )    
-
-    op2 = open( output_file, 'w' )
-    for item in final_list:
-        op2.write( item  + '\n')
-    op2.close()
-
-    print  'Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.'
-    print  'Surviving objects are listed in file ' + output_file
-
 
 def read_SNANA_lc( params ):
     """
@@ -115,7 +44,7 @@ def read_SNANA_lc( params ):
     """
 
     #read light curve data
-    op1 = open(params['path_to_obs'][0] + params['path_to_lc'][0], 'r')
+    op1 = open(params['path_to_lc'][0], 'r')
     lin1 = op1.readlines()
     op1.close()
 
@@ -154,6 +83,72 @@ def read_SNANA_lc( params ):
             mdata[ item ] = raw_data[item]
 
     return mdata
+
+def choose_sn( params, output_file='snlist.dat' ):
+    """
+    Read through all files within a given directory and 
+    select those satisfying criteria in user input file.
+
+    input:  params (dict)
+
+    output: txt file with the name of objects surviving selections cuts.
+    """  
+
+    #take all file names in data directory
+    filename = os.listdir( params['path_to_obs'][0] )
+
+    #store files for light curves surviving selection cuts
+    final_list = []
+
+    for name in filename:
+
+        if params['file_root'][0] in name:
+
+            #read light curve data
+            op1 = open( params['path_to_obs'][0] + name, 'r')
+            lin1 = op1.readlines()
+            op1.close()
+
+            data1 = [ elem.split() for elem in lin1 ]
+
+            #take header parameters
+            header = {}
+            for line in data1:
+                if len( line ) > 1 and line[0] in params['header']:
+                    header[ line[0] ] = line[1:]
+
+            #check for request SN type
+            if  params['type_cut'][0]  != 'None' :
+                if header[ params['type_flag'][0]][0] in params['type_cut']:
+                    type_surv = True
+
+                else:
+                    type_surv = False 
+            else:
+                type_surv = True
+
+            #check for requested SN sample  
+            if params['sample_cut'][0] != 'None': 
+
+                if str(header[params['sample_flag'][0]][0]) in params['sample_cut']:
+                    sample_surv = True
+                else:
+                    sample_surv = False
+
+            else:
+                sample_surv = True 
+          
+            #store only if all requirements are satisfied
+            if type_surv == True and sample_surv == True:
+                final_list.append( name )    
+
+    op2 = open( output_file, 'w' )
+    for item in final_list:
+        op2.write( item  + '\n')
+    op2.close()
+
+    print  'Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.'
+    print  'Surviving objects are listed in file ' + output_file
 
 
 def main():
