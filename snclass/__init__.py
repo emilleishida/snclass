@@ -13,3 +13,5 @@ __license__ = "GPL"
 
 from util import read_user_input, choose_sn, read_SNANA_lc
 from fit_lc_george import lnprob2, fit_LC
+from prepare_lc import LC
+

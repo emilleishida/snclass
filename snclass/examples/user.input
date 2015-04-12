@@ -17,7 +17,9 @@ type_flag           = SIM_NON1a:								   # type identification
 type_cut	   = None									   # type selection cut
 
 sample_flag	    = SNTYPE:									   # sample identification		
-sample_cut	   = -9										   # sample selection cut	
+sample_cut	   = -9										   # sample selection cut
+
+quality_cut        = 0.0									   # SNR selection cut	
 
 n_realizations       = 100									   # number of GP realizations to calculate
 samples_dir        = /home/emille/Dropbox/meu_KPCA/github/tests/GP/samples/                        # directory to store GP realizations
