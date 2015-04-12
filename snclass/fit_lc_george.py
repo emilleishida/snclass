@@ -23,6 +23,9 @@ def lnprob2(p, gp, y):
     return lnprior + gp.lnlikelihood(y, quiet=True)
 
 def fit_LC(data):
+    """
+    Gaussian Process fit using george. 
+    """
 
     for fil in data['filters']:
         t = data[fil][:,0]

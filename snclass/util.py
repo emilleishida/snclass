@@ -1,6 +1,5 @@
 import numpy as np
 import os 
-
 import matplotlib.pylab as plt
 
 #########################################
@@ -149,6 +148,69 @@ def choose_sn( params, output_file='snlist.dat' ):
 
     print  'Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.'
     print  'Surviving objects are listed in file ' + output_file
+
+
+def plot(user_input, lc_data, output_file):
+    """  
+    Plot GP fit to light curve. 
+
+    input:    user_input -> output from function read_user_input
+              lc_data -> output from function fit_LC
+              output_file -> str, name of output file to store plot
+    """
+
+    #initiate figure
+    plt.figure()
+    
+    for fil in user_input['filters']:
+
+        # Plot the samples in data space.
+        ax = plt.subplot(len(user_input['filters']), 1, user_input['filters'].index(fil) + 1)
+        for s in lc_data['realizations'][fil]:
+            plt.plot(lc_data['xarr'][fil], s, color="#4682b4", alpha=0.3)
+        plt.errorbar(lc_data[fil][:,0], lc_data[fil][:,1], yerr=lc_data[fil][:,2], fmt=".k", capsize=0, label=fil)
+        plt.plot(lc_data['xarr'][fil], lc_data['GP_fit'][fil], 'r:', linewidth=2)
+        plt.ylabel("FLUXCAL")
+        plt.xlabel("MJD")
+        plt.legend()
+        plt.xlim(min(lc_data[fil][:,0]) - 1.0, max(lc_data[fil][:,0]) + 1.0)
+
+    plt.suptitle("Results with Gaussian process noise model")
+    plt.savefig(output_file, dpi=350)
+
+
+def plot_shifted(user_input, lc_data, output_file):
+    """  
+    Plot GP fit to light curve. 
+
+    input:    user_input -> output from function read_user_input
+              lc_data -> output from function fit_LC
+              output_file -> str, name of output file to store plot
+    """
+
+    #initiate figure
+    plt.figure()
+    
+    for fil in user_input['filters']:
+
+        # Plot the samples in data space.
+        ax = plt.subplot(len(user_input['filters']), 1, user_input['filters'].index(fil) + 1)
+        for s in lc_data.fitted['norm_realizations'][fil]:
+            plt.plot(lc_data.fitted['xarr_shifted'][fil], s, color="#4682b4", alpha=0.3)
+        plt.errorbar(lc_data.raw[fil][:,0] - lc_data.fitted['peak_mjd'], 
+                     lc_data.raw[fil][:,1]/lc_data.fitted['max_flux'], 
+                     yerr=lc_data.raw[fil][:,2]/lc_data.fitted['max_flux'], 
+                     fmt=".k", capsize=0, label=fil)
+        plt.plot(lc_data.fitted['xarr_shifted'][fil], 
+                 lc_data.fitted['norm_fit'][fil], 'r:', linewidth=2)
+        plt.ylabel("FLUXCAL")
+        plt.xlabel("MJD")
+        plt.legend()
+        plt.xlim(min(lc_data.raw[fil][:,0]) - lc_data.fitted['peak_mjd'] - 1.0, 
+                 max(lc_data.raw[fil][:,0]) - lc_data.fitted['peak_mjd'] + 1.0)
+
+    plt.suptitle("Results with Gaussian process noise model")
+    plt.savefig(output_file, dpi=350)
 
 
 def main():

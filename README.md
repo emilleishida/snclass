@@ -99,8 +99,8 @@ The list of all SNe satisfying your selection cuts will be stored in ``my_sample
 * george >= 0.2.1
 
 
-License
-********
+## License
+
 
 * GNU General Public License (GPL>=3)
 
