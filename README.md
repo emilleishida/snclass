@@ -55,6 +55,55 @@ This should generate a plot like this:
 ![Example fitted light curve using george] 
 (https://github.com/emilleishida/snclass/blob/emille_dev/snclass/examples/gp-results.png)
 
+Notice that the above plot is only the GP posterior for the given SN in all filters. 
+
+In order to decide if a given object satisfy all requirements stated in the user input file, do
+
+```python
+import numpy as np
+import snclass
+
+#read user input file
+user_input=snclass.read_user_input('fit_lc_input.dat')
+
+#read raw data
+lc_data = snclass.read_SNANA_lc(user_input)
+
+#update data object
+lc_data.update(user_input)
+
+#create LC object
+lc = snclass.LC(lc_data, user_input)
+
+#check SNR and number of epochs cuts
+lc.check_basic()
+if lc.basic_cuts == True:
+    
+    #fit GP u
+    lc.fit_GP()
+ 
+    #normalize according to larger flux (all filters)
+    lc.normalize()
+
+    #shift to peak MJD
+    lc.mjd_shift()
+
+    #check minimum and maximum epoch
+    lc.check_epoch()
+    if lc.epoch_cuts == True:
+        
+        #build initial data matrix elements
+        lc.build_steps()
+```
+
+This will make sure the object in question pass all requirements to populate the initial data matrix. 
+
+You can see the graphical output using
+
+```python
+lc.plot_fitted(samples=True, nsamples=int(user_input['n_samples'][0]))
+```
+
 
 ## Identifying samples
 
