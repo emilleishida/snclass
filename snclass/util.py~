@@ -43,7 +43,7 @@ def read_SNANA_lc( params ):
     """
 
     #read light curve data
-    op1 = open(params['path_to_obs'][0] + params['path_to_lc'][0], 'r')
+    op1 = open(params['path_to_obs'] + params['path_to_lc'][0], 'r')
     lin1 = op1.readlines()
     op1.close()
 
