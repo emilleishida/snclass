@@ -2,7 +2,7 @@ from setuptools import setup
 import snclass.__init__ as snclass
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.md') as f:
         return f.read()
 
 setup(name = 'snclass',
@@ -17,7 +17,7 @@ setup(name = 'snclass',
       install_requires=[
                       'numpy>=1.8.2',
                       'matplotlib>=1.3.1',   
-                      'george>=0.2.1'          
+                      'george>=0.2.1',           
       ],
       scripts=['snclass/bin/fit_plot_lc_george.py'],
       package_dir= {'snclass': 'snclass', 'examples':'snclass/examples'},

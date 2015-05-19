@@ -34,7 +34,7 @@ def fit_LC(data):
         y = data[fil][:,1]
         yerr = data[fil][:,2]     
 
-        gp = george.GP(np.mean(y) * kernels.ExpSquaredKernel(max(yerr)))
+        gp = george.GP(0.5 * np.mean(y) * kernels.ExpSquaredKernel(max(yerr)))
         gp.compute(t, yerr)
 
         p0 = gp.kernel.vector
