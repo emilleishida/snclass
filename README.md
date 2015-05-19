@@ -64,7 +64,7 @@ import numpy as np
 import snclass
 
 #read user input file
-user_input=snclass.read_user_input('fit_lc_input.dat')
+user_input=snclass.read_user_input('user.input')
 
 #read raw data
 lc_data = snclass.read_SNANA_lc(user_input)
