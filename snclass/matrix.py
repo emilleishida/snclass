@@ -4,7 +4,7 @@ import os
 import numpy as np
 from astropy.io import ascii
 
-from prepare_lc import LC
+from treat_lc import LC
 from util import read_user_input, choose_sn, read_SNANA_lc, plot
 
 ##############################################
@@ -15,12 +15,20 @@ class DataMatrix(object):
     """
 
     def __init__(self, input_file):
+        """
+        Read user input file. 
+
+        input: input_file -> str
+               name of user input file
+        """  
 
         self.user_choices = read_user_input(input_file)
 
 
     def build(self, file_out):
-        "Build data matrix according to user input file specifications."
+        """
+        Build data matrix according to user input file specifications.
+        """
 
         if not os.path.exists(self.user_choices['samples_dir'][0]):
             os.makedirs(self.user_choices['samples_dir'][0])

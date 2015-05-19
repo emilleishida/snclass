@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+from __future__ import division
+
 import numpy as np
 import matplotlib.pylab as plt
 
@@ -69,7 +73,7 @@ class LC(object):
                                             for elem in self.fitted['GP_fit'][fil]]
             
             #check if we are realizations were calculated
-            if int(self.user_choices['n_realizations'][0]) > 0:      
+            if int(self.user_choices['n_samples'][0]) > 0:      
                 self.fitted['norm_realizations'][fil] = [elem/self.fitted['max_flux'] 
                                                          for elem in self.fitted['realizations'][fil]]        
 
@@ -121,22 +125,50 @@ class LC(object):
   
 
 
-    def plot_fitted(self, file_out=False):
-        "Plotted light curve as it enters the data matrix."
+    def plot_fitted(self, samples=False, nsamples=0, file_out=None):
+        """
+        Plotted light curve as it enters the data matrix.
+
+        input:  samples ->   bool, optional
+                             Rather or not to plot realizations 
+                             from the posterior.
+                nsamples ->  int, optional
+                             number of samples to draw from the posterior
+                             only effective if samples = True
+                file_out >   bool, optional
+                             File name where to store the final plot.
+                             If None shows the plot in the screen.
+                             Default is None.
+
+        output: if file_out is str -> plot wrote to file
+        """
+
+        #set the number of samples variable according to input
+        if samples == False:
+            nsamples = 0
 
         plt.figure()
-        for i in xrange(len(self.user_choices['filters'])):   
-            plt.subplot(2, len(self.user_choices['filters'])/2 + len(self.user_choices['filters'])%2, i + 1)
-            plt.title('filter = ' + self.user_choices['filters'][i])
-            plt.errorbar(self.raw[self.user_choices['filters'][i]][:,0] - self.fitted['peak_mjd'], 
-                        self.raw[self.user_choices['filters'][i]][:,1]/self.fitted['max_flux'],
-                        yerr=self.raw[self.user_choices['filters'][i]][:,2]/self.fitted['max_flux'], color='blue',
-                        fmt='o')
-            plt.plot(self.fitted['xarr_shifted'][self.user_choices['filters'][i]], 
-                     self.fitted['norm_fit'][self.user_choices['filters'][i]], color='red')
+        for i in xrange(len(self.user_choices['filters'])): 
+            fil =  self.user_choices['filters'][i] 
+            plt.subplot(2, len(self.user_choices['filters'])/2 + 
+                           len(self.user_choices['filters'])%2, i + 1)
+            plt.title('filter = ' + fil)
+            plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'], 
+                        self.raw[fil][:,1]/self.fitted['max_flux'],
+                        yerr=self.raw[fil][:,2]/self.fitted['max_flux'], 
+                        color='blue', fmt='o')
+            plt.plot(self.fitted['xarr_shifted'][fil], 
+                     self.fitted['norm_fit'][fil], color='red')
+            
+            #plot samples
+            if samples == True:
+                for s in self.fitted['realizations'][fil]:
+                    plt.plot(self.fitted['xarr_shifted'][fil], s/self.fitted['max_flux'], 
+                             color="#4682b4", alpha=0.3)
             plt.xlabel('days since maximum', fontsize=15)
             plt.ylabel('normalized flux', fontsize=15)
-            plt.xlim(float(self.user_choices['epoch_cut'][0]), float(self.user_choices['epoch_cut'][1]))
+            plt.xlim(float(self.user_choices['epoch_cut'][0]), 
+                     float(self.user_choices['epoch_cut'][1]))
             
         if isinstance(file_out, str):
             plt.savefig(file_out)
