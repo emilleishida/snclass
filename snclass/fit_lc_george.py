@@ -2,7 +2,6 @@
 
 from __future__ import division
 
-import argparse
 import emcee
 import os
 import numpy as np
@@ -44,7 +43,7 @@ def fit_LC(data):
         data['xarr'][fil] = np.linspace(min(t), max(t), 500)
         data['GP_fit'][fil] = gp.predict(y, data['xarr'][fil])[0]
 
-        if int(data['n_realizations'][0]) > 0:
+        if int(data['n_samples'][0]) > 0:
 
             nwalkers, ndim = 24, len(gp.kernel)
             sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob2, 
@@ -64,7 +63,7 @@ def fit_LC(data):
             sampler.run_mcmc(p1, nwalkers) 
             data['realizations'][fil] = []
 
-            for k in xrange(int(data['n_realizations'][0])):
+            for k in xrange(int(data['n_samples'][0])):
                 w = np.random.randint(sampler.chain.shape[0])
                 n = np.random.randint(nwalkers, sampler.chain.shape[1])
                 gp.kernel.pars = np.exp(sampler.chain[w, n]) 

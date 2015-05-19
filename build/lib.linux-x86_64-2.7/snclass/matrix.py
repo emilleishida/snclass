@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import numpy as np
 from astropy.io import ascii
@@ -20,6 +21,9 @@ class DataMatrix(object):
 
     def build(self, file_out):
         "Build data matrix according to user input file specifications."
+
+        if not os.path.exists(self.user_choices['samples_dir'][0]):
+            os.makedirs(self.user_choices['samples_dir'][0])
 
         #read list of SN in sample
         snlist = ascii.read(self.user_choices['snlist'][0])
