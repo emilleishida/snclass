@@ -25,9 +25,12 @@ class DataMatrix(object):
         self.user_choices = read_user_input(input_file)
 
 
-    def build(self, file_out):
+    def build(self, file_out, plot=False):
         """
         Build data matrix according to user input file specifications.
+
+        input:   file_out -> file to store data matrix (str)
+                 plot (optional) -> rather to make save plot for each LC
         """
 
         if not os.path.exists(self.user_choices['samples_dir'][0]):
@@ -59,6 +62,8 @@ class DataMatrix(object):
             #initiate light curve object
             lc = LC(raw, self.user_choices)
 
+            print 'Fitting SN' + raw['SNID:'][0]
+
             #write SN identification and type
             op1.write(raw['SNID:'][0] + '    ' + raw['SIM_NON1a:'][0] + '    ' 
                       + raw['REDSHIFT_FINAL:'][0] + '     ')            
@@ -69,8 +74,10 @@ class DataMatrix(object):
             #check if satisfy minimum cut
             if lc.basic_cuts:
 
+                print '... Passed basic cuts'
+
                 #fit 
-                lc.fit_GP()
+                lc.fit_GP(samples=False)
 
                 #normalize
                 lc.normalize()
@@ -84,7 +91,11 @@ class DataMatrix(object):
                 if lc.epoch_cuts:
 
                     cont = cont + 1
-                    print 'Calculating SN number ' + str(cont) + ',  SNID: ' + raw['SNID:'][0]
+                    print '... ... Passed epoch cuts. This is SN number ' + str(cont)
+
+                    if int(self.user_choices['n_samples'][0]) > 0:
+                         lc.fit_GP(samples=True)  
+                         lc.normalize(samples=True)                      
              
                     #build data matrix lines
                     lc.build_steps()
@@ -95,7 +106,19 @@ class DataMatrix(object):
                             op1.write(str(elem) + '    ')
                     op1.write('\n')
               
-                    lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png')
+                    if plot == True:
+                        if int(self.user_choices['n_samples'][0]) == 0:
+                            lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png')
+                        else:
+                            lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png', 
+                                           samples=True, nsamples=int(self.user_choices['n_samples'][0]))
+
+                else:
+                    print '... ... Failed to pass epoch cuts!\n'
+
+            else:
+                print '... Failed to pass basic cuts!\n'
+                    
 
         op1.close()
 

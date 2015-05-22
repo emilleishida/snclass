@@ -137,6 +137,18 @@ snclass.choose_sn(user_choices, output_file='my_sample.list')
 
 The list of all SNe satisfying your selection cuts will be stored in ``my_sample.list``.
 
+***
+**WARNING**
+
+The samples separated using this method where only selected through header variables (types, samples, etc.).
+No calculations were made in the raw data. 
+In order to select a smaller subset satisfying selection cuts which require treatment, use the ``matrix.build`` module.
+***
+
+## Building a data matrix
+
+
+
 
 ## Requirements
 

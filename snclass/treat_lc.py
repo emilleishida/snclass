@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 import matplotlib.pylab as plt
 
-from fit_lc_george import lnprob2, fit_LC
+from fit_lc_gptools import fit_LC
 from scipy import interpolate
 
 ##############################################################
@@ -16,13 +16,23 @@ class LC(object):
     """
 
     def __init__(self, raw_data, user_choices):
+        """"
+        Set parameters. 
+
+        input: raw_data -> output from util.read_SNANA_lc
+               user_choices -> output from util.read_user_input
+        """
   
-        self.raw = raw_data				#output from function util.read_SNANA_lc
-        self.user_choices = user_choices                #output from function util.read_user_input
+        self.raw = raw_data				
+        self.user_choices = user_choices                
+
 
     def check_basic(self):  
         """
         Check selection cuts which must be satisfied before any calculation.
+
+        self.basic_cuts is set to True if object passes basic selection cuts 
+        (no calculations at this point, only headers)
         """
 
         #check if we have observed epochs in all filters
@@ -49,17 +59,22 @@ class LC(object):
         else:
             self.basic_cuts = False
 
-    def fit_GP(self):
-        "Perform Gaussian Process Fit"
+    def fit_GP(self, **kwargs):
+        """
+        Perform Gaussian Process Fit.
+
+        self.fitted -> dictionary of fitted parameters
+                       
+        """
 
         #add extra keys
         self.raw.update(self.user_choices)
 
         #fit light curve
-        self.fitted = fit_LC(self.raw)
+        self.fitted = fit_LC(self.raw, **kwargs)
 
-    def normalize(self):
-        "Normalize according to maximum flux in all filters."
+    def normalize(self, samples=False):
+        "Normalize according to maximum flux in all filters."                      
 
         #determine maximum flux 
         self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item]) 
@@ -72,8 +87,8 @@ class LC(object):
             self.fitted['norm_fit'][fil] = [elem/self.fitted['max_flux'] 
                                             for elem in self.fitted['GP_fit'][fil]]
             
-            #check if we are realizations were calculated
-            if int(self.user_choices['n_samples'][0]) > 0:      
+            #check if  realizations were calculated
+            if samples == True and int(self.user_choices['n_samples'][0]) > 0:     
                 self.fitted['norm_realizations'][fil] = [elem/self.fitted['max_flux'] 
                                                          for elem in self.fitted['realizations'][fil]]        
 
@@ -147,16 +162,12 @@ class LC(object):
         if samples == False:
             nsamples = 0
 
-        plt.figure()
+        f = plt.figure()
         for i in xrange(len(self.user_choices['filters'])): 
             fil =  self.user_choices['filters'][i] 
             plt.subplot(2, len(self.user_choices['filters'])/2 + 
                            len(self.user_choices['filters'])%2, i + 1)
             plt.title('filter = ' + fil)
-            plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'], 
-                        self.raw[fil][:,1]/self.fitted['max_flux'],
-                        yerr=self.raw[fil][:,2]/self.fitted['max_flux'], 
-                        color='blue', fmt='o')
             plt.plot(self.fitted['xarr_shifted'][fil], 
                      self.fitted['norm_fit'][fil], color='red')
             
@@ -165,10 +176,15 @@ class LC(object):
                 for s in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil], s/self.fitted['max_flux'], 
                              color="#4682b4", alpha=0.3)
+            plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'], 
+                        self.raw[fil][:,1]/self.fitted['max_flux'],
+                        yerr=self.raw[fil][:,2]/self.fitted['max_flux'], 
+                        color='blue', fmt='o')
             plt.xlabel('days since maximum', fontsize=15)
             plt.ylabel('normalized flux', fontsize=15)
             plt.xlim(float(self.user_choices['epoch_cut'][0]), 
                      float(self.user_choices['epoch_cut'][1]))
+        f.tight_layout()
             
         if isinstance(file_out, str):
             plt.savefig(file_out)
