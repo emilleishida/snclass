@@ -2,7 +2,6 @@ import argparse
 import os
 
 import numpy as np
-from astropy.io import ascii
 
 from treat_lc import LC
 from util import read_user_input, choose_sn, read_SNANA_lc, plot
@@ -37,7 +36,11 @@ class DataMatrix(object):
             os.makedirs(self.user_choices['samples_dir'][0])
 
         #read list of SN in sample
-        snlist = ascii.read(self.user_choices['snlist'][0])
+        op = open(self.user_choices['snlist'][0], 'r')
+        lin = op.readlines()
+        op.close()
+
+        snlist = [elem.split()[0] for elem in lin]
 
         #open output file
         op1 = open(file_out, 'w')
@@ -54,7 +57,7 @@ class DataMatrix(object):
         for sn in snlist: 
 
             #update object
-            self.user_choices['path_to_lc'] = [sn[0]]
+            self.user_choices['path_to_lc'] = [sn]
 
             #read light curve raw data
             raw = read_SNANA_lc(self.user_choices)
