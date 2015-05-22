@@ -24,6 +24,13 @@ def lnprob2(p, gp, y):
 def fit_LC(data):
     """
     Gaussian Process fit using george. 
+
+    input:  data -> dictionary of raw data
+                    output from read_SNANA_lc
+                    keys: filters
+
+    output: data -> update dictionary with new key
+                    realizations: 
     """
 
     data['realizations'] = {}
@@ -38,7 +45,7 @@ def fit_LC(data):
 
         p0 = gp.kernel.vector
 
-        results = gp.optimize(t, y, yerr=yerr)
+        results = gp.optimize(t, y, yerr=yerr, verbose=False)
 
         data['xarr'][fil] = np.linspace(min(t), max(t), 500)
         data['GP_fit'][fil] = gp.predict(y, data['xarr'][fil])[0]
@@ -52,12 +59,12 @@ def fit_LC(data):
             p1 = [np.log(gp.kernel.pars) + 1e-4 * np.random.randn(ndim) 
                   for i in xrange(nwalkers)]
 
-            if bool(data['screen'][0]) == True:  
+            if int(data['screen'][0]) == 1:  
                 print 'Running burn-in for ' + fil + ' band ...'
 
             p0, _, _ = sampler.run_mcmc(p1, nwalkers)
   
-            if bool(data['screen'][0]) == True:
+            if int(data['screen'][0]) == 1:
                 print 'Running production chain for ' + fil +  ' band...'
 
             sampler.run_mcmc(p1, nwalkers) 

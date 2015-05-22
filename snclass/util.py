@@ -181,7 +181,7 @@ def plot(user_input, lc_data, output_file):
 
 def plot_shifted(user_input, lc_data, output_file):
     """  
-    Plot GP fit to light curve. 
+    Plot shifted and normalized GP fit to light curve. 
 
     input:    user_input -> output from function read_user_input
               lc_data -> output from function fit_LC
