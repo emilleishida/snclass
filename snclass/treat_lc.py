@@ -188,6 +188,7 @@ class LC(object):
             
         if isinstance(file_out, str):
             plt.savefig(file_out)
+            f.close()
         else:             
             plt.show()    
 
