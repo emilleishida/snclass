@@ -112,9 +112,13 @@ class DataMatrix(object):
                     if plot == True:
                         if int(self.user_choices['n_samples'][0]) == 0:
                             lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png')
+                            print '\n' 
                         else:
                             lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png', 
                                            samples=True, nsamples=int(self.user_choices['n_samples'][0]))
+                            print '\n'
+
+                    print '\n'
 
                 else:
                     print '... ... Failed to pass epoch cuts!\n'
@@ -124,6 +128,8 @@ class DataMatrix(object):
                     
 
         op1.close()
+
+     
 
         
 

@@ -38,12 +38,13 @@ def fit_LC(data, samples=False):
        
         data['GP_fit'][fil] = out[0]
         data['GP_std'][fil] = out[1]
+        data['GP_obj'][fil] = gp
 
         if samples == True and int(data['n_samples'][0]) > 0:
 
             print '... ... calculate samples'
 
-            v1 = gp.draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
+            v1 = data['GP_obj'][fil].draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
 
             data['realizations'][fil] = v1.T
             
