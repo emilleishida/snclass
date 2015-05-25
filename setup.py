@@ -17,7 +17,8 @@ setup(name = 'snclass',
       install_requires=[
                       'numpy>=1.8.2',
                       'matplotlib>=1.3.1',   
-                      'george>=0.2.1',           
+                      'george>=0.2.1',      
+                      'gptools>=0.1'      
       ],
       scripts=['snclass/bin/fit_plot_lc_george.py'],
       package_dir= {'snclass': 'snclass', 'examples':'snclass/examples'},
