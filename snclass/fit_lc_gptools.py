@@ -71,7 +71,7 @@ def fit_LC(data, samples=False):
             for fil in data['filters']:
                 for i1 in xrange(len(data['xarr'][fil])):   
                     op1.write(fil + '    ' + str(data['xarr'][fil][i1]) + '    ')
-                    for i2 in xrange(len(data['realizations'][fil])):
+                    for i2 in xrange(int(data['n_samples'][0])):
                         op1.write(str(data['realizations'][fil][i2][i1]) + '    ') 
                     op1.write('\n')
             op1.close()

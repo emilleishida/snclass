@@ -16,11 +16,10 @@ setup(name = 'snclass',
       packages = ['snclass'],
       install_requires=[
                       'numpy>=1.8.2',
-                      'matplotlib>=1.3.1',   
-                      'george>=0.2.1',      
+                      'matplotlib>=1.3.1',        
                       'gptools>=0.1'      
       ],
-      scripts=['snclass/bin/fit_plot_lc_george.py'],
+      scripts=['snclass/bin/fit_plot_lc.py'],
       package_dir= {'snclass': 'snclass', 'examples':'snclass/examples'},
       zip_safe=False,
       classifiers = [

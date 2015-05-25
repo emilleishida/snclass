@@ -35,7 +35,8 @@ def read_user_input(filename):
 
 def read_SNANA_lc( params ):
     """
-    Reads light curve in SNANA format and returns a dictionary with the variables chosen in the user input file.
+    Reads light curve in SNANA format and returns a dictionary with the 
+    variables chosen in the user input file.
 
     input:     params -> dictionary of input parameters 
 
@@ -49,7 +50,7 @@ def read_SNANA_lc( params ):
 
     data1 = [elem.split() for elem in lin1]
    
-    raw_data = dict( [[line[0], line[1:]] for line in data1 if len(line) > 1 ])
+    raw_data = dict([[line[0], line[1:]] for line in data1 if len(line) > 1])
 
     #determine MJD index
     mjd_indx = raw_data[params['param_list'][0]].index(params['mjd_flag'][0]) + 1
@@ -67,14 +68,17 @@ def read_SNANA_lc( params ):
     quality_indx = raw_data[params['param_list'][0]].index(params['quality_flag'][0]) + 1
 
     #build measurement list for each filter
-    mdata = dict([[item, np.array([ [ float(line[ mjd_indx]), float(line[ photon_indx ]), float(line[ photonerr_indx]), float(line[quality_indx])] 
+    mdata = dict([[item, np.array([[float(line[ mjd_indx]), 
+                                    float(line[photon_indx]), 
+                                    float(line[photonerr_indx]), 
+                                    float(line[quality_indx])] 
  			for line in data1 
-			if len( line ) > 1 
+			if len(line) > 1 
 			and line[0] == params['epoch_flag'][0] 
-			and line[ filter_indx ] == item 	
-			and float( line[ quality_indx ] ) >= float(params['quality_cut'][0])
+			and line[filter_indx] == item 	
+			and float(line[photon_indx]) >= 0
                         ])] 
-		for item in params['filters'] ])
+		for item in params['filters']])
 
     #add usefull header information to output dictionary
     for item in params['header']:
