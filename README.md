@@ -26,7 +26,7 @@ If you do not have root privileges, do::
 
 
 At this point the script will read the raw data given in [SNANA](http://das.sdss2.org/ge/sample/sdsssn/SNANA-PUBLIC/) format
-(you can find an example in ``~snclass/examples/DES_SN07317.DAT``) and many GP realizations for all available bands, generated using [gptools](http://gptools.readthedocs.org/en/latest/).
+(you can find an example in ``~snclass/examples/DES_SN077317.DAT``) and many GP realizations for all available bands, generated using [gptools](http://gptools.readthedocs.org/en/latest/).
 
 Copy the sample input file  ``~snclass/examples/user.input``  and the data file ``~snclass/examples/DES_SN077317.DAT``  to your current directory.
 
