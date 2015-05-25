@@ -38,22 +38,22 @@ def fit_LC(data, samples=False):
        
         data['GP_fit'][fil] = out[0]
         data['GP_std'][fil] = out[1]
-        data['GP_obj'][fil] = gp
 
         if samples == True and int(data['n_samples'][0]) > 0:
 
             print '... ... calculate samples'
 
-            v1 = data['GP_obj'][fil].draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
+            v1 = gp.draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
 
-            data['realizations'][fil] = v1.T
-            
+            data['realizations'][fil] = v1.T          
 
         gp = None
         v1 = None
         out = None 
         k = None
         del gp, out, v1, k 
+
+    print '\n'
 
     if bool(int(data['save_samples'][0])) == True:
 
@@ -62,29 +62,27 @@ def fit_LC(data, samples=False):
             if not os.path.exists(data['samples_dir'][0]):
                 os.makedirs(data['samples_dir'][0])
 
-            op1 = open(data['samples_dir'][0] + data['file_root'][0] + 
+            op1 = open(data['samples_dir'][0] + data['file_root'][0] + \
                        data['SNID:'][0] + '_samples.dat', 'w')
+            op1.write('filter    MJD    ')
+            for j in xrange(int(data['n_samples'][0])): 
+                op1.write('samp' + str(j+1))
+            op1.write('\n')
             for fil in data['filters']:
                 for i1 in xrange(len(data['xarr'][fil])):   
-                    op1.write(fil + str(data['xarr'][fil][i1]) + '    ')
-            op1.write('\n')
-            for j1 in xrange(len(data['realizations'][fil])):
-                for fil in data['filters']:
-                    for k1 in xrange(len(data['xarr'][fil])):
-                        op1.write(str(data['realizations'][fil][j1][k1]) + '    ')
-                op1.write('\n') 
+                    op1.write(fil + '    ' + str(data['xarr'][fil][i1]) + '    ')
+                    for i2 in xrange(len(data['realizations'][fil])):
+                        op1.write(str(data['realizations'][fil][i2][i1]) + '    ') 
+                    op1.write('\n')
             op1.close()
 
         op2 = open(data['samples_dir'][0] + data['file_root'][0] + 
                    data['SNID:'][0] + '_mean.dat', 'w')
+        op2.write('filter    MJD    GP_fit     GP_std\n')
         for fil in data['filters']:
             for i2 in xrange(len(data['xarr'][fil])):   
-                op2.write(fil + str(data['xarr'][fil][i2]) + '    ')
-        op2.write('\n')
-        for fil in data['filters']:
-            for j2 in xrange(len(data['xarr'][fil])):
-                op2.write(str(data['GP_fit'][fil][j2]) + '    ')
-
+                op2.write(fil + '    ' + str(data['xarr'][fil][i2]) + '    ' +
+                          str(data['GP_fit'][fil][i2]) + '    ' + str(data['GP_std'][fil][i2]) + '\n')
         op2.close()       
 
     return data
