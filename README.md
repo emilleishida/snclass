@@ -108,7 +108,7 @@ You can see the graphical output using
 lc.plot_fitted()
 ```
 
-# Fitting a set of SN
+### Fitting a set of SN
 
 You can also fit a set of SN sequentially. 
 In this case, build a ``sn.list`` file, which contains the name of the raw files for all objects you want to fit.
