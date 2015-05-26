@@ -108,6 +108,18 @@ You can see the graphical output using
 lc.plot_fitted()
 ```
 
+# Fitting a set of SN
+
+You can also fit a set of SN sequentially. 
+In this case, build a ``sn.list`` file, which contains the name of the raw files for all objects you want to fit.
+ 
+In the ``user.input`` file, set the keyword ``snlist`` and do
+ 
+```python
+fit_objs(user_input)
+```
+
+Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory. 
 
 ## Identifying samples
 

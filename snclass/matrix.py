@@ -23,6 +23,7 @@ class DataMatrix(object):
 
         self.user_choices = read_user_input(input_file)
 
+    
 
     def build(self, file_out, plot=False):
         """
