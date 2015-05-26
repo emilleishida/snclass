@@ -42,7 +42,7 @@ To generate the fit and plot from the command line do::
 
     $ fit_plot_lc.py -i user.input -c 1
 
-This will generate a file with the GP mean, another file with the GP realizations and the corresponding jpeg plot.
+This will generate a file with the GP mean, another file with the GP realizations and the corresponding plot.
 
 The ``-c`` option denotes if you want to calculate all GP realizations or if you only want to read a previous calculated result.
 
@@ -51,7 +51,7 @@ If you only want to take a look at a result you calculated before, do::
     $ fit_plot_lc.py -i user.input -c 0
 
 
-This should generate a plot like this:
+This will generate a plot like this:
 
 ![Example GP fitted light curve] 
 (https://github.com/emilleishida/snclass/blob/emille_dev/snclass/examples/gp-results.png)
@@ -80,8 +80,8 @@ lc = snclass.LC(lc_data, user_input)
 lc.check_basic()
 if lc.basic_cuts == True:
     
-    #fit GP u
-    lc.fit_GP()
+    #fit GP  - this calculates only mean fit
+    lc.fit_GP(mean=True, samples=False)
  
     #normalize according to larger flux (all filters)
     lc.normalize()
@@ -91,18 +91,21 @@ if lc.basic_cuts == True:
 
     #check minimum and maximum epoch
     lc.check_epoch()
-    if lc.epoch_cuts == True:
-        
-        #build initial data matrix elements
-        lc.build_steps()
+    
+    print lc.epoch_cuts
 ```
 
-This will make sure the object in question pass all requirements to populate the initial data matrix. 
+If the  object given in keyword ``path_to_lc`` passes all requirements to populate the initial data matrix this will return ``True``. 
+In this case, you might want to calculate a number of realizations from the constrained GP. 
+
+```python
+lc.fit_GP(mean=False, samples=True)
+```
 
 You can see the graphical output using
 
 ```python
-lc.plot_fitted(samples=True, nsamples=int(user_input['n_samples'][0]))
+lc.plot_fitted()
 ```
 
 
