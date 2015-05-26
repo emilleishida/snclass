@@ -116,7 +116,7 @@ In this case, build a ``sn.list`` file, which contains the name of the raw files
 In the ``user.input`` file, set the keyword ``snlist`` and do
  
 ```python
-fit_objs(user_input)
+snclass.fit_objs(user_input)
 ```
 
 Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory. 

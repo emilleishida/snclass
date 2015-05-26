@@ -42,19 +42,8 @@ class DataMatrix(object):
         op.close()
 
         snlist = [elem.split()[0] for elem in lin]
-
-        #open output file
-        op1 = open(file_out, 'w')
-        op1.write('SNID    SIM_NON1a    z    ')
-        for fil in self.user_choices['filters']:
-            for day in np.arange(float(self.user_choices['epoch_cut'][0]), 
-                                 float(self.user_choices['epoch_cut'][1]), 
-                                 float(self.user_choices['epoch_bin'][0])):
-                op1.write( fil + '_' + str(abs(int(day))) + '    ')
-        op1.write('\n')
-
+ 
         cont = 0
-
         for sn in snlist: 
 
             #update object
@@ -65,12 +54,7 @@ class DataMatrix(object):
 
             #initiate light curve object
             lc = LC(raw, self.user_choices)
-
-            print 'Fitting SN' + raw['SNID:'][0]
-
-            #write SN identification and type
-            op1.write(raw['SNID:'][0] + '    ' + raw['SIM_NON1a:'][0] + '    ' 
-                      + raw['REDSHIFT_FINAL:'][0] + '     ')            
+  
 
             #perform basic check
             lc.check_basic()
@@ -78,10 +62,8 @@ class DataMatrix(object):
             #check if satisfy minimum cut
             if lc.basic_cuts:
 
-                print '... Passed basic cuts'
-
-                #fit 
-                lc.fit_GP(samples=False)
+                #load GP fit
+                lc.load_fit_GP()
 
                 #normalize
                 lc.normalize()

@@ -269,8 +269,6 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
             if plot == True:
                 lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')   
 
-            print '\n'
-
         else:
             print 'Failed to pass basic cuts!\n'     
          
