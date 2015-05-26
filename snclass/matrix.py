@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 from treat_lc import LC
-from util import read_user_input, choose_sn, read_SNANA_lc, plot
+from util import read_user_input, choose_sn, read_SNANA_lc
 
 ##############################################
 

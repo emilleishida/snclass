@@ -4,9 +4,10 @@ from __future__ import division
 
 import numpy as np
 import matplotlib.pylab as plt
+from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from scipy import interpolate
+from util import read_fitted
 
 ##############################################################
 
@@ -73,6 +74,18 @@ class LC(object):
         #fit light curve
         self.fitted = fit_LC(self.raw, **kwargs)
 
+    def load_fit_GP(self):
+        """
+         Load previously calculated GP fit.
+        """
+        
+        #add extra keys
+        self.raw.update(self.user_choices)
+
+        #load  
+        self.fitted = read_fitted(self.raw)
+
+
     def normalize(self, samples=False):
         "Normalize according to maximum flux in all filters."                      
 
@@ -84,13 +97,13 @@ class LC(object):
         self.fitted['norm_fit'] = {}
         self.fitted['norm_realizations'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['norm_fit'][fil] = [elem/self.fitted['max_flux'] 
-                                            for elem in self.fitted['GP_fit'][fil]]
+            self.fitted['norm_fit'][fil] = np.array([elem/self.fitted['max_flux'] 
+                                            for elem in self.fitted['GP_fit'][fil]])
             
             #check if  realizations were calculated
             if samples == True and int(self.user_choices['n_samples'][0]) > 0:     
-                self.fitted['norm_realizations'][fil] = [elem/self.fitted['max_flux'] 
-                                                         for elem in self.fitted['realizations'][fil]]        
+                self.fitted['norm_realizations'][fil] = np.array([elem/self.fitted['max_flux'] 
+                                                         for elem in self.fitted['realizations'][fil]])        
 
     def mjd_shift(self):
         "Determine day of maximum and shift all epochs."
@@ -98,13 +111,13 @@ class LC(object):
         #determine day of maximum
         self.fitted['peak_mjd_fil'] = [fil for fil in self.user_choices['filters'] 
                                                       if 1.0 in self.fitted['norm_fit'][fil]][0]
-        pkmjd_indx = self.fitted['norm_fit'][self.fitted['peak_mjd_fil']].index(1.0)         
+        pkmjd_indx = list(self.fitted['norm_fit'][self.fitted['peak_mjd_fil']]).index(1.0)         
         self.fitted['peak_mjd'] = self.fitted['xarr'][self.fitted['peak_mjd_fil']][pkmjd_indx]
 
         #shift light curve
         self.fitted['xarr_shifted'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['xarr_shifted'][fil] = [elem - self.fitted['peak_mjd'] for elem in self.fitted['xarr'][fil]]
+            self.fitted['xarr_shifted'][fil] = np.array([elem - self.fitted['peak_mjd'] for elem in self.fitted['xarr'][fil]])
 
     def check_epoch(self):
         "Check if all filters satisfy epoch coverage requirements."
@@ -140,17 +153,11 @@ class LC(object):
   
 
 
-    def plot_fitted(self, samples=False, nsamples=0, file_out=None):
+    def plot_fitted(self, file_out=None):
         """
         Plotted light curve as it enters the data matrix.
 
-        input:  samples ->   bool, optional
-                             Rather or not to plot realizations 
-                             from the posterior.
-                nsamples ->  int, optional
-                             number of samples to draw from the posterior
-                             only effective if samples = True
-                file_out >   bool, optional
+        input: file_out >   bool, optional
                              File name where to store the final plot.
                              If None shows the plot in the screen.
                              Default is None.
@@ -159,14 +166,20 @@ class LC(object):
         """
 
         #set the number of samples variable according to input
-        if samples == False:
-            nsamples = 0
+        samples = bool(int(self.user_choices['n_samples'][0]))
+        
+        xmin = float(self.user_choices['epoch_cut'][0])
+        xmax = float(self.user_choices['epoch_cut'][1])
 
         f = plt.figure()
         for i in xrange(len(self.user_choices['filters'])): 
-            fil =  self.user_choices['filters'][i] 
+
+            fil =  self.user_choices['filters'][i]
+            func = interpolate.interp1d(self.fitted['xarr_shifted'][fil], self.fitted['norm_fit'][fil])
+ 
             plt.subplot(2, len(self.user_choices['filters'])/2 + 
                            len(self.user_choices['filters'])%2, i + 1)
+            ax = plt.gca() 
             plt.title('filter = ' + fil)
             plt.plot(self.fitted['xarr_shifted'][fil], 
                      self.fitted['norm_fit'][fil], color='red')
@@ -174,16 +187,19 @@ class LC(object):
             #plot samples
             if samples == True:
                 for s in self.fitted['realizations'][fil]:
-                    plt.plot(self.fitted['xarr_shifted'][fil], s/self.fitted['max_flux'], 
-                             color="#4682b4", alpha=0.3)
+                    plt.plot(self.fitted['xarr_shifted'][fil], np.array(s)/self.fitted['max_flux'], 
+                             color='gray', alpha=0.3)
             plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'], 
                         self.raw[fil][:,1]/self.fitted['max_flux'],
                         yerr=self.raw[fil][:,2]/self.fitted['max_flux'], 
                         color='blue', fmt='o')
             plt.xlabel('days since maximum', fontsize=15)
             plt.ylabel('normalized flux', fontsize=15)
-            plt.xlim(float(self.user_choices['epoch_cut'][0]), 
-                     float(self.user_choices['epoch_cut'][1]))
+            plt.xlim(min(self.raw[fil][:,0] - self.fitted['peak_mjd'])-1.0, 
+                     max(self.raw[fil][:,0] - self.fitted['peak_mjd'])+1.0)
+            plt.vlines(xmin, ax.get_ylim()[0], func(xmin), color='black', linestyles='dashed')
+            plt.vlines(xmax, ax.get_ylim()[0], func(xmax), color='black', linestyles='dashed')
+
         f.tight_layout()
             
         if isinstance(file_out, str):
