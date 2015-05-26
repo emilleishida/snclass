@@ -3,11 +3,12 @@
 from __future__ import division
 
 import numpy as np
+import os
 import matplotlib.pylab as plt
 from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from util import read_fitted
+from util import read_fitted, read_user_input, read_SNANA_lc
 
 ##############################################################
 
@@ -211,7 +212,67 @@ class LC(object):
 
             
 
-        
+def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
+    """
+    Perform a GP fit in a set of objects.
+
+    input: user_choices
+           output from read_user_input
+
+           plot - bool, optional
+           rather or not to generate an output png file
+           default is False
+
+           calc_mean - bool, optional
+           rather or not to calculate the main GP fit
+           default is True
+
+           calc_samp - bool, optional
+           rather or not to calulate realizations of the final fit
+           default is False
+    """
+
+    if not os.path.exists(user_choices['samples_dir'][0]):
+        os.makedirs(user_choices['samples_dir'][0])
+
+    #read list of SN in sample
+    op = open(user_choices['snlist'][0], 'r')
+    lin = op.readlines()
+    op.close()
+
+    snlist = [elem.split()[0] for elem in lin]
+
+    for sn in snlist: 
+
+        #update object
+        user_choices['path_to_lc'] = [sn]
+
+        #read light curve raw data
+        raw = read_SNANA_lc(user_choices)
+
+        #initiate light curve object
+        lc = LC(raw, user_choices)
+
+        print 'Fitting SN' + raw['SNID:'][0]
+
+        #perform basic check
+        lc.check_basic()
+
+        #check if satisfy minimum cut
+        if lc.basic_cuts:
+
+            print '... Passed basic cuts'
+
+            #fit 
+            lc.fit_GP(mean=calc_mean, samples=calc_samp)
+      
+            if plot == True:
+                lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')   
+
+            print '\n'
+
+        else:
+            print 'Failed to pass basic cuts!\n'     
          
         
 

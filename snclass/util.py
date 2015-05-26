@@ -201,7 +201,6 @@ def read_fitted(lc_data):
 
 
 
-
 def main():
   print(__doc__)
 
