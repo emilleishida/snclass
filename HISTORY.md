@@ -27,5 +27,10 @@ April 16, 2015
 May 22, 2015
 1. Changed GP code to gptools. 
    Fixed problematic fitting. 
+----------------------------------------------------------------
+May 26, 2015
+1. Included a separate function for fitting a set of objects. 
+2. Separated the fitting from the matrix building algorithms. 
+3. Improved the output format for the mean and samples.
 
 
