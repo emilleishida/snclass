@@ -6,7 +6,7 @@ snclass - Supernova Photometric Classifier
 
 It works in 3 steps:
 
-* Convert flux/magnitude measurements in a continuous function using Gaussian process (GP). 
+* Convert flux/magnitude measurements into a continuous function using Gaussian process (GP). 
 * Dimentionality reduction through kernel principal component analysis (kPCA). 
 * Classification of a purely photometric sample thorough nearst neighbor (NN).  
 

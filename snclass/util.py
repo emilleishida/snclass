@@ -193,7 +193,9 @@ def read_fitted(lc_data):
 
     loaded['GP_std'] = {}
     loaded['GP_fit'] = {}
+    loaded['xarr'] = {}
     for fil in lc_data['filters']:
+        loaded['xarr'][fil] = [float(d2[j][1]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
         loaded['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
         loaded['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
 

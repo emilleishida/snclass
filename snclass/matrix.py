@@ -25,42 +25,38 @@ class DataMatrix(object):
 
     
 
-    def build(self, file_out, plot=False):
+    def build(self, file_out=None):
         """
         Build data matrix according to user input file specifications.
 
-        input:   file_out -> file to store data matrix (str)
-                 plot (optional) -> rather to make save plot for each LC
+        input:   file_out -> str, optional
+                 file to store data matrix (str). Default is None
         """
 
-        if not os.path.exists(self.user_choices['samples_dir'][0]):
-            os.makedirs(self.user_choices['samples_dir'][0])
+        #list all files in sample directory
+        file_list = os.listdir(self.user_choices['samples_dir'][0])
 
-        #read list of SN in sample
-        op = open(self.user_choices['snlist'][0], 'r')
-        lin = op.readlines()
-        op.close()
+        datam = []
+        self.snid = []
+        self.redshift = []
+        self.sntype = [] 
 
-        snlist = [elem.split()[0] for elem in lin]
- 
-        cont = 0
-        for sn in snlist: 
+        for obj in file_list:
+            if 'mean' in obj:
 
-            #update object
-            self.user_choices['path_to_lc'] = [sn]
+                #take object identifier
+                name = obj[len('DES_SN'):-len('_mean.dat')]
 
-            #read light curve raw data
-            raw = read_SNANA_lc(self.user_choices)
-
-            #initiate light curve object
-            lc = LC(raw, self.user_choices)
+                if len(name) == 5:
+                    name = '0' + name
   
+                self.user_choices['path_to_lc'] = ['DES_SN' + name + '.DAT']
 
-            #perform basic check
-            lc.check_basic()
+                #read light curve raw data
+                raw = read_SNANA_lc(self.user_choices)
 
-            #check if satisfy minimum cut
-            if lc.basic_cuts:
+                #initiate light curve object
+                lc = LC(raw, self.user_choices)
 
                 #load GP fit
                 lc.load_fit_GP()
@@ -73,47 +69,32 @@ class DataMatrix(object):
 
                 #check epoch requirements
                 lc.check_epoch()
-
-                if lc.epoch_cuts:
-
-                    cont = cont + 1
-                    print '... ... Passed epoch cuts. This is SN number ' + str(cont)
-
-                    if int(self.user_choices['n_samples'][0]) > 0:
-                         lc.fit_GP(samples=True)  
-                         lc.normalize(samples=True)                      
+  
+                if lc.epoch_cuts:                     
              
                     #build data matrix lines
                     lc.build_steps()
 
-                    #write to file
-                    for fil1 in self.user_choices['filters']:
-                        for elem in lc.flux_for_matrix[fil1]:
-                            op1.write(str(elem) + '    ')
-                    op1.write('\n')
-              
-                    if plot == True:
-                        if int(self.user_choices['n_samples'][0]) == 0:
-                            lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png')
-                            print '\n' 
-                        else:
-                            lc.plot_fitted(file_out=self.user_choices['samples_dir'][0] + raw['SNID:'][0]+'.png', 
-                                           samples=True, nsamples=int(self.user_choices['n_samples'][0]))
-                            print '\n'
+                    #store
+                    obj_line = []
+                    for fil in self.user_choices['filters']:
+                        for item in lc.flux_for_matrix[fil]: 
+                            obj_line.append(item)
 
-                    print '\n'
+                    datam.append(obj_line)
+                    self.snid.append(raw['SNID:'][0])
+                    self.redshift.append(raw[self.user_choices['redshift_flag'][0]][0])
+                    self.sntype.append(raw[self.user_choices['type_flag'][0]][0])
 
-                else:
-                    print '... ... Failed to pass epoch cuts!\n'
+        self.datam = np.array(datam)
 
-            else:
-                print '... Failed to pass basic cuts!\n'
-                    
-
-        op1.close()
-
-     
-
-        
-
-        
+        if file_out is not None:     
+            op1 = open(file_out, 'w')
+            op1.write('SNID    type    z   LC...\n')
+            for i in xrange(len(datam)):
+                op1.write(str(snid[i]) + '    ' + str(sntype[i]) + '    ' + str(redshift[i]) + '    ')
+                for j in xrange(len(datam[i])):
+                    op1.write(str(datam[i][j]) + '    ')
+                op1.write('\n')
+            op1.close()  
+  
