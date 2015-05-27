@@ -1,8 +1,12 @@
+#!/usr/bin/env python
+
 import numpy as np
 import gptools
 import os
 
-def fit_LC(data, mean=True, samples=False):
+from util import screen
+
+def fit_LC(data, mean=True, samples=False, screen=['0']):
     """
     Gaussian Process fit using gptools. 
 
@@ -21,7 +25,7 @@ def fit_LC(data, mean=True, samples=False):
   
 
     for fil in data['filters']:
-        print '... filter: ' + fil
+        screen('... filter: ' + fil, {'screen':screen})
 
         t = data[fil][:,0]
         y = data[fil][:,1]
@@ -45,7 +49,7 @@ def fit_LC(data, mean=True, samples=False):
 
         if samples == True and int(data['n_samples'][0]) > 0:
 
-            print '... ... calculate samples'
+            screen('... ... calculate samples', {'screen': screen})
 
             v1 = data['GP_obj'][fil].draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
 
@@ -57,7 +61,7 @@ def fit_LC(data, mean=True, samples=False):
         k = None
         del gp, out, v1, k 
 
-    print '\n'
+    screen('\n', {'screen': screen})
 
     if bool(int(data['save_samples'][0])) == True:
 

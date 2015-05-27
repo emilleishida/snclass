@@ -164,6 +164,19 @@ In order to select a smaller subset satisfying selection cuts which require trea
 ## Building a data matrix
 
 
+After you have all your desired light curves already fitted through a GP, with means saved in the ``samples_dir`` directory, you can easily build the data matrix using
+
+```python
+from snclass import DataMatrix
+
+d = DataMatrix('user.input')
+d.build(file_out='matrix.dat')
+```
+
+## Dimensionality reduction and classifier
+
+The current version of ``snclass`` 
+
 
 
 ## Requirements
