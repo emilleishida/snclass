@@ -4,6 +4,21 @@ import matplotlib.pylab as plt
 
 #########################################
 
+def screen(message, choices):
+    """
+    Print message on screen according to users choice
+
+    input:   message, str
+             message to be printed
+
+             choices, dict
+             dictionary of users choices
+    """
+    
+    if bool(int(choices['screen'][0])):
+        print message
+
+
 def read_user_input(filename):
     """
     Read user input from file and construct initial dictionary parameter. 
@@ -21,12 +36,73 @@ def read_user_input(filename):
     data1 = [elem.split() for elem in lin1]     
 
     #store options in params dictionary
-    params = dict([(line[0], line[2:line.index('#')])  for line in data1 if len(line) > 1])
+    params = dict([(line[0], line[2:line.index('#')])  
+                   for line in data1 if len(line) > 1])
+
+    #check dimensionality reduction function
+    if ('dim_reduction_func' in params.keys()):
+        if  (params['dim_reduction_func'][0] == 'kpca'):
+            from functions import kpca
+            params['dim_reduction_func'] = kpca
+            for i1 in xrange(len(params['kpca_pars'])):
+                try:
+                    params[params['kpca_pars'][i1]] = int(params['kpca_val'][i1])
+                except ValueError:
+                    try:
+                        params[params['kpca_pars'][i1]] = float(params['kpca_val'][i1])  
+                    except ValueError:
+                        params[params['kpca_pars'][i1]] = params['kpca_val'][i1]
+
+        elif params['dim_reduction_func'][0] == 'None':
+            params['dim_reduction_func'] = None
+
+    #check classifier function
+    if ('classifier_func' in params.keys()):
+        if (params['classifier_func'][0] == 'nn'):
+            from functions import nn
+            params['classifier_func'] = nn     
+            for i2 in xrange(len(params['classifier_pars'])):
+                try:
+                    params[params['classifier_pars'][i2]] = int(params['classifier_val'][i2])
+                except ValueError:
+                    try:
+                        params[params['classifier_pars'][i2]] = float(params['classifier_val'][i2])
+                    except ValueError:
+                        params[params['classifier_pars'][i2]] = params['classifier_val'][i2]     
+            
+        elif params['classifier_func'][0] == 'None':
+            params['classifier_func'][0] = None
+
+    #check set types function
+    if ('transform_types_func' in params.keys()):
+        if (params['transform_types_func'][0] == 'set_types'):
+            from functions import set_types
+            params['transform_types_func'] = set_types
+        elif params['transform_types_func'][0] == 'None':
+            params['transform_types_func'][0] = None
+
+    #check cross-validation function
+    if ('cross_validation_func' in params.keys()):
+        if (params['cross_validation_func'][0] == 'cross_val'):
+            from functions import core_cross_val
+            params['cross_validation_func'] = core_cross_val
+            params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
+            params['n_cross_val_particles'] = int(params['n_cross_val_particles'][0])
+            for i3 in xrange(len(params['cross_val_par'])):
+                try:
+                    params[params['cross_val_par'][i3] + '_lim'] = [int(params[params['cross_val_par'][i3] + '_lim'][i4]) for i4 in range(2)]
+                except ValueError:
+                    params[params['cross_val_par'][i3] + '_lim'] = [float(params[params['cross_val_par'][i3] + '_lim'][i4]) for i4 in range(2)]
+
+        elif params['cross_validation_func'][0] == 'None':
+            params['cross_validation_func'] = None
 
     params['GP_fit'] = {}
     params['realizations'] = {}
     params['xarr'] = {}
-    
+    params['GP_obj'] = {}
+    params['GP_std'] = {}
+
     #check if ``observer'' data already exists
     if not os.path.isdir(params['path_to_obs'][0]):
         raise TypeError('Variable "path_to_obs" is not a valid directory!')            
@@ -151,8 +227,8 @@ def choose_sn( params, output_file='snlist.dat' ):
         op2.write( item  + '\n')
     op2.close()
 
-    print  'Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.'
-    print  'Surviving objects are listed in file ' + output_file
+    screen('Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.', params)
+    screen('Surviving objects are listed in file ' + output_file, params)
 
 
 def read_fitted(lc_data):

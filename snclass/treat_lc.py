@@ -8,7 +8,7 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from util import read_fitted, read_user_input, read_SNANA_lc
+from util import read_fitted, read_user_input, read_SNANA_lc, screen
 
 ##############################################################
 
@@ -253,7 +253,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
         #initiate light curve object
         lc = LC(raw, user_choices)
 
-        print 'Fitting SN' + raw['SNID:'][0]
+        screen('Fitting SN' + raw['SNID:'][0], user_choices)
 
         #perform basic check
         lc.check_basic()
@@ -261,7 +261,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
         #check if satisfy minimum cut
         if lc.basic_cuts:
 
-            print '... Passed basic cuts'
+            screen('... Passed basic cuts', user_choices)
 
             #fit 
             lc.fit_GP(mean=calc_mean, samples=calc_samp)
@@ -270,10 +270,14 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
                 lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')   
 
         else:
-            print 'Failed to pass basic cuts!\n'     
+            screen('Failed to pass basic cuts!\n', user_choices)     
          
         
+def main():
+  print(__doc__)
 
+if __name__=='__main__':
+  main() 
 
 
         
