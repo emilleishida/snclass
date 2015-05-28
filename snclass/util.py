@@ -3,9 +3,6 @@ Created by Emille Ishida in May, 2015.
 
 Miscelaneous functions for supernova classification.
 
-- screen:
-        Print messages to screen according to user choice
-
 - check_reduction:
         Check dimensionality reduction function input choices.
 
@@ -38,21 +35,6 @@ import numpy as np
 import os
 
 #########################################
-
-
-def screen(message, choices):
-    """
-    Print message on screen according to users choice.
-
-    input:   message, str
-             message to be printed
-
-             choices, dict
-             dictionary of users choices
-    """
-    if bool(int(choices['screen'][0])):
-        print message
-
 
 def check_reduction(params):
     """

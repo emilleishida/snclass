@@ -9,7 +9,7 @@ import sys
 
 from snclass import read_user_input, read_SNANA_lc
 from snclass import fit_LC
-from snclass.util import screen
+from snclass.functions import screen
 
 
 def main(args):

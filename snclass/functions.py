@@ -1,3 +1,24 @@
+"""
+Created by Emille Ishida in May, 2015.
+
+Stand alone functions for supernova classification.
+
+- screen:
+        Print messages to screen according to user choice.
+
+- kpca:
+        Perform dimensionality reduction using kernel PCA.
+
+- nn:
+        Classify a given data matrix according to its n nearst neighbours.
+
+- set_types:
+        Transform the original vector of types.
+
+- core_cross_val:
+        Perform 1/3 validation.
+"""
+
 #!/usr/bin/env python
 
 from __future__ import division
@@ -13,7 +34,22 @@ from sklearn import neighbors
 from scipy.sparse.linalg.eigen.arpack import ArpackNoConvergence
 
 import snclass
-from snclass.util import screen
+
+#########################################
+
+def screen(message, choices):
+    """
+    Print message on screen according to users choice.
+
+    input:   message, str
+             message to be printed
+
+             choices, dict
+             dictionary of users choices
+    """
+    if bool(int(choices['screen'][0])):
+        print message
+
 
 def kpca(data_matrix, pars, transform=False):
     """
@@ -83,6 +119,7 @@ def nn(test, data_matrix, types, pars):
 def set_types(types):
     """
     Transform the original vector of types.
+
     All non-Ia objects are typed '1' and all Ia objects are typed as '0'.
     This confusing nomenclature is to abide with SNANA notation.
 
