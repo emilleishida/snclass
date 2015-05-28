@@ -62,17 +62,17 @@ def check_reduction(params):
             updated dictionary of input parameters
     """
     if 'dim_reduction_func' in params.keys():
-        if  params['dim_reduction_func'][0] == 'kpca':
+        if  params['dim_reduction_func'][0]=='kpca':
             from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
             for i in xrange(len(params['kpca_pars'])):
                 try:
                     params[params['kpca_pars'][i]] = \
-                                  int(params['kpca_val'][i])
+                    int(params['kpca_val'][i])
                 except ValueError:
                     try:
                         params[params['kpca_pars'][i]] = \
-                               float(params['kpca_val'][i]) 
+                        float(params['kpca_val'][i]) 
                     except ValueError:
                         params[params['kpca_pars'][i]] = params['kpca_val'][i]
 
@@ -142,7 +142,7 @@ def check_crossval(params):
             updated dictionary of input parameters   
     """
     if 'cross_validation_func' in params.keys():
-        if params['cross_validation_func'][0] == 'cross_val':
+        if params['cross_validation_func'][0]=='cross_val':
             from functions import core_cross_val
             params['cross_validation_func'] = core_cross_val
             params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
