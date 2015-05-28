@@ -54,7 +54,8 @@ def imp_gptools(data, fil):
 
     return data
 
-def save_result(data, mean, samples):
+
+def save_result(data, mean=True, samples=False):
     """
     Save results of GP fit to file.
 
@@ -63,29 +64,31 @@ def save_result(data, mean, samples):
            output from read_snana_lc
            keys: filters
 
-           mean, bool
+           mean, bool - optional
            if True, save mean GP fit
+           Default is True
 
-           samples, bool
+           samples, bool - optional
            if True, save draws from GP fit
+           Default is False
     """
-    #check if storage directory exsts
+    # check if storage directory exsts
     if not os.path.exists(data['samples_dir'][0]):
-                os.makedirs(data['samples_dir'][0])
+        os.makedirs(data['samples_dir'][0])
 
     if bool(int(data['save_samples'][0])) and samples:
-        op1 = open(data['samples_dir'][0] + data['file_root'][0] + \
+        op1 = open(data['samples_dir'][0] + data['file_root'][0] +
                    data['SNID:'][0] + '_samples.dat', 'w')
         op1.write('filter    MJD    ')
         for j in xrange(int(data['n_samples'][0])):
-            op1.write('samp' + str(j+1))
+            op1.write('samp' + str(j + 1))
         op1.write('\n')
         for fil in data['filters']:
-            for i1 in xrange(len(data['xarr'][fil])):
+            for i in xrange(len(data['xarr'][fil])):
                 op1.write(fil + '    ' + 
-                          str(data['xarr'][fil][i1]) + '    ')
-                for i2 in xrange(int(data['n_samples'][0])):
-                    op1.write(str(data['realizations'][fil][i2][i1]) + 
+                          str(data['xarr'][fil][i]) + '    ')
+                for j in xrange(int(data['n_samples'][0])):
+                    op1.write(str(data['realizations'][fil][j][i]) +
                               '    ')
                 op1.write('\n')
         op1.close()
@@ -95,10 +98,10 @@ def save_result(data, mean, samples):
                    data['SNID:'][0] + '_mean.dat', 'w')
         op2.write('filter    MJD    GP_fit     GP_std\n')
         for fil in data['filters']:
-            for i2 in xrange(len(data['xarr'][fil])):
-                op2.write(fil + '    ' + str(data['xarr'][fil][i2]) + 
-                          '    ' + str(data['GP_fit'][fil][i2]) + 
-                          '    ' + str(data['GP_std'][fil][i2]) + '\n')
+            for k in xrange(len(data['xarr'][fil])):
+                op2.write(fil + '    ' + str(data['xarr'][fil][k]) + 
+                          '    ' + str(data['GP_fit'][fil][k]) + 
+                          '    ' + str(data['GP_std'][fil][k]) + '\n')
         op2.close()
 
 
@@ -148,7 +151,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
 
             data['realizations'][fil] = draws.T
 
-    save_result(data)
+    save_result(data, mean=mean, samples=samples)
 
     if screen:
         print '\n'
@@ -157,6 +160,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
 
 
 def main():
+    """Print documentation."""
     print __doc__
 
 if __name__ == '__main__':
