@@ -137,7 +137,7 @@ def set_types(types):
     return np.array(new_type)
 
 
-def calc_scores(matrix2, ncomp, dist, test_type):
+def calc_scores(matrix2, ncomp, dist):
     """
     Calculate classification results for 1 data matrix.
 
@@ -172,7 +172,7 @@ def calc_scores(matrix2, ncomp, dist, test_type):
                           matrix2.sntype, matrix2.user_choices)
 
     # calculate score
-    score = sum(new_label == test_type)
+    score = sum(new_label == matrix2.test_type)
 
     return [ncomp, matrix2.user_choices['gamma'], score]
 
@@ -207,7 +207,7 @@ def core_cross_val(data, types, user_choices):
 
     # set test data matrix and types
     matrix2.data_test = np.array([data[indx] for indx in indx_list2])
-    test_type = np.array([types[indx] for indx in indx_list2])
+    matrix2.test_type = np.array([types[indx] for indx in indx_list2])
 
     ploc = matrix2.user_choices['gamma_lim'][0]
     pscale = matrix2.user_choices['gamma_lim'][1] - ploc
@@ -221,7 +221,7 @@ def core_cross_val(data, types, user_choices):
         k = 0
         while k < user_choices['gamma_nparticles']:
             try:
-                results.append(calc_scores(matrix2, ncomp, dist, test_type))
+                results.append(calc_scores(matrix2, ncomp, dist))
 
                 # update counter
                 k = k + 1
