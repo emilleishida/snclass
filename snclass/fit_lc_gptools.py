@@ -4,9 +4,8 @@ import numpy as np
 import gptools
 import os
 
-from util import screen
 
-def fit_LC(data, mean=True, samples=False, screen=['0']):
+def fit_LC(data, mean=True, samples=False, screen=False):
     """
     Gaussian Process fit using gptools. 
 
@@ -14,8 +13,20 @@ def fit_LC(data, mean=True, samples=False, screen=['0']):
                     output from read_SNANA_lc
                     keys: filters
 
-    output: data -> update dictionary with new key
-                    realizations: 
+            mean -> bool, optional
+                    if True, calculate mean GP fit
+                    Default is True
+ 
+            samples -> bool, optional
+                       if True, calculate samples from the final GP
+                       Default is False
+
+            screen -> bool, optional
+                      if True, print calculation steps into screen
+                      Default is False 
+
+    output: data -> update dictionary with new keyword:
+                    realizations
     """
 
     key_list = ['realizations', 'xarr', 'GP_std', 'GP_obj']
@@ -25,13 +36,14 @@ def fit_LC(data, mean=True, samples=False, screen=['0']):
   
 
     for fil in data['filters']:
-        screen('... filter: ' + fil, {'screen':screen})
+        if screen:
+            print '... filter: ' + fil
 
         t = data[fil][:,0]
         y = data[fil][:,1]
         yerr = data[fil][:,2]
 
-        if mean == True:
+        if mean:
             #setup GP
             k = gptools.SquaredExponentialKernel(param_bounds=[(0, max(y)), (0, np.std(t))])
             gp = gptools.GaussianProcess(k)
@@ -47,9 +59,10 @@ def fit_LC(data, mean=True, samples=False, screen=['0']):
             data['GP_std'][fil] = out[1]
             data['GP_obj'][fil] = gp
 
-        if samples == True and int(data['n_samples'][0]) > 0:
+        if samples and int(data['n_samples'][0]) > 0:
 
-            screen('... ... calculate samples', {'screen': screen})
+            if screen:
+                print '... ... calculate samples'
 
             v1 = data['GP_obj'][fil].draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
 
@@ -61,7 +74,8 @@ def fit_LC(data, mean=True, samples=False, screen=['0']):
         k = None
         del gp, out, v1, k 
 
-    screen('\n', {'screen': screen})
+    if screen:
+        print '\n'
 
     if bool(int(data['save_samples'][0])) == True:
 
