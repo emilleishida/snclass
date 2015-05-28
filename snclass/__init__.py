@@ -11,9 +11,7 @@ __status__ = "Prototype"
 __license__ = "GPL"
 
 
-from util import read_user_input, choose_sn, read_SNANA_lc, read_fitted
-from fit_lc_gptools import fit_LC
-from treat_lc import LC, fit_objs
-from matrix import DataMatrix
+from util import read_user_input, read_SNANA_lc, read_fitted
+from treat_lc import fit_objs
 
 

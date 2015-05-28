@@ -4,8 +4,6 @@ from __future__ import division
 
 import argparse
 import matplotlib.pyplot as plt
-import numpy as np
-import sys
 
 from snclass import read_user_input, read_SNANA_lc
 from snclass import fit_LC
@@ -61,7 +59,7 @@ def main(args):
     for fil in user_input['filters']:
 
         # Plot the samples in data space.
-        ax = plt.subplot(2, len(lc_data['filters'])/2 + 
+        plt.subplot(2, len(lc_data['filters'])/2 + 
                         len(lc_data['filters'])%2, lc_data['filters'].index(fil) + 1)
         for s in lc_data['realizations'][fil]:
             plt.plot(lc_data['xarr'][fil], s, color="gray", alpha=0.3)
