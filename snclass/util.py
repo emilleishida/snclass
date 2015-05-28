@@ -1,12 +1,45 @@
+"""
+Created by Emille Ishida in May, 2015.
+
+Miscelaneous functions for supernova classification. 
+
+- screen: 
+        Print messages to screen according to user choice
+
+- check_reduction:
+        Check dimensionality reduction function input choices.
+
+- check_classifier:
+        Check classifier function input choices.
+
+- check_types:
+        Check set types function input choices.
+
+- check_crossval:
+        Check cross-validation function input choices.
+ 
+- read_user_input: 
+        read user choices from input file
+
+- read_SNANA_lc: 
+        read raw SNANA light curve .DAT file 
+
+- choose_sn: 
+        Builds a list of SN satifying basic selction criteria
+
+- read_fitted: 
+        reads previously calculated GP results
+"""
+
+
 import numpy as np
-import os 
-import matplotlib.pylab as plt
+import os
 
 #########################################
 
 def screen(message, choices):
     """
-    Print message on screen according to users choice
+    Print message on screen according to users choice.
 
     input:   message, str
              message to be printed
@@ -14,32 +47,20 @@ def screen(message, choices):
              choices, dict
              dictionary of users choices
     """
-    
     if bool(int(choices['screen'][0])):
         print message
 
 
-def read_user_input(filename):
+def check_reduction(params):
     """
-    Read user input from file and construct initial dictionary parameter. 
+    Check dimensionality reduction function input choices.
 
-    input:    filename (string) -> user input file parameter 
+    input: params, dict
+           dictionary of input parameters
 
-    output:   dictionary with formated user choices
+    output: params, dict
+            updated dictionary of input parameters   
     """
-
-    #read user input data
-    op1 = open(filename, 'r')
-    lin1 = op1.readlines()
-    op1.close()
-
-    data1 = [elem.split() for elem in lin1]     
-
-    #store options in params dictionary
-    params = dict([(line[0], line[2:line.index('#')])  
-                   for line in data1 if len(line) > 1])
-
-    #check dimensionality reduction function
     if ('dim_reduction_func' in params.keys()):
         if  (params['dim_reduction_func'][0] == 'kpca'):
             from functions import kpca
@@ -56,7 +77,18 @@ def read_user_input(filename):
         elif params['dim_reduction_func'][0] == 'None':
             params['dim_reduction_func'] = None
 
-    #check classifier function
+    return params
+
+def check_classifier(params):
+    """
+    Check classifier function input choices.
+
+    input: params, dict
+           dictionary of input parameters
+
+    output: params, dict
+            updated dictionary of input parameters   
+    """
     if ('classifier_func' in params.keys()):
         if (params['classifier_func'][0] == 'nn'):
             from functions import nn
@@ -73,7 +105,18 @@ def read_user_input(filename):
         elif params['classifier_func'][0] == 'None':
             params['classifier_func'][0] = None
 
-    #check set types function
+    return params
+
+def check_types(params):
+    """
+    Check set types function input choices.
+
+    input: params, dict
+           dictionary of input parameters
+
+    output: params, dict
+            updated dictionary of input parameters   
+    """
     if ('transform_types_func' in params.keys()):
         if (params['transform_types_func'][0] == 'set_types'):
             from functions import set_types
@@ -81,7 +124,18 @@ def read_user_input(filename):
         elif params['transform_types_func'][0] == 'None':
             params['transform_types_func'][0] = None
 
-    #check cross-validation function
+    return params
+
+def check_crossval(params):
+    """
+    Check cross-validation function input choices.
+
+    input: params, dict
+           dictionary of input parameters
+
+    output: params, dict
+            updated dictionary of input parameters   
+    """
     if ('cross_validation_func' in params.keys()):
         if (params['cross_validation_func'][0] == 'cross_val'):
             from functions import core_cross_val
@@ -97,6 +151,32 @@ def read_user_input(filename):
         elif params['cross_validation_func'][0] == 'None':
             params['cross_validation_func'] = None
 
+    return params
+
+
+def read_user_input(filename):
+    """
+    Read user input from file and construct initial dictionary parameter.
+
+    input:    filename (string) -> user input file parameter
+
+    output:   dictionary with formated user choices
+    """
+    #read user input data
+    op1 = open(filename, 'r')
+    lin1 = op1.readlines()
+    op1.close()
+
+    data1 = [elem.split() for elem in lin1]
+
+    #store options in params dictionary
+    params = dict([(line[0], line[2:line.index('#')])
+                   for line in data1 if len(line) > 1])
+
+    params = check_reduction(params)
+    params = check_classifier(params)
+    params = check_crossval(params)
+
     params['GP_fit'] = {}
     params['realizations'] = {}
     params['xarr'] = {}
@@ -105,16 +185,16 @@ def read_user_input(filename):
 
     #check if ``observer'' data already exists
     if not os.path.isdir(params['path_to_obs'][0]):
-        raise TypeError('Variable "path_to_obs" is not a valid directory!')            
+        raise TypeError('Variable "path_to_obs" is not a valid directory!')
 
     return params
 
 def read_SNANA_lc( params ):
     """
-    Reads light curve in SNANA format and returns a dictionary with the 
+    Reads light curve in SNANA format and returns a dictionary with the
     variables chosen in the user input file.
 
-    input:     params -> dictionary of input parameters 
+    input:     params -> dictionary of input parameters
 
     output:    mdata -> data from light curve
     """
@@ -125,7 +205,6 @@ def read_SNANA_lc( params ):
     op1.close()
 
     data1 = [elem.split() for elem in lin1]
-   
     raw_data = dict([[line[0], line[1:]] for line in data1 if len(line) > 1])
 
     #determine MJD index
@@ -144,38 +223,38 @@ def read_SNANA_lc( params ):
     quality_indx = raw_data[params['param_list'][0]].index(params['quality_flag'][0]) + 1
 
     #build measurement list for each filter
-    mdata = dict([[item, np.array([[float(line[ mjd_indx]), 
-                                    float(line[photon_indx]), 
-                                    float(line[photonerr_indx]), 
-                                    float(line[quality_indx])] 
- 			for line in data1 
-			if len(line) > 1 
-			and line[0] == params['epoch_flag'][0] 
-			and line[filter_indx] == item 	
+    mdata = dict([[item, np.array([[float(line[ mjd_indx]),
+                                    float(line[photon_indx]),
+                                    float(line[photonerr_indx]),
+                                    float(line[quality_indx])]
+ 			for line in data1
+			if len(line) > 1
+			and line[0] == params['epoch_flag'][0]
+			and line[filter_indx] == item
 			and float(line[photon_indx]) >= 0.0
                         and float(line[quality_indx]) >= float(params['quality_cut'][0])
-                        ])] 
+                        ])]
 		for item in params['filters']])
 
     #add usefull header information to output dictionary
     for item in params['header']:
         if item not in params['param_list']:
-            mdata[ item ] = raw_data[item]
+            mdata[item] = raw_data[item]
 
     return mdata
 
-def choose_sn( params, output_file='snlist.dat' ):
+def choose_sn(params, output_file='snlist.dat'):
     """
-    Read through all files within a given directory and 
+    Read through all files within a given directory and
     select those satisfying criteria in user input file.
 
     input:  params (dict)
 
     output: txt file with the name of objects surviving selections cuts.
-    """  
+    """
 
     #take all file names in data directory
-    filename = os.listdir( params['path_to_obs'][0] )
+    filename = os.listdir(params['path_to_obs'][0])
 
     #store files for light curves surviving selection cuts
     final_list = []
@@ -198,17 +277,17 @@ def choose_sn( params, output_file='snlist.dat' ):
                     header[ line[0] ] = line[1:]
 
             #check for request SN type
-            if  params['type_cut'][0]  != 'None' :
+            if  params['type_cut'][0]  != 'None':
                 if header[ params['type_flag'][0]][0] in params['type_cut']:
                     type_surv = True
 
                 else:
-                    type_surv = False 
+                    type_surv = False
             else:
                 type_surv = True
 
-            #check for requested SN sample  
-            if params['sample_cut'][0] != 'None': 
+            #check for requested SN sample
+            if params['sample_cut'][0] != 'None':
 
                 if str(header[params['sample_flag'][0]][0]) in params['sample_cut']:
                     sample_surv = True
@@ -216,11 +295,11 @@ def choose_sn( params, output_file='snlist.dat' ):
                     sample_surv = False
 
             else:
-                sample_surv = True 
-          
+                sample_surv = True
+
             #store only if all requirements are satisfied
             if type_surv == True and sample_surv == True:
-                final_list.append( name )    
+                final_list.append( name )
 
     op2 = open( output_file, 'w' )
     for item in final_list:
@@ -230,19 +309,18 @@ def choose_sn( params, output_file='snlist.dat' ):
     screen('Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.', params)
     screen('Surviving objects are listed in file ' + output_file, params)
 
-
 def read_fitted(lc_data):
-    """  
+    """
     Read GP results previously calculated and populate the correct keywords in the parameter dictionary.
 
     input:  user_input, dic
             output from read_SNANA_lc()
 
     output: updated dictionary of parameters.
-    """ 
+    """
 
     loaded = {}
-  
+
     if bool(int(lc_data['n_samples'][0])):
         op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_samples.dat', 'r')
         lin1 = op1.readlines()
@@ -250,17 +328,16 @@ def read_fitted(lc_data):
 
         d1 = [elem.split() for elem in lin1]
 
-
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
-            loaded['realizations'][fil] = [[float(d1[kk][jj]) for kk in xrange(len(d1)) if d1[kk][0]==fil] 
+            loaded['realizations'][fil] = [[float(d1[kk][jj]) for kk in xrange(len(d1)) if d1[kk][0]==fil]
                                                 for jj in xrange(2, int(lc_data['n_samples'][0]) + 2)]
-            loaded['xarr'][fil] = []  
+            loaded['xarr'][fil] = []
             for i1 in xrange(len(d1)):
                 if d1[i1][0] == fil:
                     loaded['xarr'][fil].append(float(d1[i1][1]))
-                
+
     op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_mean.dat', 'r')
     lin2 = op2.readlines()
     op2.close()
@@ -277,11 +354,8 @@ def read_fitted(lc_data):
 
     return loaded
 
-
-
 def main():
-  print(__doc__)
+    print(__doc__)
 
 if __name__=='__main__':
-  main()    
-
+    main()    
