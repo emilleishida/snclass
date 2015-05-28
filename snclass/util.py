@@ -24,6 +24,9 @@ Miscelaneous functions for supernova classification.
 - read_SNANA_lc:
         read raw SNANA light curve .DAT file
 
+- compare_type:
+        Compare type in user requests with raw SN data.
+
 - choose_sn:
         Builds a list of SN satifying basic selction criteria
 
@@ -232,6 +235,7 @@ def read_SNANA_lc(params):
     quality_indx = raw_data[par].index(params['quality_flag'][0]) + 1
 
     # build measurement list for each filter
+    fils = params['filters']
     mdata = dict([[item, np.array([[float(line[mjd_indx]),
                                     float(line[photon_indx]),
                                     float(line[photonerr_indx]),
@@ -242,8 +246,7 @@ def read_SNANA_lc(params):
                    line[filter_indx] == item and
                    float(line[photon_indx]) >= 0.0 and
                    float(line[quality_indx]) >=
-                   float(params['quality_cut'][0])])] 
-            for item in params['filters']])
+                   float(params['quality_cut'][0])])] for item in fils])
 
     # add usefull header information to output dictionary
     for item in params['header']:
@@ -251,6 +254,56 @@ def read_SNANA_lc(params):
             mdata[item] = raw_data[item]
 
     return mdata
+
+
+def compare_type(params, header):
+    """
+    Compare type in user requests with raw SN data.
+
+    input:  params, dict
+            dictionary of user choices
+ 
+            header, dict
+            dictionary of header variables
+
+    output: type_surv, bool
+            if True, object satisfies type selection cuts
+    """
+    if params['type_cut'][0] != 'None':
+        if header[params['type_flag'][0]][0] in params['type_cut']:
+            type_surv = True
+        else:
+            type_surv = False
+    else:
+        type_surv = True
+
+    return type_surv
+
+
+def compare_sample(params, header):
+    """
+    Compare sample in user requests with raw SN data.
+
+    input:  params, dict
+            dictionary of user choices
+ 
+            header, dict
+            dictionary of header variables
+
+    output: sample_surv, bool
+            if True, object satisfies sample selection cuts
+    """
+    if params['sample_cut'][0] != 'None':
+        par = params['sample_flag'][0]
+        if str(header[par][0]) in params['sample_cut']:
+            sample_surv = True
+        else:
+            sample_surv = False
+
+    else:
+        sample_surv = True
+
+    return sample_surv
 
 
 def choose_sn(params, output_file='snlist.dat'):
@@ -284,27 +337,11 @@ def choose_sn(params, output_file='snlist.dat'):
                 if len(line) > 1 and line[0] in params['header']:
                     header[line[0]] = line[1:]
 
-            # check for request SN type
-            if params['type_cut'][0] != 'None':
-                if header[params['type_flag'][0]][0] in params['type_cut']:
-                    type_surv = True
+            # check type
+            type_surv = compare_type(params, header)
 
-                else:
-                    type_surv = False
-            else:
-                type_surv = True
-
-            # check for requested SN sample
-            if params['sample_cut'][0] != 'None':
-
-                par = params['sample_flag'][0]  
-                if str(header[par][0]) in params['sample_cut']:
-                    sample_surv = True
-                else:
-                    sample_surv = False
-
-            else:
-                sample_surv = True
+            # check sample
+            sample_surv = compare_sample(params, header)
 
             # store only if all requirements are satisfied
             if type_surv and sample_surv:
@@ -342,11 +379,11 @@ def read_fitted(lc_data):
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
-            par = lc_data['n_samples'][0] 
+            par = lc_data['n_samples'][0]
             loaded['realizations'][fil] = [[float(data1[kk][jj])
                                             for kk in xrange(len(data1))
                                             if data1[kk][0] == fil]
-                                            for jj in xrange(2, int(par) + 2)]
+                                           for jj in xrange(2, int(par) + 2)]
 
             loaded['xarr'][fil] = []
             for i in xrange(len(data1)):
@@ -369,18 +406,19 @@ def read_fitted(lc_data):
                                if data2[j][0] == fil]
 
         loaded['GP_fit'][fil] = [float(data2[j][2])
-                              for j in xrange(1, len(data2))
-                              if data2[j][0] == fil]
+                                 for j in xrange(1, len(data2))
+                                 if data2[j][0] == fil]
 
         loaded['GP_std'][fil] = [float(data2[j][3])
-        for j in xrange(1, len(data2)) if data2[j][0] == fil]
+                                 for j in xrange(1, len(data2))
+                                 if data2[j][0] == fil]
 
     return loaded
 
 
 def main():
-    "Print docstring."
+    """Print docstring."""
     print __doc__
 
 if __name__ == '__main__':
-    main()    
+    main()
