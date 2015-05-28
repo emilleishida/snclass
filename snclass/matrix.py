@@ -105,7 +105,7 @@ class DataMatrix(object):
 
             rflag = self.user_choices['redshift_flag'][0]
             redshift = raw[rflag][0]
-            
+
             obj_class = raw[self.user_choices['type_flag'][0]][0]
 
             self.snid.append(raw['SNID:'][0])
@@ -114,7 +114,7 @@ class DataMatrix(object):
 
         else:
             screen('... Failed to pass epoch cuts!', self.user_choices)
-            return None 
+            return None
 
     def store_training(self, file_out):
         """
@@ -161,9 +161,8 @@ class DataMatrix(object):
         self.redshift = np.array(redshift)
         self.sntype = np.array(sntype)
 
-        #store results
+        # store results
         self.store_training(file_out)
-
 
     def reduce_dimension(self):
         """

@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+"""
+Created by Emille Ishida in May, 2015.
+
+Class to deal with operations on light curves.
+"""
 
 from __future__ import division
 
@@ -7,30 +11,29 @@ import os
 import matplotlib.pylab as plt
 from scipy import interpolate
 
-from fit_lc_gptools import fit_lc
+from snclass.fit_lc_gptools import fit_lc
 from snclass.util import read_fitted, read_user_input, read_snana_lc
 from snclass.functions import screen
 
 ##############################################################
 
+
 class LC(object):
-    """
-    Light curve object.
-    """
+
+    """Light curve object."""
 
     def __init__(self, raw_data, user_choices):
         """"
-        Set parameters. 
+        Set parameters.
 
         input: raw_data -> output from util.read_snana_lc
                user_choices -> output from util.read_user_input
         """
-  
-        self.raw = raw_data				
-        self.user_choices = user_choices                
 
+        self.raw = raw_data
+        self.user_choices = user_choices
 
-    def check_basic(self):  
+    def check_basic(self):
         """
         Check selection cuts which must be satisfied before any calculation.
 
@@ -39,8 +42,9 @@ class LC(object):
         """
 
         #check if we have observed epochs in all filters
-        filters_cut = all(item in self.raw.keys() for item in self.user_choices['filters'])
-      
+        filters_cut = all(item in self.raw.keys() 
+                          for item in self.user_choices['filters'])
+
         if filters_cut:
 
             #apply SNR cuts
@@ -50,9 +54,10 @@ class LC(object):
                 for line in self.raw[fil]:
                     if float(line[-1]) >= float(self.user_choices['quality_cut'][0]):
                         pop[fil].append(line)
-  
+
             #check if there are at least 3 epochs in each filter
-            epoch_cut = all(len(pop[fil]) > 2 for fil in self.user_choices['filters'])
+            epoch_cut = all(len(pop[fil]) > 2 
+                            for fil in self.user_choices['filters'])
 
             if epoch_cut:
                 self.basic_cuts = True
@@ -67,9 +72,7 @@ class LC(object):
         Perform Gaussian Process Fit.
 
         self.fitted -> dictionary of fitted parameters
-                       
         """
-
         #add extra keys
         self.raw.update(self.user_choices)
 
@@ -80,46 +83,48 @@ class LC(object):
         """
          Load previously calculated GP fit.
         """
-        
         #add extra keys
         self.raw.update(self.user_choices)
 
-        #load  
+        #load
         self.fitted = read_fitted(self.raw)
 
-
     def normalize(self, samples=False):
-        "Normalize according to maximum flux in all filters."                      
+        "Normalize according to maximum flux in all filters."
 
-        #determine maximum flux 
-        self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item]) 
+        #determine maximum flux
+        self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item])
                             for item in self.user_choices['filters']])
 
         #normalize
         self.fitted['norm_fit'] = {}
         self.fitted['norm_realizations'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['norm_fit'][fil] = np.array([elem/self.fitted['max_flux'] 
+            self.fitted['norm_fit'][fil] = np.array([elem/self.fitted['max_flux']
                                             for elem in self.fitted['GP_fit'][fil]])
-            
+
             #check if  realizations were calculated
-            if samples == True and int(self.user_choices['n_samples'][0]) > 0:     
-                self.fitted['norm_realizations'][fil] = np.array([elem/self.fitted['max_flux'] 
-                                                         for elem in self.fitted['realizations'][fil]])        
+            if samples and int(self.user_choices['n_samples'][0]) > 0:
+                self.fitted['norm_realizations'][fil] = \
+                np.array([elem/self.fitted['max_flux']
+                          for elem in self.fitted['realizations'][fil]])
 
     def mjd_shift(self):
-        "Determine day of maximum and shift all epochs."
-        
+        """Determine day of maximum and shift all epochs."""
         #determine day of maximum
-        self.fitted['peak_mjd_fil'] = [fil for fil in self.user_choices['filters'] 
-                                                      if 1.0 in self.fitted['norm_fit'][fil]][0]
-        pkmjd_indx = list(self.fitted['norm_fit'][self.fitted['peak_mjd_fil']]).index(1.0)         
-        self.fitted['peak_mjd'] = self.fitted['xarr'][self.fitted['peak_mjd_fil']][pkmjd_indx]
+        self.fitted['peak_mjd_fil'] = [fil for fil in 
+                                       self.user_choices['filters'] if 1.0 in
+                                       self.fitted['norm_fit'][fil]][0]
+        pkmjd_indx = list(self.fitted['norm_fit']\
+                          [self.fitted['peak_mjd_fil']]).index(1.0)
+        self.fitted['peak_mjd'] = self.fitted['xarr']\
+                                 [self.fitted['peak_mjd_fil']][pkmjd_indx]
 
         #shift light curve
         self.fitted['xarr_shifted'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['xarr_shifted'][fil] = np.array([elem - self.fitted['peak_mjd'] for elem in self.fitted['xarr'][fil]])
+            self.fitted['xarr_shifted'][fil] = np.array([elem - 
+            self.fitted['peak_mjd'] for elem in self.fitted['xarr'][fil]])
 
     def check_epoch(self):
         "Check if all filters satisfy epoch coverage requirements."
@@ -128,7 +133,10 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if min(self.fitted['xarr_shifted'][fil]) <= int(self.user_choices['epoch_cut'][0]) and max(self.fitted['xarr_shifted'][fil]) >= int(self.user_choices['epoch_cut'][1]):
+            if (min(self.fitted['xarr_shifted'][fil]) <= 
+               int(self.user_choices['epoch_cut'][0])) and 
+               (max(self.fitted['xarr_shifted'][fil]) >= 
+               int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
             else:
                 epoch_flags.append(False)
@@ -144,16 +152,15 @@ class LC(object):
         for fil in self.user_choices['filters']:
 
             #create function interpolating previous results
-            self.func = interpolate.interp1d(self.fitted['xarr_shifted'][fil], self.fitted['norm_fit'][fil])
-            
+            self.func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
+                                             self.fitted['norm_fit'][fil])
+
             #create new horizontal axis
-            self.xnew = np.arange(float(self.user_choices['epoch_cut'][0]), 
-                             float(self.user_choices['epoch_cut'][1]), 
+            self.xnew = np.arange(float(self.user_choices['epoch_cut'][0]),
+                             float(self.user_choices['epoch_cut'][1]),
                              float(self.user_choices['epoch_bin'][0]))
 
             self.flux_for_matrix[fil] = self.func(self.xnew)
-  
-
 
     def plot_fitted(self, file_out=None):
         """
@@ -169,49 +176,51 @@ class LC(object):
 
         #set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
-        
+
         xmin = float(self.user_choices['epoch_cut'][0])
         xmax = float(self.user_choices['epoch_cut'][1])
 
         f = plt.figure()
-        for i in xrange(len(self.user_choices['filters'])): 
+        for i in xrange(len(self.user_choices['filters'])):
 
             fil =  self.user_choices['filters'][i]
-            func = interpolate.interp1d(self.fitted['xarr_shifted'][fil], self.fitted['norm_fit'][fil])
- 
-            plt.subplot(2, len(self.user_choices['filters'])/2 + 
+            func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
+                                        self.fitted['norm_fit'][fil])
+
+            plt.subplot(2, len(self.user_choices['filters'])/2 +
                            len(self.user_choices['filters'])%2, i + 1)
-            ax = plt.gca() 
+            ax = plt.gca()
             plt.title('filter = ' + fil)
-            plt.plot(self.fitted['xarr_shifted'][fil], 
+            plt.plot(self.fitted['xarr_shifted'][fil],
                      self.fitted['norm_fit'][fil], color='red')
-            
+
             #plot samples
             if samples == True:
                 for s in self.fitted['realizations'][fil]:
-                    plt.plot(self.fitted['xarr_shifted'][fil], np.array(s)/self.fitted['max_flux'], 
+                    plt.plot(self.fitted['xarr_shifted'][fil], 
+                             np.array(s)/self.fitted['max_flux'], 
                              color='gray', alpha=0.3)
-            plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'], 
+            plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'],
                         self.raw[fil][:,1]/self.fitted['max_flux'],
-                        yerr=self.raw[fil][:,2]/self.fitted['max_flux'], 
+                        yerr=self.raw[fil][:,2]/self.fitted['max_flux'],
                         color='blue', fmt='o')
             plt.xlabel('days since maximum', fontsize=15)
             plt.ylabel('normalized flux', fontsize=15)
-            plt.xlim(min(self.raw[fil][:,0] - self.fitted['peak_mjd'])-1.0, 
+            plt.xlim(min(self.raw[fil][:,0] - self.fitted['peak_mjd'])-1.0,
                      max(self.raw[fil][:,0] - self.fitted['peak_mjd'])+1.0)
-            plt.vlines(xmin, ax.get_ylim()[0], func(xmin), color='black', linestyles='dashed')
-            plt.vlines(xmax, ax.get_ylim()[0], func(xmax), color='black', linestyles='dashed')
+            plt.vlines(xmin, ax.get_ylim()[0], func(xmin), color='black',
+                       linestyles='dashed')
+            plt.vlines(xmax, ax.get_ylim()[0], func(xmax), color='black', 
+                       linestyles='dashed')
 
         f.tight_layout()
-            
+
         if isinstance(file_out, str):
             plt.savefig(file_out)
             plt.close()
-        else:             
-            plt.show()    
+        else:
+            plt.show()
 
-
-            
 
 def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
     """
@@ -232,7 +241,6 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
            rather or not to calulate realizations of the final fit
            default is False
     """
-
     if not os.path.exists(user_choices['samples_dir'][0]):
         os.makedirs(user_choices['samples_dir'][0])
 
@@ -243,7 +251,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
     snlist = [elem.split()[0] for elem in lin]
 
-    for sn in snlist: 
+    for sn in snlist:
 
         #update object
         user_choices['path_to_lc'] = [sn]
@@ -261,24 +269,21 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
         #check if satisfy minimum cut
         if lc.basic_cuts:
-
             screen('... Passed basic cuts', user_choices)
 
-            #fit 
+            #fit
             lc.fit_GP(mean=calc_mean, samples=calc_samp)
-      
+
             if plot == True:
-                lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')   
+                lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
 
         else:
-            screen('Failed to pass basic cuts!\n', user_choices)     
-         
+            screen('Failed to pass basic cuts!\n', user_choices)
+
         
 def main():
-  print(__doc__)
+    """Print documentation."""
+    print __doc__
 
-if __name__=='__main__':
-  main() 
-
-
-        
+if __name__ == '__main__':
+    main()
