@@ -165,8 +165,8 @@ class DataMatrix(object):
         types = self.sntype
         choices = self.user_choices
 
-        parameters = [data, types, choices] * \
-                      self.user_choices['n_cross_val_particles']
+        nparticles = self.user_choices['n_cross_val_particles']
+        parameters = [data, types, choices] * nparticles
 
         if int(self.user_choices['n_proc'][0]) > 0:
             cv_func = self.user_choices['cross_validation_func']
@@ -183,8 +183,8 @@ class DataMatrix(object):
 
         else:
             number = self.user_choices['n_cross_val_particles']
-            results = np.array([core_cross_val(data, types, choices)
-                               for attempt in xrange(number)])
+            results = core_cross_val(data, types, choices) * number
+            results = np.array(results)
 
         indx_max = list(results[:, -1]).index(max(results[:, -1]))
 
