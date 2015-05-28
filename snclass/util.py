@@ -17,7 +17,7 @@ Miscelaneous functions for supernova classification.
 
 - check_crossval:
         Check cross-validation function input choices.
- 
+
 - read_user_input:
         read user choices from input file
 
@@ -36,6 +36,7 @@ import os
 
 #########################################
 
+
 def screen(message, choices):
     """
     Print message on screen according to users choice.
@@ -49,6 +50,7 @@ def screen(message, choices):
     if bool(int(choices['screen'][0])):
         print message
 
+
 def check_reduction(params):
     """
     Check dimensionality reduction function input choices.
@@ -57,20 +59,22 @@ def check_reduction(params):
            dictionary of input parameters
 
     output: params, dict
-            updated dictionary of input parameters   
+            updated dictionary of input parameters
     """
-    if ('dim_reduction_func' in params.keys()):
-        if  (params['dim_reduction_func'][0] == 'kpca'):
-            from functions import kpca
+    if 'dim_reduction_func' in params.keys():
+        if  params['dim_reduction_func'][0] == 'kpca':
+            from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
-            for i1 in xrange(len(params['kpca_pars'])):
+            for i in xrange(len(params['kpca_pars'])):
                 try:
-                    params[params['kpca_pars'][i1]] = int(params['kpca_val'][i1])
+                    params[params['kpca_pars'][i]] = 
+                                  int(params['kpca_val'][i])
                 except ValueError:
                     try:
-                        params[params['kpca_pars'][i1]] = float(params['kpca_val'][i1])  
+                        params[params['kpca_pars'][i]] = 
+                               float(params['kpca_val'][i]) 
                     except ValueError:
-                        params[params['kpca_pars'][i1]] = params['kpca_val'][i1]
+                        params[params['kpca_pars'][i]] = params['kpca_val'][i]
 
         elif params['dim_reduction_func'][0] == 'None':
             params['dim_reduction_func'] = None
@@ -87,19 +91,22 @@ def check_classifier(params):
     output: params, dict
             updated dictionary of input parameters   
     """
-    if ('classifier_func' in params.keys()):
-        if (params['classifier_func'][0] == 'nn'):
+    if 'classifier_func' in params.keys():
+        if params['classifier_func'][0] == 'nn':
             from functions import nn
-            params['classifier_func'] = nn     
-            for i2 in xrange(len(params['classifier_pars'])):
+            params['classifier_func'] = nn
+            for i in xrange(len(params['classifier_pars'])):
                 try:
-                    params[params['classifier_pars'][i2]] = int(params['classifier_val'][i2])
+                    params[params['classifier_pars'][i]] = 
+                                  int(params['classifier_val'][i])
                 except ValueError:
                     try:
-                        params[params['classifier_pars'][i2]] = float(params['classifier_val'][i2])
+                        params[params['classifier_pars'][i]] =
+                                     float(params['classifier_val'][i])
                     except ValueError:
-                        params[params['classifier_pars'][i2]] = params['classifier_val'][i2]     
-            
+                        params[params['classifier_pars'][i]] =
+                                       params['classifier_val'][i]
+
         elif params['classifier_func'][0] == 'None':
             params['classifier_func'][0] = None
 
@@ -115,8 +122,8 @@ def check_types(params):
     output: params, dict
             updated dictionary of input parameters   
     """
-    if ('transform_types_func' in params.keys()):
-        if (params['transform_types_func'][0] == 'set_types'):
+    if 'transform_types_func' in params.keys():
+        if params['transform_types_func'][0] == 'set_types':
             from functions import set_types
             params['transform_types_func'] = set_types
         elif params['transform_types_func'][0] == 'None':
@@ -134,17 +141,22 @@ def check_crossval(params):
     output: params, dict
             updated dictionary of input parameters   
     """
-    if ('cross_validation_func' in params.keys()):
-        if (params['cross_validation_func'][0] == 'cross_val'):
+    if 'cross_validation_func' in params.keys():
+        if params['cross_validation_func'][0] == 'cross_val':
             from functions import core_cross_val
             params['cross_validation_func'] = core_cross_val
             params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
-            params['n_cross_val_particles'] = int(params['n_cross_val_particles'][0])
-            for i3 in xrange(len(params['cross_val_par'])):
+            params['n_cross_val_particles'] =
+                                    int(params['n_cross_val_particles'][0])
+            for i in xrange(len(params['cross_val_par'])):
                 try:
-                    params[params['cross_val_par'][i3] + '_lim'] = [int(params[params['cross_val_par'][i3] + '_lim'][i4]) for i4 in range(2)]
+                    params[params['cross_val_par'][i] + '_lim'] = 
+                          [int(params[params['cross_val_par'][i] + \
+                               '_lim'][j]) for j in range(2)]
                 except ValueError:
-                    params[params['cross_val_par'][i3] + '_lim'] = [float(params[params['cross_val_par'][i3] + '_lim'][i4]) for i4 in range(2)]
+                    params[params['cross_val_par'][i] + '_lim'] = 
+                          [float(params[params['cross_val_par'][i] + \
+                                '_lim'][j]) for j in range(2)]
 
         elif params['cross_validation_func'][0] == 'None':
             params['cross_validation_func'] = None
@@ -205,20 +217,22 @@ def read_SNANA_lc( params ):
     data1 = [elem.split() for elem in lin1]
     raw_data = dict([[line[0], line[1:]] for line in data1 if len(line) > 1])
 
+    par = params['param_list'][0]
+
     #determine MJD index
-    mjd_indx = raw_data[params['param_list'][0]].index(params['mjd_flag'][0]) + 1
+    mjd_indx = raw_data[par].index(params['mjd_flag'][0]) + 1
 
     #determine filter index
-    filter_indx = raw_data[params['param_list'][0]].index(params['filter_flag'][0]) + 1
+    filter_indx = raw_data[par].index(params['filter_flag'][0]) + 1
 
     #determine photon count index
-    photon_indx = raw_data[params['param_list'][0]].index(params['photon_flag'][0]) + 1
+    photon_indx = raw_data[par].index(params['photon_flag'][0]) + 1
 
     #determine photon count error index
-    photonerr_indx = raw_data[params['param_list'][0]].index(params['photonerr_flag'][0]) + 1
+    photonerr_indx = raw_data[par].index(params['photonerr_flag'][0]) + 1
 
     #determine quality criteria index
-    quality_indx = raw_data[params['param_list'][0]].index(params['quality_flag'][0]) + 1
+    quality_indx = raw_data[par].index(params['quality_flag'][0]) + 1
 
     #build measurement list for each filter
     mdata = dict([[item, np.array([[float(line[ mjd_indx]),
@@ -230,7 +244,8 @@ def read_SNANA_lc( params ):
 			and line[0] == params['epoch_flag'][0]
 			and line[filter_indx] == item
 			and float(line[photon_indx]) >= 0.0
-                        and float(line[quality_indx]) >= float(params['quality_cut'][0])
+                        and float(line[quality_indx]) >= \
+                            float(params['quality_cut'][0])
                         ])]
 		for item in params['filters']])
 
@@ -287,7 +302,8 @@ def choose_sn(params, output_file='snlist.dat'):
             #check for requested SN sample
             if params['sample_cut'][0] != 'None':
 
-                if str(header[params['sample_flag'][0]][0]) in params['sample_cut']:
+                if str(header[params['sample_flag'][0]][0]) in 
+                              params['sample_cut']:
                     sample_surv = True
                 else:
                     sample_surv = False
@@ -304,23 +320,25 @@ def choose_sn(params, output_file='snlist.dat'):
         op2.write( item  + '\n')
     op2.close()
 
-    screen('Found ' + str( len( final_list ) ) + ' SN satisfying sample and type cuts.', params)
+    screen('Found ' + str( len( final_list ) ) + \
+           ' SN satisfying sample and type cuts.', params)
     screen('Surviving objects are listed in file ' + output_file, params)
 
 def read_fitted(lc_data):
     """
-    Read GP results previously calculated and populate the correct keywords in the parameter dictionary.
+    Read GP results previously calculated and populate the
+    correct keywords in the parameter dictionary.
 
     input:  user_input, dic
             output from read_SNANA_lc()
 
     output: updated dictionary of parameters.
     """
-
     loaded = {}
 
     if bool(int(lc_data['n_samples'][0])):
-        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_samples.dat', 'r')
+        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+                   lc_data['SNID:'][0] + '_samples.dat', 'r')
         lin1 = op1.readlines()
         op1.close()
 
@@ -329,14 +347,18 @@ def read_fitted(lc_data):
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
-            loaded['realizations'][fil] = [[float(d1[kk][jj]) for kk in xrange(len(d1)) if d1[kk][0]==fil]
-                                                for jj in xrange(2, int(lc_data['n_samples'][0]) + 2)]
+            loaded['realizations'][fil] = [[float(d1[kk][jj]) 
+                                            for kk in xrange(len(d1)) 
+                                            if d1[kk][0]==fil]
+                        for jj in xrange(2, int(lc_data['n_samples'][0]) + 2)]
+
             loaded['xarr'][fil] = []
             for i1 in xrange(len(d1)):
                 if d1[i1][0] == fil:
                     loaded['xarr'][fil].append(float(d1[i1][1]))
 
-    op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_mean.dat', 'r')
+    op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+               lc_data['SNID:'][0] + '_mean.dat', 'r')
     lin2 = op2.readlines()
     op2.close()
 
@@ -346,9 +368,14 @@ def read_fitted(lc_data):
     loaded['GP_fit'] = {}
     loaded['xarr'] = {}
     for fil in lc_data['filters']:
-        loaded['xarr'][fil] = [float(d2[j][1]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
-        loaded['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
-        loaded['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
+        loaded['xarr'][fil] = [float(d2[j][1]) for j in xrange(1,len(d2))
+                                               if d2[j][0] == fil]
+
+        loaded['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2))
+                                                 if d2[j][0] == fil]
+
+        loaded['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2))
+                                                 if d2[j][0] == fil]
 
     return loaded
 
