@@ -241,9 +241,9 @@ def read_SNANA_lc(params):
                    line[0] == params['epoch_flag'][0] and
                    line[filter_indx] == item and
                    float(line[photon_indx]) >= 0.0 and
-                   float(line[quality_indx]) >= \
+                   float(line[quality_indx]) >=
                    float(params['quality_cut'][0])])]
-                   for item in params['filters']])
+                        for item in params['filters']])
 
     # add usefull header information to output dictionary
     for item in params['header']:
@@ -315,7 +315,7 @@ def choose_sn(params, output_file='snlist.dat'):
         op2.write(item  + '\n')
     op2.close()
 
-    screen('Found ' + str(len(final_list)) + \
+    screen('Found ' + str(len(final_list)) +
            ' SN satisfying sample and type cuts.', params)
     screen('Surviving objects are listed in file ' + output_file, params)
 
@@ -332,7 +332,7 @@ def read_fitted(lc_data):
     loaded = {}
 
     if bool(int(lc_data['n_samples'][0])):
-        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] +
                    lc_data['SNID:'][0] + '_samples.dat', 'r')
         lin1 = op1.readlines()
         op1.close()
@@ -342,17 +342,18 @@ def read_fitted(lc_data):
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
-            loaded['realizations'][fil] = [[float(d1[kk][jj]) 
-                                            for kk in xrange(len(d1)) 
-                                            if d1[kk][0]==fil]
-                        for jj in xrange(2, int(lc_data['n_samples'][0]) + 2)]
+            loaded['realizations'][fil] = [[float(d1[kk][jj])
+                                            for kk in xrange(len(d1))
+                                            if d1[kk][0] == fil]
+                                            for jj in xrange(2,
+                                            int(lc_data['n_samples'][0]) + 2)]
 
             loaded['xarr'][fil] = []
             for i1 in xrange(len(d1)):
                 if d1[i1][0] == fil:
                     loaded['xarr'][fil].append(float(d1[i1][1]))
 
-    op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+    op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] +
                lc_data['SNID:'][0] + '_mean.dat', 'r')
     lin2 = op2.readlines()
     op2.close()
@@ -364,13 +365,13 @@ def read_fitted(lc_data):
     loaded['xarr'] = {}
     for fil in lc_data['filters']:
         loaded['xarr'][fil] = [float(d2[j][1]) for j in xrange(1,len(d2))
-                                               if d2[j][0] == fil]
+                               if d2[j][0] == fil]
 
         loaded['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2))
-                                                 if d2[j][0] == fil]
+                                 if d2[j][0] == fil]
 
         loaded['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2))
-                                                 if d2[j][0] == fil]
+                                 if d2[j][0] == fil]
 
     return loaded
 

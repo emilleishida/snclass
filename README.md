@@ -6,9 +6,9 @@ snclass - Supernova Photometric Classifier
 
 It works in 3 steps:
 
-* Convert flux/magnitude measurements into a continuous function using Gaussian process (GP). 
-* Dimentionality reduction through kernel principal component analysis (kPCA). 
-* Classification of a purely photometric sample thorough nearst neighbor (NN).  
+* Convert flux/magnitude measurements into a continuous function using Gaussian process (GP).
+* Dimentionality reduction through kernel principal component analysis (kPCA).
+* Classification of a purely photometric sample thorough nearst neighbor (NN).
 
 
 ## Installation
@@ -64,32 +64,32 @@ In order to decide if a given object satisfy all requirements stated in the user
 import numpy as np
 import snclass
 
-#read user input file
+# read user input file
 user_input=snclass.read_user_input('user.input')
 
-#read raw data
+# read raw data
 lc_data = snclass.read_SNANA_lc(user_input)
 
-#update data object
+# update data object
 lc_data.update(user_input)
 
-#create LC object
+# create LC object
 lc = snclass.LC(lc_data, user_input)
 
-#check SNR and number of epochs cuts
+# check SNR and number of epochs cuts
 lc.check_basic()
 if lc.basic_cuts == True:
     
-    #fit GP  - this calculates only mean fit
+    # fit GP  - this calculates only mean fit
     lc.fit_GP(mean=True, samples=False, screen=True)
  
-    #normalize according to larger flux (all filters)
+    # normalize according to larger flux (all filters)
     lc.normalize()
 
-    #shift to peak MJD
+    # shift to peak MJD
     lc.mjd_shift()
 
-    #check minimum and maximum epoch
+    # check minimum and maximum epoch
     lc.check_epoch()
     
     print lc.epoch_cuts
@@ -114,23 +114,23 @@ lc.plot_fitted()
 To create a list of all SNe in the initial pool satisfying some selection cuts, update the corresponding keywords in the user input file. 
 As an example, for the post-SNPCC data, in order to select all the spectroscopically classified SNe, set::
 
-    type_flag      = SIM_NON1a:	        # type identification	
-    type_cut	   = None		# type selection cut
+    type_flag      = SIM_NON1a:	        # type identification
+    type_cut	   = None	        	# type selection cut
 
-    sample_flag	    = SNTYPE:		        # sample identification	
-    sample_cut	    = 1 3 21 22 23 32 33 	# sample selection cut    
+    sample_flag	    = SNTYPE:		        # sample identification
+    sample_cut	    = 1 3 21 22 23 32 33 	# sample selection cut
 
 
 Analogously, in order to construct a list of photometric-only SNe, your user input file should contain::
-	
-    type_flag      = SIM_NON1a:	        # type identification	
-    type_cut	   = None		# type selection cut
 
-    sample_flag	    = SNTYPE:		# sample identification	
-    sample_cut	   = -9			# sample selection cut	
+    type_flag      = SIM_NON1a:	        # type identification
+    type_cut	   = None		        # type selection cut
+
+    sample_flag	    = SNTYPE:		# sample identification
+    sample_cut	   = -9			    # sample selection cut
 
 
-The list is created iteractively with 
+The list is created iteractively with
 
 ```python
 import snclass
@@ -145,26 +145,24 @@ The list of all SNe satisfying your selection cuts will be stored in ``my_sample
 **WARNING**
 
 The samples separated using this method where only selected through header variables (types, samples, etc.).
-No calculations were made in the raw data. 
+No calculations were made in the raw data.
 In order to select a smaller subset satisfying selection cuts which require treatment, use the ``matrix.build`` module.
 ***
 
 ### Fitting a set of SN
 
-You can also fit a set of SN sequentially. 
+You can also fit a set of SN sequentially.
 In this case, build a ``sn.list`` file, which contains the name of the raw files for all objects you want to fit.
- 
+
 In the ``user.input`` file, set the keyword ``snlist`` and do
- 
+
 ```python
 snclass.fit_objs(user_input)
 ```
 
-Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory. 
-
+Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory.
 
 ## Building a data matrix
-
 
 After you have all your desired light curves already fitted through a GP, with means saved in the ``samples_dir`` directory, you can easily build the data matrix using
 
@@ -175,7 +173,7 @@ d = DataMatrix('user.input')
 d.build(file_out='matrix.dat')
 ```
 
-This will store the complete training data matrix (one row for each object, each row a concatenation of light curves in different filters) in ``d.datam``, the corresponding objects classification in ``d.sntypes`` and will print the complete table in ``matrix.dat`` file. 
+This will store the complete training data matrix (one row for each object, each row a concatenation of light curves in different filters) in ``d.datam``, the corresponding objects classification in ``d.sntypes`` and will print the complete table in ``matrix.dat`` file.
 
 ## Dimensionality reduction and classifier
 
@@ -188,7 +186,7 @@ In order to use the built-in dimensionality reduction KernelPCA, the necessary k
 ```python
 dim_reduction_func = kpca                 # name of dimensionality reduction function
 kpca_pars          = kernel gamma ncomp   # parameters for dimensionality reduction
-kpca_val           = rbf  1.0   2         # value for dimensionality reduction parameters 
+kpca_val           = rbf  1.0   2         # value for dimensionality reduction parameters
 ```
 
 Having these keywords in the ``user.input`` file, we can reduce the dimensionality of the data matrix simply doing
@@ -197,8 +195,8 @@ Having these keywords in the ``user.input`` file, we can reduce the dimensionali
 d.reduce_dimension()
 ```
 
-This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs. 
-Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit. 
+This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs.
+Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit.
 This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
 
 The classifier is given as a separate function, which in the case implemented so far requires the following keywords
@@ -217,22 +215,15 @@ from snclass.functions import nn
 new_label = nn(test_LCs, d.datam, d.user_choices)
 ```
 
-
-
-
 ## Requirements
-
 
 * Python 2.7
 * numpy >=1.8.2
-* matplotlib >= 1.3.1     
+* matplotlib >= 1.3.1
 * argparse >= 1.1
 * gptools >= 0.1
 
-
 ## License
 
-
 * GNU General Public License (GPL>=3)
-
 
