@@ -149,9 +149,6 @@ def calc_scores(matrix2, ncomp, dist):
 
            dist, scipy.stats.uniform distribution
            prior over gamma parameter
-
-           test_type, vector
-           types for the test sub-sample
     """
     np.random.seed()
 
