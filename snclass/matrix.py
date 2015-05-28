@@ -2,22 +2,6 @@
 Created by Emille Ishida in May, 2015.
 
 Class to implement calculations on data matrix.
-
-
-Methods:
-    - build: Build data matrix according to user input file specifications.
-    - reduce_dimension: Perform dimensionality reduction.
-    - cross_val: Perform cross-validation.
-
-Attributes:
-    - user_choices: dict, user input choices
-    - snid: vector, list of objects identifiers
-    - datam: array, data matrix for training
-    - redshift: vector, redshift for training data
-    - sntype: vector, classification of training data
-    - low_dim_matrix: array, data matrix in KernelPC space
-    - transf_test: function, project argument into KernelPC space
-    - final: vector, optimize parameter values
 """
 
 import os
@@ -27,7 +11,7 @@ import numpy as np
 from multiprocessing import Pool
 
 from snclass.treat_lc import LC
-from snclass.util import choose_sn, read_snana_lc
+from snclass.util import read_user_input, read_snana_lc
 from snclass.functions import core_cross_val
 
 ##############################################
@@ -35,8 +19,24 @@ from snclass.functions import core_cross_val
 
 class DataMatrix(object):
 
-    """Data matrix object."""
+    """
+    Data matrix class.
 
+    Methods:
+        - build: Build data matrix according to user input file specifications.
+        - reduce_dimension: Perform dimensionality reduction.
+        - cross_val: Perform cross-validation.
+
+    Attributes:
+        - user_choices: dict, user input choices
+        - snid: vector, list of objects identifiers
+        - datam: array, data matrix for training
+        - redshift: vector, redshift for training data
+        - sntype: vector, classification of training data
+        - low_dim_matrix: array, data matrix in KernelPC space
+        - transf_test: function, project argument into KernelPC space
+        - final: vector, optimize parameter values
+    """
 
     def __init__(self, input_file=None):
         """
@@ -46,6 +46,7 @@ class DataMatrix(object):
                name of user input file
         """
         self.datam = None
+        self.snid = None
         self.redshift = None
         self.sntype = None
         self.low_dim_matrix = None
@@ -54,7 +55,6 @@ class DataMatrix(object):
 
         if input_file is not None:
             self.user_choices = read_user_input(input_file)
-
 
     def build(self, file_out=None):
         """
@@ -88,33 +88,35 @@ class DataMatrix(object):
                 raw = read_snana_lc(self.user_choices)
 
                 # initiate light curve object
-                lc = LC(raw, self.user_choices)
+                lc_obj = LC(raw, self.user_choices)
 
                 # load GP fit
-                lc.load_fit_GP()
+                lc_obj.load_fit_GP()
 
                 # normalize
-                lc.normalize()
+                lc_obj.normalize()
 
                 # shift to peak mjd
-                lc.mjd_shift()
+                lc_obj.mjd_shift()
 
                 # check epoch requirements
-                lc.check_epoch()
+                lc_obj.check_epoch()
 
-                if lc.epoch_cuts:
+                if lc_obj.epoch_cuts:
                     # build data matrix lines
-                    lc.build_steps()
+                    lc_obj.build_steps()
 
                     # store
                     obj_line = []
                     for fil in self.user_choices['filters']:
-                        for item in lc.flux_for_matrix[fil]:
+                        for item in lc_obj.flux_for_matrix[fil]:
                             obj_line.append(item)
+
+                    rflag = self.user_choices['redshift_flag'][0]
 
                     datam.append(obj_line)
                     self.snid.append(raw['SNID:'][0])
-                    redshift.append(raw[self.user_choices['redshift_flag'][0]][0])
+                    redshift.append(raw[rflag][0])
                     sntype.append(raw[self.user_choices['type_flag'][0]][0])
 
         self.datam = np.array(datam)
@@ -149,28 +151,29 @@ class DataMatrix(object):
         self.low_dim_matrix = func(self.datam, self.user_choices)
 
         # define transformation function
-        self.transf_test = func(self.datam,  self.user_choices, transform=True)
+        self.transf_test = func(self.datam, self.user_choices, transform=True)
 
     def cross_val(self):
         """Optimize the hyperparameters for RBF kernel and ncomp."""
         # correct type parameters if necessary
+        types_func = self.user_choices['transform_types_func']
         if self.user_choices['transform_types_func'] is not None:
-            self.sntype = self.user_choices['transform_types_func'](self.sntype)
-   
+            self.sntype = types_func(self.sntype)
+
         # initialize parameters
         data = self.datam
         types = self.sntype
         choices = self.user_choices
 
-        parameters = [[data, types, choices] for attempt in 
-                      xrange(self.user_choices['n_cross_val_particles'])]
+        parameters = [data, types, choices] *
+                      self.user_choices['n_cross_val_particles']
 
         if int(self.user_choices['n_proc'][0]) > 0:
             cv_func = self.user_choices['cross_validation_func']
             pool = Pool(processes=int(self.user_choices['nproc'][0]))
             my_pool = pool.map_async(cv_func, parameters)
             try:
-                 results = my_pool.get(0xFFFF)
+                results = my_pool.get(0xFFFF)
             except KeyboardInterrupt:
                 print 'Interruputed by the user!'
                 sys.exit()
@@ -189,6 +192,7 @@ class DataMatrix(object):
         for i in xrange(len(self.user_choices['cross_val_par'])):
             par_list = self.user_choices['cross_val_par']
             self.final[par_list[i]] = results[indx_max][i]
+
 
 def main():
     """Print documentation."""
