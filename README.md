@@ -173,9 +173,48 @@ d = DataMatrix('user.input')
 d.build(file_out='matrix.dat')
 ```
 
+This will store the complete training data matrix (one row for each object, each row a concatenation of light curves in different filters) in ``d.datam``, the corresponding objects classification in ``d.sntypes`` and will print the complete table in ``matrix.dat`` file. 
+
 ## Dimensionality reduction and classifier
 
-The current version of ``snclass`` 
+The current version of ``snclass``  uses Kernel Principal Component Analysis ([KernelPCA](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html)) for dimensionality reduction and [1 Nearst Neighbor](http://scikit-learn.org/stable/modules/neighbors.html) algorithm as a classifier.
+
+However, those functions can be replaced if the user provides personalized functions and set the necessary keywords in the ``user.input`` file.
+
+In order to use the built-in dimensionality reduction KernelPCA, the necessary keywords are
+
+```python
+dim_reduction_func = kpca                 # name of dimensionality reduction function
+kpca_pars          = kernel gamma ncomp   # parameters for dimensionality reduction
+kpca_val           = rbf  1.0   2         # value for dimensionality reduction parameters 
+```
+
+Having these keywords in the ``user.input`` file, we can reduce the dimensionality of the data matrix simply doing
+
+```python
+d.reduce_dimension()
+```
+
+This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs. 
+Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit. 
+This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
+
+The classifier is given as a separate function, which in the case implemented so far requires the following keywords
+
+```python
+classifier_func  = nn          # classifier function
+classifier_pars  = n weights   # classifier parameters
+classifier_val   = 1 distance  # values for classifier parameters
+```
+
+In order to classify the test sample, based on the KernelPCA space from the training sample, do
+
+```python
+from snclass.functions import nn
+
+new_label = nn(test_LCs, d.datam, d.user_choices)
+```
+
 
 
 
