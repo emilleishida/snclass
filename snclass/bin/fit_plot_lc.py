@@ -9,27 +9,35 @@ import sys
 
 from snclass import read_user_input, read_SNANA_lc
 from snclass import fit_LC
+from snclass.util import screen
 
 
 def main(args):
 
-    #read_user_input
+    # read_user_input
     user_input = read_user_input(args.input) 
 
-    #read lc data
+    # read lc data
     lc_data = read_SNANA_lc(user_input)
 
-    #add extra keys
+    # add extra keys
     lc_data.update(user_input)
 
+    # set screen output
+    out = bool(int(user_input['screen'][0]))
+
     if bool(int(args.calculate)):
-        #fit lc
-        print 'Fitting SN' + lc_data['SNID:'][0]
-        lc_data = fit_LC(lc_data, samples=bool(int(lc_data['n_samples'][0])))
+       
+        screen('Fitting SN' + lc_data['SNID:'][0], user_input)
+
+        # fit lc
+        lc_data = fit_LC(lc_data, samples=bool(int(lc_data['n_samples'][0])),
+                         screen=out)
     else:
 
         if bool(int(lc_data['n_samples'][0])):
-            op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_samples.dat', 'r')
+            op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+                       lc_data['SNID:'][0] + '_samples.dat', 'r')
             lin1 = op1.readlines()
             op1.close()
 
@@ -37,14 +45,18 @@ def main(args):
 
         for fil in lc_data['filters']:
             lc_data['xarr'][fil] = []
-            lc_data['realizations'][fil] = [[float(d1[kk][jj]) for kk in xrange(len(d1)) if d1[kk][0]==fil] 
-                                            for jj in xrange(2, int(lc_data['n_samples'][0]) + 2)]
+            lc_data['realizations'][fil] = [[float(d1[kk][jj]) 
+                                             for kk in xrange(len(d1)) 
+                                             if d1[kk][0]==fil] 
+                                             for jj in xrange(2, 
+                                             int(lc_data['n_samples'][0]) + 2)]
  
             for i1 in xrange(len(d1)):
                 if d1[i1][0] == fil:
                     lc_data['xarr'][fil].append(float(d1[i1][1]))
                 
-        op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + lc_data['SNID:'][0] + '_mean.dat', 'r')
+        op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
+                   lc_data['SNID:'][0] + '_mean.dat', 'r')
         lin2 = op2.readlines()
         op2.close()
 
@@ -52,8 +64,10 @@ def main(args):
 
         lc_data['GP_std'] = {}
         for fil in lc_data['filters']:
-            lc_data['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
-            lc_data['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2)) if d2[j][0] == fil]
+            lc_data['GP_fit'][fil] = [float(d2[j][2]) 
+                                      for j in xrange(1,len(d2)) if d2[j][0] == fil]
+            lc_data['GP_std'][fil] = [float(d2[j][3]) 
+                                      for j in xrange(1,len(d2)) if d2[j][0] == fil]
 
     #initiate figure
     f = plt.figure()
@@ -62,11 +76,14 @@ def main(args):
 
         # Plot the samples in data space.
         ax = plt.subplot(2, len(lc_data['filters'])/2 + 
-                        len(lc_data['filters'])%2, lc_data['filters'].index(fil) + 1)
+                        len(lc_data['filters'])%2, 
+                        lc_data['filters'].index(fil) + 1)
         for s in lc_data['realizations'][fil]:
             plt.plot(lc_data['xarr'][fil], s, color="gray", alpha=0.3)
-        plt.errorbar(lc_data[fil][:,0], lc_data[fil][:,1], yerr=lc_data[fil][:,2], fmt="o", color='blue', label=fil)
-        plt.plot(lc_data['xarr'][fil], lc_data['GP_fit'][fil], color='red', linewidth=2)
+        plt.errorbar(lc_data[fil][:,0], lc_data[fil][:,1], 
+                     yerr=lc_data[fil][:,2], fmt="o", color='blue', label=fil)
+        plt.plot(lc_data['xarr'][fil], lc_data['GP_fit'][fil], 
+                 color='red', linewidth=2)
         plt.ylabel("FLUXCAL")
         plt.xlabel("MJD")
         plt.legend()
@@ -80,9 +97,12 @@ def main(args):
 if __name__=='__main__':
   
     #get user input file name
-    parser = argparse.ArgumentParser(description = 'Supernova photometric classification using KPCA.')
-    parser.add_argument('-i','--input', help = 'Input file name', required = True)
-    parser.add_argument('-c', '--calculate', help = 'Read or calculate GP fit', required = True) 
+    parser = argparse.ArgumentParser(description='Supernova photometric ' + \
+                                     'classification using KPCA.')
+    parser.add_argument('-i','--input', help='Input file name', 
+                        required = True)
+    parser.add_argument('-c', '--calculate', help='Read or calculate GP fit',
+                        required=True) 
     args = parser.parse_args()
    
     main(args)
