@@ -37,7 +37,10 @@ Miscelaneous functions for supernova classification.
 import numpy as np
 import os
 
+from snclass.functions import screen
+
 #########################################
+
 
 def check_reduction(params):
     """
@@ -188,7 +191,7 @@ def read_user_input(filename):
 
 def build_indx(params, raw):
     """
-    Build dictionary of index for header variables. 
+    Build dictionary of index for header variables.
 
     input: params, dict
            dictionary of user choices
@@ -204,19 +207,19 @@ def build_indx(params, raw):
     indx = {}
 
     # determine MJD index
-    indx['mjd'] = raw_data[par].index(params['mjd_flag'][0]) + 1
+    indx['mjd'] = raw[par].index(params['mjd_flag'][0]) + 1
 
     # determine filter index
-    indx['filter'] = raw_data[par].index(params['filter_flag'][0]) + 1
+    indx['filter'] = raw[par].index(params['filter_flag'][0]) + 1
 
     # determine photon count index
-    indx['photon'] = raw_data[par].index(params['photon_flag'][0]) + 1
+    indx['photon'] = raw[par].index(params['photon_flag'][0]) + 1
 
     # determine photon count error index
-    indx['photonerr'] = raw_data[par].index(params['photonerr_flag'][0]) + 1
+    indx['photonerr'] = raw[par].index(params['photonerr_flag'][0]) + 1
 
     # determine quality criteria index
-    indx['quality'] = raw_data[par].index(params['quality_flag'][0]) + 1
+    indx['quality'] = raw[par].index(params['quality_flag'][0]) + 1
 
     return indx
 
@@ -238,7 +241,7 @@ def read_SNANA_lc(params):
     raw_data = dict([[line[0], line[1:]] for line in data1 if len(line) > 1])
 
     # find correct indexes for header parameters
-    pindx = build_indx(params, raw)
+    pindx = build_indx(params, raw_data)
 
     # build measurement list for each filter
     fils = params['filters']
