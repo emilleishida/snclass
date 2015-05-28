@@ -157,7 +157,7 @@ def calc_scores(matrix2, ncomp, dist):
     matrix2.user_choices['ncomp'] = ncomp
 
     screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
-           user_choices)
+           matrix2.user_choices)
 
     matrix2.reduce_dimension()
 
