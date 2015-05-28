@@ -1,5 +1,6 @@
 import numpy as np
 import os 
+import matplotlib.pylab as plt
 
 #########################################
 
@@ -148,11 +149,11 @@ def read_SNANA_lc( params ):
                                     float(line[photonerr_indx]), 
                                     float(line[quality_indx])] 
  			for line in data1 
-			if len(line) > 1 and
-                        line[0] == params['epoch_flag'][0] and 
-			line[filter_indx] == item and  	
-			float(line[photon_indx]) >= 0.0 and 
-                        float(line[quality_indx]) >= float(params['quality_cut'][0])
+			if len(line) > 1 
+			and line[0] == params['epoch_flag'][0] 
+			and line[filter_indx] == item 	
+			and float(line[photon_indx]) >= 0.0
+                        and float(line[quality_indx]) >= float(params['quality_cut'][0])
                         ])] 
 		for item in params['filters']])
 
@@ -218,7 +219,7 @@ def choose_sn( params, output_file='snlist.dat' ):
                 sample_surv = True 
           
             #store only if all requirements are satisfied
-            if type_surv and sample_surv:
+            if type_surv == True and sample_surv == True:
                 final_list.append( name )    
 
     op2 = open( output_file, 'w' )
@@ -279,8 +280,8 @@ def read_fitted(lc_data):
 
 
 def main():
-    print(__doc__)
+  print(__doc__)
 
 if __name__=='__main__':
-    main()    
+  main()    
 

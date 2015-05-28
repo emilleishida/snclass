@@ -4,7 +4,9 @@ import numpy as np
 import gptools
 import os
 
-def fit_LC(data, mean=True, samples=False, screen=False):
+from util import screen
+
+def fit_LC(data, mean=True, samples=False, screen=['0']):
     """
     Gaussian Process fit using gptools. 
 
@@ -23,8 +25,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
   
 
     for fil in data['filters']:
-        if screen:
-            print '... filter: ' + fil
+        screen('... filter: ' + fil, {'screen':screen})
 
         t = data[fil][:,0]
         y = data[fil][:,1]
@@ -48,8 +49,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
 
         if samples == True and int(data['n_samples'][0]) > 0:
 
-            if screen:
-                print '... ... calculate samples'
+            screen('... ... calculate samples', {'screen': screen})
 
             v1 = data['GP_obj'][fil].draw_sample(data['xarr'][fil], num_samp=int(data['n_samples'][0]))
 
@@ -61,12 +61,11 @@ def fit_LC(data, mean=True, samples=False, screen=False):
         k = None
         del gp, out, v1, k 
 
-    if screen:
-        print '\n'
+    screen('\n', {'screen': screen})
 
-    if bool(int(data['save_samples'][0])):
+    if bool(int(data['save_samples'][0])) == True:
 
-        if samples:
+        if samples == True:
 
             if not os.path.exists(data['samples_dir'][0]):
                 os.makedirs(data['samples_dir'][0])
@@ -85,7 +84,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
                     op1.write('\n')
             op1.close()
 
-        if mean:
+        if mean == True:
             op2 = open(data['samples_dir'][0] + data['file_root'][0] + 
                        data['SNID:'][0] + '_mean.dat', 'w')
             op2.write('filter    MJD    GP_fit     GP_std\n')
@@ -99,9 +98,9 @@ def fit_LC(data, mean=True, samples=False, screen=False):
        
 
 def main():
-    print(__doc__)
+  print(__doc__)
 
 if __name__=='__main__':
-    main()    
+  main()    
 
 

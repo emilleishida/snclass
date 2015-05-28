@@ -8,7 +8,7 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from util import read_fitted, read_SNANA_lc, screen
+from util import read_fitted, read_user_input, read_SNANA_lc, screen
 
 ##############################################################
 
@@ -102,7 +102,7 @@ class LC(object):
                                             for elem in self.fitted['GP_fit'][fil]])
             
             #check if  realizations were calculated
-            if samples and int(self.user_choices['n_samples'][0]) > 0:     
+            if samples == True and int(self.user_choices['n_samples'][0]) > 0:     
                 self.fitted['norm_realizations'][fil] = np.array([elem/self.fitted['max_flux'] 
                                                          for elem in self.fitted['realizations'][fil]])        
 
@@ -127,15 +127,12 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if (min(self.fitted['xarr_shifted'][fil]) <= 
-                int(self.user_choices['epoch_cut'][0])) and 
-                (max(self.fitted['xarr_shifted'][fil]) >= 
-                int(self.user_choices['epoch_cut'][1])):
+            if min(self.fitted['xarr_shifted'][fil]) <= int(self.user_choices['epoch_cut'][0]) and max(self.fitted['xarr_shifted'][fil]) >= int(self.user_choices['epoch_cut'][1]):
                 epoch_flags.append(True)
             else:
                 epoch_flags.append(False)
 
-        self.epoch_cuts = all(test for test in epoch_flags)
+        self.epoch_cuts = all(test == True for test in epoch_flags)
 
     def build_steps(self):
         "Build lines for the initial data matrix"
@@ -189,7 +186,7 @@ class LC(object):
                      self.fitted['norm_fit'][fil], color='red')
             
             #plot samples
-            if samples:
+            if samples == True:
                 for s in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil], np.array(s)/self.fitted['max_flux'], 
                              color='gray', alpha=0.3)
@@ -269,7 +266,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
             #fit 
             lc.fit_GP(mean=calc_mean, samples=calc_samp)
       
-            if plot:
+            if plot == True:
                 lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')   
 
         else:
@@ -277,10 +274,10 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
          
         
 def main():
-    print(__doc__)
+  print(__doc__)
 
 if __name__=='__main__':
-    main() 
+  main() 
 
 
         
