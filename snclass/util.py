@@ -66,8 +66,8 @@ def check_reduction(params):
             from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
 
-            par = params['kpca_pars'][i]
             for i in xrange(len(params['kpca_pars'])):
+                par = params['kpca_pars'][i]
                 try:
                     params[par] = int(params['kpca_val'][i])
                 except ValueError:
@@ -239,15 +239,15 @@ def read_SNANA_lc( params ):
                                     float(line[photon_indx]),
                                     float(line[photonerr_indx]),
                                     float(line[quality_indx])]
- 			for line in data1
-			if len(line) > 1
-			and line[0] == params['epoch_flag'][0]
-			and line[filter_indx] == item
-			and float(line[photon_indx]) >= 0.0
-                        and float(line[quality_indx]) >= \
-                            float(params['quality_cut'][0])
-                        ])]
-		for item in params['filters']])
+            for line in data1
+            if len(line) > 1
+            and line[0] == params['epoch_flag'][0]
+            and line[filter_indx] == item
+            and float(line[photon_indx]) >= 0.0
+            and float(line[quality_indx]) >= \
+                     float(params['quality_cut'][0])
+                 ])]
+            for item in params['filters']])
 
     #add usefull header information to output dictionary
     for item in params['header']:
