@@ -165,7 +165,7 @@ class DataMatrix(object):
         types = self.sntype
         choices = self.user_choices
 
-        parameters = [data, types, choices] *
+        parameters = [data, types, choices] * \
                       self.user_choices['n_cross_val_particles']
 
         if int(self.user_choices['n_proc'][0]) > 0:
