@@ -31,7 +31,7 @@ Miscelaneous functions for supernova classification.
         Builds a list of SN satifying basic selction criteria
 
 - read_fitted:
-        Read previously calculated GP results
+        Read previously calculated GP results.
 """
 
 import numpy as np
@@ -244,15 +244,15 @@ def read_SNANA_lc(params):
     fils = params['filters']
     mdata = dict([[item, np.array([[float(line[pindx['mjd']]),
                                     float(line[pindx['photon']]),
-                                    float(line[pindx['photonerr']),
+                                    float(line[pindx['photonerr']]),
                                     float(line[pindx['quality']])]
                    for line in data1
                    if len(line) > 1 and
                    line[0] == params['epoch_flag'][0] and
-                   line[pindx['filter'] == item and
+                   line[pindx['filter']] == item and
                    float(line[pindx['photon']]) >= 0.0 and
                    float(line[pindx['quality']]) >=
-                   float(params[pindx['quality']][0])])] for item in fils])
+                   float(params['quality_cut'][0])])] for item in fils])
 
     # add usefull header information to output dictionary
     for item in params['header']:

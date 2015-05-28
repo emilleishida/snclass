@@ -8,7 +8,8 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from util import read_fitted, read_user_input, read_SNANA_lc, screen
+from snclass.util import read_fitted, read_user_input, read_SNANA_lc
+from snclass.functions import screen
 
 ##############################################################
 
