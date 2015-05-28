@@ -67,11 +67,11 @@ def check_reduction(params):
             params['dim_reduction_func'] = kpca
             for i in xrange(len(params['kpca_pars'])):
                 try:
-                    params[params['kpca_pars'][i]] = 
+                    params[params['kpca_pars'][i]] = \
                                   int(params['kpca_val'][i])
                 except ValueError:
                     try:
-                        params[params['kpca_pars'][i]] = 
+                        params[params['kpca_pars'][i]] = \
                                float(params['kpca_val'][i]) 
                     except ValueError:
                         params[params['kpca_pars'][i]] = params['kpca_val'][i]
@@ -97,14 +97,14 @@ def check_classifier(params):
             params['classifier_func'] = nn
             for i in xrange(len(params['classifier_pars'])):
                 try:
-                    params[params['classifier_pars'][i]] = 
+                    params[params['classifier_pars'][i]] = \
                                   int(params['classifier_val'][i])
                 except ValueError:
                     try:
-                        params[params['classifier_pars'][i]] =
+                        params[params['classifier_pars'][i]] = \
                                      float(params['classifier_val'][i])
                     except ValueError:
-                        params[params['classifier_pars'][i]] =
+                        params[params['classifier_pars'][i]] = \
                                        params['classifier_val'][i]
 
         elif params['classifier_func'][0] == 'None':
@@ -146,15 +146,15 @@ def check_crossval(params):
             from functions import core_cross_val
             params['cross_validation_func'] = core_cross_val
             params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
-            params['n_cross_val_particles'] =
+            params['n_cross_val_particles'] = \
                                     int(params['n_cross_val_particles'][0])
             for i in xrange(len(params['cross_val_par'])):
                 try:
-                    params[params['cross_val_par'][i] + '_lim'] = 
+                    params[params['cross_val_par'][i] + '_lim'] = \
                           [int(params[params['cross_val_par'][i] + \
                                '_lim'][j]) for j in range(2)]
                 except ValueError:
-                    params[params['cross_val_par'][i] + '_lim'] = 
+                    params[params['cross_val_par'][i] + '_lim'] = \
                           [float(params[params['cross_val_par'][i] + \
                                 '_lim'][j]) for j in range(2)]
 
@@ -302,7 +302,7 @@ def choose_sn(params, output_file='snlist.dat'):
             #check for requested SN sample
             if params['sample_cut'][0] != 'None':
 
-                if str(header[params['sample_flag'][0]][0]) in 
+                if str(header[params['sample_flag'][0]][0]) in \
                               params['sample_cut']:
                     sample_surv = True
                 else:
