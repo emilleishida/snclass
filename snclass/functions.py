@@ -15,6 +15,9 @@ Stand alone functions for supernova classification.
 - set_types:
         Transform the original vector of types.
 
+- calc_scores:
+        Calculate classification results for 1 data matrix.
+
 - core_cross_val:
         Perform 1/3 validation.
 """
@@ -134,6 +137,41 @@ def set_types(types):
     return np.array(new_type)
 
 
+def calc_scores(matrix2, ncomp):
+    """
+    Calculate classification results for 1 data matrix.
+
+    input: matrix2, DataMatrix object
+           output from DataMatrix.build()
+           
+           ncomp, int
+           number of PCs to calculate
+           
+    """
+    np.random.seed()
+
+    # reduce dimensionality
+    matrix2.user_choices['gamma'] = dist.rvs()
+    matrix2.user_choices['ncomp'] = ncomp
+
+    screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
+           user_choices)
+
+    matrix2.reduce_dimension()
+
+    # project test
+    test_proj = matrix2.transf_test.transform(matrix2.data_test)
+
+    # classify
+    new_label = nneighbor(test_proj, matrix2.low_dim_matrix,
+                          matrix2.sntype, matrix2.user_choices)
+
+    # calculate score
+    score = sum(new_label == test_type)
+
+    return [ncomp, matrix2.user_choices['gamma'], score]
+
+
 def core_cross_val(data, types, user_choices):
     """
     Perform 1/3 validation.
@@ -151,8 +189,6 @@ def core_cross_val(data, types, user_choices):
             parameters with higher classification success
             [n_components, gamma, n_successes]
     """
-    np.random.seed()
-
     # split sample in 3
     indx_list1 = np.random.randint(0, len(data), size=int(2 * len(data) / 3))
     indx_list2 = [elem for elem in xrange(len(data))
@@ -180,27 +216,7 @@ def core_cross_val(data, types, user_choices):
         k = 0
         while k < user_choices['gamma_nparticles']:
             try:
-                # reduce dimensionality
-                matrix2.user_choices['gamma'] = dist.rvs()
-                matrix2.user_choices['ncomp'] = ncomp
-
-                screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
-                       user_choices)
-
-                matrix2.reduce_dimension()
-
-                # project test
-                test_proj = matrix2.transf_test.transform(matrix2.data_test)
-
-                # classify
-                new_label = nneighbor(test_proj, matrix2.low_dim_matrix,
-                               matrix2.sntype, matrix2.user_choices)
-
-                # calculate score
-                score = sum(new_label == test_type)
-
-                # store
-                results.append([ncomp, matrix2.user_choices['gamma'], score])
+                results.append(calc_scores(matrix2, ncomp))
 
                 # update counter
                 k = k + 1
