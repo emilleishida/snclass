@@ -81,7 +81,7 @@ lc.check_basic()
 if lc.basic_cuts == True:
     
     #fit GP  - this calculates only mean fit
-    lc.fit_GP(mean=True, samples=False)
+    lc.fit_GP(mean=True, samples=False, screen=True)
  
     #normalize according to larger flux (all filters)
     lc.normalize()
@@ -99,7 +99,7 @@ If the  object given in keyword ``path_to_lc`` passes all requirements to popula
 In this case, you might want to calculate a number of realizations from the constrained GP. 
 
 ```python
-lc.fit_GP(mean=False, samples=True)
+lc.fit_GP(mean=False, samples=True, screen=True)
 ```
 
 You can see the graphical output using

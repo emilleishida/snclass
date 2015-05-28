@@ -237,13 +237,13 @@ def read_SNANA_lc(params):
                                     float(line[photonerr_indx]),
                                     float(line[quality_indx])]
                    for line in data1
-                   if len(line) > 1
-                   and line[0] == params['epoch_flag'][0]
-                   and line[filter_indx] == item
-                   and float(line[photon_indx]) >= 0.0
-                   and float(line[quality_indx]) >= \
-                       float(params['quality_cut'][0])])]
-            for item in params['filters']])
+                   if len(line) > 1 and
+                   line[0] == params['epoch_flag'][0] and
+                   line[filter_indx] == item and
+                   float(line[photon_indx]) >= 0.0 and
+                   float(line[quality_indx]) >= \
+                   float(params['quality_cut'][0])])]
+                   for item in params['filters']])
 
     # add usefull header information to output dictionary
     for item in params['header']:
