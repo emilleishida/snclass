@@ -11,7 +11,8 @@ import numpy as np
 import gptools
 import os
 
-def imp_gptools(data):
+
+def imp_gptools(data, fil):
     """
     Perform Gaussian Process with gptools through MCMC.
 
@@ -20,13 +21,16 @@ def imp_gptools(data):
            output from read_snana_lc
            keys: filters
 
+           fil, str
+           filter
+
     output: data, dict
             updated dictionary with GP results
     """
     # format data
-    mjd = data[fil][:,0]
-    flux = data[fil][:,1]
-    fluxerr = data[fil][:,2]
+    mjd = data[fil][:, 0]
+    flux = data[fil][:, 1]
+    fluxerr = data[fil][:, 2]
 
     # setup GP
     k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
@@ -80,7 +84,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
             print '... filter: ' + fil
 
         if mean:
-            data = imp_gptools(data)
+            data = imp_gptools(data, fil)
 
         if samples and int(data['n_samples'][0]) > 0:
 
