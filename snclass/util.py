@@ -1,9 +1,9 @@
 """
 Created by Emille Ishida in May, 2015.
 
-Miscelaneous functions for supernova classification. 
+Miscelaneous functions for supernova classification.
 
-- screen: 
+- screen:
         Print messages to screen according to user choice
 
 - check_reduction:
@@ -18,19 +18,18 @@ Miscelaneous functions for supernova classification.
 - check_crossval:
         Check cross-validation function input choices.
  
-- read_user_input: 
+- read_user_input:
         read user choices from input file
 
-- read_SNANA_lc: 
-        read raw SNANA light curve .DAT file 
+- read_SNANA_lc:
+        read raw SNANA light curve .DAT file
 
-- choose_sn: 
+- choose_sn:
         Builds a list of SN satifying basic selction criteria
 
-- read_fitted: 
+- read_fitted:
         reads previously calculated GP results
 """
-
 
 import numpy as np
 import os
@@ -49,7 +48,6 @@ def screen(message, choices):
     """
     if bool(int(choices['screen'][0])):
         print message
-
 
 def check_reduction(params):
     """
