@@ -229,10 +229,10 @@ def read_SNANA_lc(params):
     # determine photon count error index
     photonerr_indx = raw_data[par].index(params['photonerr_flag'][0]) + 1
 
-    #determine quality criteria index
+    # determine quality criteria index
     quality_indx = raw_data[par].index(params['quality_flag'][0]) + 1
 
-    #build measurement list for each filter
+    # build measurement list for each filter
     mdata = dict([[item, np.array([[float(line[ mjd_indx]),
                                     float(line[photon_indx]),
                                     float(line[photonerr_indx]),
@@ -247,7 +247,7 @@ def read_SNANA_lc(params):
                  ])]
             for item in params['filters']])
 
-    #add usefull header information to output dictionary
+    # add usefull header information to output dictionary
     for item in params['header']:
         if item not in params['param_list']:
             mdata[item] = raw_data[item]
@@ -265,30 +265,30 @@ def choose_sn(params, output_file='snlist.dat'):
     output: txt file with the name of objects surviving selections cuts.
     """
 
-    #take all file names in data directory
+    # take all file names in data directory
     filename = os.listdir(params['path_to_obs'][0])
 
-    #store files for light curves surviving selection cuts
+    # store files for light curves surviving selection cuts
     final_list = []
 
     for name in filename:
 
         if params['file_root'][0] in name:
 
-            #read light curve data
+            # read light curve data
             op1 = open(params['path_to_obs'][0] + name, 'r')
             lin1 = op1.readlines()
             op1.close()
 
             data1 = [elem.split() for elem in lin1]
 
-            #take header parameters
+            # take header parameters
             header = {}
             for line in data1:
                 if len(line) > 1 and line[0] in params['header']:
                     header[line[0]] = line[1:]
 
-            #check for request SN type
+            # check for request SN type
             if  params['type_cut'][0]  != 'None':
                 if header[params['type_flag'][0]][0] in params['type_cut']:
                     type_surv = True
@@ -298,7 +298,7 @@ def choose_sn(params, output_file='snlist.dat'):
             else:
                 type_surv = True
 
-            #check for requested SN sample
+            # check for requested SN sample
             if params['sample_cut'][0] != 'None':
 
                 if str(header[params['sample_flag'][0]][0]) in \
@@ -310,7 +310,7 @@ def choose_sn(params, output_file='snlist.dat'):
             else:
                 sample_surv = True
 
-            #store only if all requirements are satisfied
+            # store only if all requirements are satisfied
             if type_surv == True and sample_surv == True:
                 final_list.append(name)
 
