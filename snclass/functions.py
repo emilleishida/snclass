@@ -19,13 +19,9 @@ Stand alone functions for supernova classification.
         Perform 1/3 validation.
 """
 
-#!/usr/bin/env python
-
 from __future__ import division
 
 import numpy as np
-import matplotlib.pylab as plt
-from itertools import combinations
 from scipy.stats import uniform
 
 from sklearn.decomposition import KernelPCA
@@ -36,6 +32,7 @@ from scipy.sparse.linalg.eigen.arpack import ArpackNoConvergence
 import snclass
 
 #########################################
+
 
 def screen(message, choices):
     """
@@ -53,10 +50,10 @@ def screen(message, choices):
 
 def kpca(data_matrix, pars, transform=False):
     """
-    Perform dimensionality reduction using kernel PCA. 
+    Perform dimensionality reduction using kernel PCA.
 
     input: data_matrix, array
-           
+
            other arguments are passed directly to 
            sklearn.decomposition.KernelPCA rotine.
 
@@ -71,16 +68,16 @@ def kpca(data_matrix, pars, transform=False):
     output: X_kpca, array
             lines are objects.
             collumns are projections over different kPCs.
-            
     """
-
-    kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'], n_components=pars['ncomp'])
-    X_kpca = kpca.fit_transform(data_matrix)
+    kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'], 
+                     n_components=pars['ncomp'])
+    x_kpca = kpca.fit_transform(data_matrix)
 
     if transform:
         return kpca
     else:
-        return X_kpca
+        return x_kpca
+
 
 def nn(test, data_matrix, types, pars):
     """
@@ -98,18 +95,17 @@ def nn(test, data_matrix, types, pars):
            pars - dict
            Dictionary of parameters
            keywords: 'n', 'weights'
- 
+
     output: type, list of str
             classification of point
     """
-
-    #initia NN object
+    # initia NN object
     clf = neighbors.KNeighborsClassifier(pars['n'], weights=pars['weights'])
 
-    #fit model
+    # fit model
     clf.fit(data_matrix, types)
 
-    #predict type
+    # predict type
     new_label = clf.predict(test)
 
     return new_label
@@ -142,7 +138,7 @@ def set_types(types):
 
 def core_cross_val(data, types, user_choices):
     """
-    Perform 1/3 validation. 
+    Perform 1/3 validation.
 
     input: data, array
            data matrix
@@ -160,17 +156,19 @@ def core_cross_val(data, types, user_choices):
     np.random.seed()
 
     #split sample in 3
-    indx_list1 = [np.random.randint(0, len(data)) for j in xrange(int(2*len(data)/3))]
-    indx_list2 = [elem for elem in xrange(len(data)) if (elem not in indx_list1)]
+    indx_list1 = [np.random.randint(0, len(data))
+                  for j in xrange(int(2*len(data)/3))]
+    indx_list2 = [elem for elem in xrange(len(data))
+                  if (elem not in indx_list1)]
 
     #set train data matrix and types
     d2 = snclass.DataMatrix()
     d2.user_choices = user_choices
-    d2.datam = np.array([data[indx] for indx in indx_list1]) 
+    d2.datam = np.array([data[indx] for indx in indx_list1])
     d2.sntype = np.array([types[indx] for indx in indx_list1])
 
     #set test data matrix and types
-    d2.data_test = np.array([data[indx] for indx in indx_list2]) 
+    d2.data_test = np.array([data[indx] for indx in indx_list2])
     test_type = np.array([types[indx] for indx in indx_list2])
 
     ploc = d2.user_choices['gamma_lim'][0]
@@ -188,7 +186,8 @@ def core_cross_val(data, types, user_choices):
                 d2.user_choices['gamma'] = dist.rvs()
                 d2.user_choices['ncomp'] = ncomp
 
-                screen('... ... gamma = ' + str(d2.user_choices['gamma']), user_choices)
+                screen('... ... gamma = ' + str(d2.user_choices['gamma']),
+                       user_choices)
     
                 d2.reduce_dimension()
 
@@ -196,7 +195,8 @@ def core_cross_val(data, types, user_choices):
                 test_proj = d2.transf_test.transform(d2.data_test)
 
                 #classify
-                new_label = nn(test_proj, d2.low_dim_matrix, d2.sntype, d2.user_choices)
+                new_label = nn(test_proj, d2.low_dim_matrix, 
+                               d2.sntype, d2.user_choices)
 
                 #calculate score
                 score = sum(new_label == test_type)
