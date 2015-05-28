@@ -137,16 +137,18 @@ def set_types(types):
     return np.array(new_type)
 
 
-def calc_scores(matrix2, ncomp):
+def calc_scores(matrix2, ncomp, dist):
     """
     Calculate classification results for 1 data matrix.
 
     input: matrix2, DataMatrix object
            output from DataMatrix.build()
-           
+
            ncomp, int
            number of PCs to calculate
-           
+
+           dist, scipy.stats.uniform distribution
+           prior over gamma parameter
     """
     np.random.seed()
 
@@ -216,7 +218,7 @@ def core_cross_val(data, types, user_choices):
         k = 0
         while k < user_choices['gamma_nparticles']:
             try:
-                results.append(calc_scores(matrix2, ncomp))
+                results.append(calc_scores(matrix2, ncomp, dist))
 
                 # update counter
                 k = k + 1
