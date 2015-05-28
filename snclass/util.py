@@ -65,16 +65,16 @@ def check_reduction(params):
         if  params['dim_reduction_func'][0]=='kpca':
             from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
+
+            par = params['kpca_pars'][i]
             for i in xrange(len(params['kpca_pars'])):
                 try:
-                    params[params['kpca_pars'][i]] = \
-                    int(params['kpca_val'][i])
+                    params[par] = int(params['kpca_val'][i])
                 except ValueError:
                     try:
-                        params[params['kpca_pars'][i]] = \
-                        float(params['kpca_val'][i]) 
+                        params[par] = float(params['kpca_val'][i])
                     except ValueError:
-                        params[params['kpca_pars'][i]] = params['kpca_val'][i]
+                        params[par] = params['kpca_val'][i]
 
         elif params['dim_reduction_func'][0] == 'None':
             params['dim_reduction_func'] = None
