@@ -1,0 +1,15 @@
+doc-warnings: yes
+test-warnings: no
+strictness: veryhigh
+max-line-length: 79
+autodetect: yes
+requirements:
+    - deps/core.txt
+    - deps/test.txt
+ignore-paths:
+    - docs
+    - dist/
+    - build/
+    - snclass.egg-info/
+pep8:
+    full: true
