@@ -12,7 +12,7 @@ from multiprocessing import Pool
 
 from snclass.treat_lc import LC
 from snclass.util import read_user_input, read_snana_lc
-from snclass.functions import core_cross_val
+from snclass.functions import core_cross_val, screen
 
 ##############################################
 
@@ -46,7 +46,7 @@ class DataMatrix(object):
                name of user input file
         """
         self.datam = None
-        self.snid = None
+        self.snid = []
         self.redshift = None
         self.sntype = None
         self.low_dim_matrix = None
@@ -55,6 +55,86 @@ class DataMatrix(object):
 
         if input_file is not None:
             self.user_choices = read_user_input(input_file)
+
+    def check_file(self, filename):
+        """
+        Construct one line of the data matrix.
+
+        input:   filename, str
+                 file of raw data for 1 supernova
+        """
+
+        # take object identifier
+        name = filename[len('DES_SN'):-len('_mean.dat')]
+
+        screen('Fitting SN' + name, self.user_choices)
+
+        if len(name) == 5:
+            name = '0' + name
+        elif len(name) == 4:
+            name = '00' + name
+
+        self.user_choices['path_to_lc'] = ['DES_SN' + name + '.DAT']
+
+        # read light curve raw data
+        raw = read_snana_lc(self.user_choices)
+
+        # initiate light curve object
+        lc_obj = LC(raw, self.user_choices)
+
+        # load GP fit
+        lc_obj.load_fit_GP()
+
+        # normalize
+        lc_obj.normalize()
+
+        # shift to peak mjd
+        lc_obj.mjd_shift()
+
+        # check epoch requirements
+        lc_obj.check_epoch()
+
+        if lc_obj.epoch_cuts:
+            # build data matrix lines
+            lc_obj.build_steps()
+
+            # store
+            obj_line = []
+            for fil in self.user_choices['filters']:
+                for item in lc_obj.flux_for_matrix[fil]:
+                    obj_line.append(item)
+
+            rflag = self.user_choices['redshift_flag'][0]
+            redshift = raw[rflag][0]
+            
+            obj_class = raw[self.user_choices['type_flag'][0]][0]
+
+            self.snid.append(raw['SNID:'][0])
+
+            return obj_line, redshift, obj_class
+
+        else:
+            screen('... Failed to pass epoch cuts!', self.user_choices)
+            return None 
+
+    def store_training(self, file_out):
+        """
+        Store complete training matrix.
+
+        input: file_out, str
+               output file name
+        """
+        # write to file
+        if file_out is not None:
+            op1 = open(file_out, 'w')
+            op1.write('SNID    type    z   LC...\n')
+            for i in xrange(len(self.datam)):
+                op1.write(str(self.snid[i]) + '    ' + str(self.sntype[i]) +
+                          '    ' + str(self.redshift[i]) + '    ')
+                for j in xrange(len(self.datam[i])):
+                    op1.write(str(self.datam[i][j]) + '    ')
+                op1.write('\n')
+            op1.close()
 
     def build(self, file_out=None):
         """
@@ -67,73 +147,24 @@ class DataMatrix(object):
         file_list = os.listdir(self.user_choices['samples_dir'][0])
 
         datam = []
-        self.snid = []
         redshift = []
         sntype = []
 
         for obj in file_list:
             if 'mean' in obj:
-
-                # take object identifier
-                name = obj[len('DES_SN'):-len('_mean.dat')]
-
-                if len(name) == 5:
-                    name = '0' + name
-                elif len(name) == 4:
-                    name = '00' + name
-
-                self.user_choices['path_to_lc'] = ['DES_SN' + name + '.DAT']
-
-                # read light curve raw data
-                raw = read_snana_lc(self.user_choices)
-
-                # initiate light curve object
-                lc_obj = LC(raw, self.user_choices)
-
-                # load GP fit
-                lc_obj.load_fit_GP()
-
-                # normalize
-                lc_obj.normalize()
-
-                # shift to peak mjd
-                lc_obj.mjd_shift()
-
-                # check epoch requirements
-                lc_obj.check_epoch()
-
-                if lc_obj.epoch_cuts:
-                    # build data matrix lines
-                    lc_obj.build_steps()
-
-                    # store
-                    obj_line = []
-                    for fil in self.user_choices['filters']:
-                        for item in lc_obj.flux_for_matrix[fil]:
-                            obj_line.append(item)
-
-                    rflag = self.user_choices['redshift_flag'][0]
-
-                    datam.append(obj_line)
-                    self.snid.append(raw['SNID:'][0])
-                    redshift.append(raw[rflag][0])
-                    sntype.append(raw[self.user_choices['type_flag'][0]][0])
+                sn_char = self.check_file(obj)
+                if sn_char is not None:
+                    datam.append(sn_char[0])
+                    redshift.append(sn_char[1])
+                    sntype.append(sn_char[2])
 
         self.datam = np.array(datam)
         self.redshift = np.array(redshift)
         self.sntype = np.array(sntype)
 
-        # write to file
-        if file_out is not None:
-            op1 = open(file_out, 'w')
-            op1.write('SNID    type    z   LC...\n')
-            for i in xrange(len(datam)):
-                op1.write(str(self.snid[i]) + '    ' + str(self.sntype[i]) +
-                          '    ' + str(self.redshift[i]) + '    ')
-                for j in xrange(len(datam[i])):
-                    op1.write(str(datam[i][j]) + '    ')
-                op1.write('\n')
-            op1.close()
+        #store results
+        self.store_training(file_out)
+
 
     def reduce_dimension(self):
         """
