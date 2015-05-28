@@ -225,7 +225,7 @@ new_label = nn(test_LCs, d.datam, d.user_choices)
 * numpy >=1.8.2
 * matplotlib >= 1.3.1     
 * argparse >= 1.1
-* george >= 0.2.1
+* gptools >= 0.1
 
 
 ## License
