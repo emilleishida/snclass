@@ -97,14 +97,14 @@ def check_classifier(params):
             from snclass.functions import nn
             params['classifier_func'] = nn
             for i in xrange(len(params['classifier_pars'])):
-                p = params['classifier_pars'][i]
+                pvar = params['classifier_pars'][i]
                 try:
-                    params[p] = int(params['classifier_val'][i])
+                    params[pvar] = int(params['classifier_val'][i])
                 except ValueError:
                     try:
-                        params[p] = float(params['classifier_val'][i])
+                        params[pvar] = float(params['classifier_val'][i])
                     except ValueError:
-                        params[p] = params['classifier_val'][i]
+                        params[pvar] = params['classifier_val'][i]
 
         elif params['classifier_func'][0] == 'None':
             params['classifier_func'][0] = None
@@ -120,11 +120,11 @@ def check_types(params):
            dictionary of input parameters
 
     output: params, dict
-            updated dictionary of input parameters   
+            updated dictionary of input parameters
     """
     if 'transform_types_func' in params.keys():
         if params['transform_types_func'][0] == 'set_types':
-            from functions import set_types
+            from snclass.functions import set_types
             params['transform_types_func'] = set_types
         elif params['transform_types_func'][0] == 'None':
             params['transform_types_func'][0] = None
@@ -140,21 +140,22 @@ def check_crossval(params):
            dictionary of input parameters
 
     output: params, dict
-            updated dictionary of input parameters   
+            updated dictionary of input parameters
     """
     if 'cross_validation_func' in params.keys():
-        if params['cross_validation_func'][0]=='cross_val':
+        if params['cross_validation_func'][0] == 'cross_val':
             from snclass.functions import core_cross_val
             params['cross_validation_func'] = core_cross_val
             params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
-            params['n_cross_val_particles'] = \
-                                    int(params['n_cross_val_particles'][0])
+
+            name = 'n_cross_val_particles'
+            params[name] = int(params[name][0])
             for i in xrange(len(params['cross_val_par'])):
-                p = params['cross_val_par'][i] + '_lim'
+                pvar = params['cross_val_par'][i] + '_lim'
                 try:
-                    params[p] = [int(params[p][j]) for j in range(2)]
+                    params[pvar] = [int(params[pvar][j]) for j in range(2)]
                 except ValueError:
-                    params[p] = [float(params[p][j]) for j in range(2)]
+                    params[pvar] = [float(params[pvar][j]) for j in range(2)]
 
         elif params['cross_validation_func'][0] == 'None':
             params['cross_validation_func'] = None
@@ -170,14 +171,13 @@ def read_user_input(filename):
 
     output:   dictionary with formated user choices
     """
-    #read user input data
     op1 = open(filename, 'r')
     lin1 = op1.readlines()
     op1.close()
 
     data1 = [elem.split() for elem in lin1]
 
-    #store options in params dictionary
+    # store options in params dictionary
     params = dict([(line[0], line[2:line.index('#')])
                    for line in data1 if len(line) > 1])
 
@@ -191,16 +191,16 @@ def read_user_input(filename):
     params['GP_obj'] = {}
     params['GP_std'] = {}
 
-    #check if ``observer'' data already exists
+    # check if ``observer'' data already exists
     if not os.path.isdir(params['path_to_obs'][0]):
         raise TypeError('Variable "path_to_obs" is not a valid directory!')
 
     return params
 
 
-def read_SNANA_lc( params ):
+def read_SNANA_lc(params):
     """
-    Reads light curve in SNANA format and returns a dictionary with the
+    Read light curve in SNANA format and returns a dictionary with the
     variables chosen in the user input file.
 
     input:     params -> dictionary of input parameters
