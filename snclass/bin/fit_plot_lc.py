@@ -23,7 +23,7 @@ import argparse
 import matplotlib.pyplot as plt
 
 from snclass import read_user_input, read_snana_lc
-from snclass import fit_LC
+from snclass import fit_lc
 from snclass.functions import screen
 
 

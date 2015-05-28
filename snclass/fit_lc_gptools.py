@@ -85,7 +85,7 @@ def save_result(data, mean=True, samples=False):
         op1.write('\n')
         for fil in data['filters']:
             for i in xrange(len(data['xarr'][fil])):
-                op1.write(fil + '    ' + 
+                op1.write(fil + '    ' +
                           str(data['xarr'][fil][i]) + '    ')
                 for j in xrange(int(data['n_samples'][0])):
                     op1.write(str(data['realizations'][fil][j][i]) +
@@ -99,13 +99,13 @@ def save_result(data, mean=True, samples=False):
         op2.write('filter    MJD    GP_fit     GP_std\n')
         for fil in data['filters']:
             for k in xrange(len(data['xarr'][fil])):
-                op2.write(fil + '    ' + str(data['xarr'][fil][k]) + 
-                          '    ' + str(data['GP_fit'][fil][k]) + 
+                op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
+                          '    ' + str(data['GP_fit'][fil][k]) +
                           '    ' + str(data['GP_std'][fil][k]) + '\n')
         op2.close()
 
 
-def fit_LC(data, mean=True, samples=False, screen=False):
+def fit_lc(data, mean=True, samples=False, screen=False):
     """
     Gaussian Process fit using gptools.
 

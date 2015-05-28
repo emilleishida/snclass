@@ -7,7 +7,7 @@ import os
 import matplotlib.pylab as plt
 from scipy import interpolate
 
-from fit_lc_gptools import fit_LC
+from fit_lc_gptools import fit_lc
 from snclass.util import read_fitted, read_user_input, read_snana_lc
 from snclass.functions import screen
 
@@ -74,7 +74,7 @@ class LC(object):
         self.raw.update(self.user_choices)
 
         #fit light curve
-        self.fitted = fit_LC(self.raw, **kwargs)
+        self.fitted = fit_lc(self.raw, **kwargs)
 
     def load_fit_GP(self):
         """
