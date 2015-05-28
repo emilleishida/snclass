@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-from snclass import read_user_input, read_SNANA_lc
+from snclass import read_user_input, read_snana_lc
 from snclass import fit_LC
 from snclass.functions import screen
 
@@ -18,7 +18,7 @@ def main(args):
     user_input = read_user_input(args.input) 
 
     # read lc data
-    lc_data = read_SNANA_lc(user_input)
+    lc_data = read_snana_lc(user_input)
 
     # add extra keys
     lc_data.update(user_input)

@@ -21,8 +21,8 @@ Miscelaneous functions for supernova classification.
 - build_indx:
         Build dictionary of index for header variables.
 
-- read_SNANA_lc:
-        Read raw SNANA light curve .DAT file
+- read_snana_lc:
+        Read raw snana light curve .DAT file
 
 - compare_type:
         Compare type in user requests with raw SN data.
@@ -224,9 +224,9 @@ def build_indx(params, raw):
     return indx
 
 
-def read_SNANA_lc(params):
+def read_snana_lc(params):
     """
-    Read light curve in SNANA format and returns a dictionary.
+    Read light curve in snana format and returns a dictionary.
 
     input:     params -> dictionary of input parameters
 
@@ -371,7 +371,7 @@ def read_fitted(lc_data):
     Read GP results and populate dictionary parameters.
 
     input:  user_input, dic
-            output from read_SNANA_lc()
+            output from read_snana_lc()
 
     output: updated dictionary of parameters.
     """

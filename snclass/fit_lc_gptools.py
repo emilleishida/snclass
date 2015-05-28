@@ -10,7 +10,7 @@ def fit_LC(data, mean=True, samples=False, screen=False):
     Gaussian Process fit using gptools. 
 
     input:  data -> dictionary of raw data
-                    output from read_SNANA_lc
+                    output from read_snana_lc
                     keys: filters
 
             mean -> bool, optional

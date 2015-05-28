@@ -8,7 +8,7 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 
 from fit_lc_gptools import fit_LC
-from snclass.util import read_fitted, read_user_input, read_SNANA_lc
+from snclass.util import read_fitted, read_user_input, read_snana_lc
 from snclass.functions import screen
 
 ##############################################################
@@ -22,7 +22,7 @@ class LC(object):
         """"
         Set parameters. 
 
-        input: raw_data -> output from util.read_SNANA_lc
+        input: raw_data -> output from util.read_snana_lc
                user_choices -> output from util.read_user_input
         """
   
@@ -249,7 +249,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
         user_choices['path_to_lc'] = [sn]
 
         #read light curve raw data
-        raw = read_SNANA_lc(user_choices)
+        raw = read_snana_lc(user_choices)
 
         #initiate light curve object
         lc = LC(raw, user_choices)

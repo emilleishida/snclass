@@ -8,7 +8,7 @@ import numpy as np
 from multiprocessing import Pool
 
 from treat_lc import LC
-from util import read_user_input, choose_sn, read_SNANA_lc
+from util import read_user_input, choose_sn, read_snana_lc
 from functions import core_cross_val
 
 
@@ -62,7 +62,7 @@ class DataMatrix(object):
                 self.user_choices['path_to_lc'] = ['DES_SN' + name + '.DAT']
 
                 #read light curve raw data
-                raw = read_SNANA_lc(self.user_choices)
+                raw = read_snana_lc(self.user_choices)
 
                 #initiate light curve object
                 lc = LC(raw, self.user_choices)
