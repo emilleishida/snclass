@@ -90,23 +90,21 @@ def check_classifier(params):
            dictionary of input parameters
 
     output: params, dict
-            updated dictionary of input parameters   
+            updated dictionary of input parameters
     """
     if 'classifier_func' in params.keys():
         if params['classifier_func'][0] == 'nn':
-            from functions import nn
+            from snclass.functions import nn
             params['classifier_func'] = nn
             for i in xrange(len(params['classifier_pars'])):
+                p = params['classifier_pars'][i]
                 try:
-                    params[params['classifier_pars'][i]] = \
-                                  int(params['classifier_val'][i])
+                    params[p] = int(params['classifier_val'][i])
                 except ValueError:
                     try:
-                        params[params['classifier_pars'][i]] = \
-                                     float(params['classifier_val'][i])
+                        params[p] = float(params['classifier_val'][i])
                     except ValueError:
-                        params[params['classifier_pars'][i]] = \
-                                       params['classifier_val'][i]
+                        params[p] = params['classifier_val'][i]
 
         elif params['classifier_func'][0] == 'None':
             params['classifier_func'][0] = None
@@ -146,20 +144,17 @@ def check_crossval(params):
     """
     if 'cross_validation_func' in params.keys():
         if params['cross_validation_func'][0]=='cross_val':
-            from functions import core_cross_val
+            from snclass.functions import core_cross_val
             params['cross_validation_func'] = core_cross_val
             params['gamma_nparticles'] = int(params['gamma_nparticles'][0])
             params['n_cross_val_particles'] = \
                                     int(params['n_cross_val_particles'][0])
             for i in xrange(len(params['cross_val_par'])):
+                p = params['cross_val_par'][i] + '_lim'
                 try:
-                    params[params['cross_val_par'][i] + '_lim'] = \
-                          [int(params[params['cross_val_par'][i] + \
-                               '_lim'][j]) for j in range(2)]
+                    params[p] = [int(params[p][j]) for j in range(2)]
                 except ValueError:
-                    params[params['cross_val_par'][i] + '_lim'] = \
-                          [float(params[params['cross_val_par'][i] + \
-                                '_lim'][j]) for j in range(2)]
+                    params[p] = [float(params[p][j]) for j in range(2)]
 
         elif params['cross_validation_func'][0] == 'None':
             params['cross_validation_func'] = None
