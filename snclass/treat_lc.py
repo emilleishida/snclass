@@ -133,9 +133,9 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if (min(self.fitted['xarr_shifted'][fil]) <= 
+            if (min(self.fitted['xarr_shifted'][fil]) <= \
                int(self.user_choices['epoch_cut'][0])) and 
-               (max(self.fitted['xarr_shifted'][fil]) >= 
+               (max(self.fitted['xarr_shifted'][fil]) >= \
                int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
             else:
