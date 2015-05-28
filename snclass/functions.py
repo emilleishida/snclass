@@ -54,7 +54,7 @@ def kpca(data_matrix, pars, transform=False):
 
     input: data_matrix, array
 
-           other arguments are passed directly to 
+           other arguments are passed directly to
            sklearn.decomposition.KernelPCA rotine.
 
            pars, dict
@@ -69,12 +69,12 @@ def kpca(data_matrix, pars, transform=False):
             lines are objects.
             collumns are projections over different kPCs.
     """
-    kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'], 
+    obj_kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'],
                      n_components=pars['ncomp'])
-    x_kpca = kpca.fit_transform(data_matrix)
+    x_kpca = obj_kpca.fit_transform(data_matrix)
 
     if transform:
-        return kpca
+        return obj_kpca
     else:
         return x_kpca
 
@@ -111,7 +111,6 @@ def nn(test, data_matrix, types, pars):
     return new_label
 
 
-
 def set_types(types):
     """
     Transform the original vector of types.
@@ -134,8 +133,6 @@ def set_types(types):
 
     return np.array(new_type)
 
-
-
 def core_cross_val(data, types, user_choices):
     """
     Perform 1/3 validation.
@@ -155,97 +152,65 @@ def core_cross_val(data, types, user_choices):
     """
     np.random.seed()
 
-    #split sample in 3
+    # split sample in 3
     indx_list1 = [np.random.randint(0, len(data))
                   for j in xrange(int(2*len(data)/3))]
     indx_list2 = [elem for elem in xrange(len(data))
                   if (elem not in indx_list1)]
 
-    #set train data matrix and types
-    d2 = snclass.DataMatrix()
-    d2.user_choices = user_choices
-    d2.datam = np.array([data[indx] for indx in indx_list1])
-    d2.sntype = np.array([types[indx] for indx in indx_list1])
+    # set train data matrix and types
+    matrix2 = snclass.DataMatrix()
+    matrix2.user_choices = user_choices
+    matrix2.datam = np.array([data[indx] for indx in indx_list1])
+    matrix2.sntype = np.array([types[indx] for indx in indx_list1])
 
-    #set test data matrix and types
-    d2.data_test = np.array([data[indx] for indx in indx_list2])
+    # set test data matrix and types
+    matrix2.data_test = np.array([data[indx] for indx in indx_list2])
     test_type = np.array([types[indx] for indx in indx_list2])
 
-    ploc = d2.user_choices['gamma_lim'][0]
-    pscale = d2.user_choices['gamma_lim'][1] - ploc
+    ploc = matrix2.user_choices['gamma_lim'][0]
+    pscale = matrix2.user_choices['gamma_lim'][1] - ploc
     dist = uniform(loc=ploc, scale=pscale)
 
     results = []
     for ncomp in xrange(2, 11):
 
         screen('... ncomp = ' + str(ncomp), user_choices)
-        for k in xrange(user_choices['gamma_nparticles']):
 
+        k=0
+        while k < user_choices['gamma_nparticles']:
             try:
-                #reduce dimensionality
-                d2.user_choices['gamma'] = dist.rvs()
-                d2.user_choices['ncomp'] = ncomp
+                # reduce dimensionality
+                matrix2.user_choices['gamma'] = dist.rvs()
+                matrix2.user_choices['ncomp'] = ncomp
 
-                screen('... ... gamma = ' + str(d2.user_choices['gamma']),
+                screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
                        user_choices)
     
-                d2.reduce_dimension()
+                matrix2.reduce_dimension()
 
-                #project test 
-                test_proj = d2.transf_test.transform(d2.data_test)
+                # project test 
+                test_proj = matrix2.transf_test.transform(matrix2.data_test)
 
-                #classify
-                new_label = nn(test_proj, d2.low_dim_matrix, 
-                               d2.sntype, d2.user_choices)
+                # classify
+                new_label = nn(test_proj, matrix2.low_dim_matrix, 
+                               matrix2.sntype, matrix2.user_choices)
 
-                #calculate score
+                # calculate score
                 score = sum(new_label == test_type)
 
-                #store
-                results.append([ncomp, d2.user_choices['gamma'], score])
+                # store
+                results.append([ncomp, matrix2.user_choices['gamma'], score])
+
+                #update counter
+                k = k + 1
 
             except ArpackNoConvergence:
+                screen('Arparck fail to converge!', user_choices)
                 pass
 
     results = np.array(results)
     indx_max = list(results[:,-1]).index(max(results[:,-1]))
-    
+
     return results[indx_max]
 
-
-"""
-import numpy as np
-import snclass
-from snclass.util import read_user_input
-
-path = '/home/emille/Dropbox2/Dropbox/meu_KPCA/artigo_type_Ia_n2/calculations/post-SNPCC/output/matrix/griz/extrapolate_no/GP/SNR0_3_24_s1/data_matrix_spec.dat'
-
-op1 = open(path, 'r')
-lin1 = op1.readlines()
-op1.close()
-
-data1 = [elem.split() for elem in lin1]
-
-datam=np.array([[float(elem) for elem in line[4:]] for line in data1[1:]])
-type = np.array([line[1] for line in data1[1:]])
-
-user_input=snclass.util.read_user_input('fit_lc_input.dat')
-d=snclass.DataMatrix()
-d.datam = datam
-d.sntype = type
-d.user_choices = user_input
-d.cross_val()
-
-y = np.array(d.sntype[1:])
-
-snIa = y == '0'
-snother = y != '0'
-
-
-plt.figure()
-plt.scatter(matrix[snIa, 0], matrix[snIa, 1], color='red', label='Ia')
-plt.scatter(matrix[snother, 0], matrix[snother, 1], color='blue', label='nonIa')
-plt.scatter([item[0][0]], [item[0][1]], color='green', label=new_label)
-plt.legend()
-plt.show()
-"""
