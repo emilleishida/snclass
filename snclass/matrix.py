@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
 import os
 import sys
 
@@ -8,7 +7,7 @@ import numpy as np
 from multiprocessing import Pool
 
 from treat_lc import LC
-from util import read_user_input, choose_sn, read_SNANA_lc
+from util import read_user_input, read_SNANA_lc
 from functions import core_cross_val
 
 
@@ -144,7 +143,7 @@ class DataMatrix(object):
             pool = Pool(processes=int(self.user_choices['nproc'][0]))
             p = pool.map_async(self.user_choices['cross_validation_func'], parameters)
             try:
-                 results = p.get(0xFFFF)
+                results = p.get(0xFFFF)
             except KeyboardInterrupt:
                 print 'Interruputed by the user!'
                 sys.exit()
@@ -162,8 +161,8 @@ class DataMatrix(object):
             self.final[self.user_choices['cross_val_par'][l1]] = results[indx_max][l1]
         
 def main():
-  print(__doc__)
+    print(__doc__)
 
 if __name__=='__main__':
-  main()     
+    main()     
 
