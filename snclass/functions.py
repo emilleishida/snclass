@@ -9,7 +9,7 @@ Stand alone functions for supernova classification.
 - kpca:
         Perform dimensionality reduction using kernel PCA.
 
-- nn:
+- nneighbor:
         Classify a given data matrix according to its n nearst neighbours.
 
 - set_types:
@@ -79,7 +79,7 @@ def kpca(data_matrix, pars, transform=False):
         return x_kpca
 
 
-def nn(test, data_matrix, types, pars):
+def nneighbor(test, data_matrix, types, pars):
     """
     Classify a given data matrix according to its first nearst neighbour.
 
@@ -193,7 +193,7 @@ def core_cross_val(data, types, user_choices):
                 test_proj = matrix2.transf_test.transform(matrix2.data_test)
 
                 # classify
-                new_label = nn(test_proj, matrix2.low_dim_matrix,
+                new_label = nneighbor(test_proj, matrix2.low_dim_matrix,
                                matrix2.sntype, matrix2.user_choices)
 
                 # calculate score
