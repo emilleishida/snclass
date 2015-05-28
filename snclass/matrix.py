@@ -63,7 +63,6 @@ class DataMatrix(object):
         input:   filename, str
                  file of raw data for 1 supernova
         """
-
         # take object identifier
         name = filename[len('DES_SN'):-len('_mean.dat')]
 
