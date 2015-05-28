@@ -137,7 +137,7 @@ def set_types(types):
     return np.array(new_type)
 
 
-def calc_scores(matrix2, ncomp, dist):
+def calc_scores(matrix2, ncomp, dist, test_type):
     """
     Calculate classification results for 1 data matrix.
 
@@ -149,6 +149,9 @@ def calc_scores(matrix2, ncomp, dist):
 
            dist, scipy.stats.uniform distribution
            prior over gamma parameter
+
+           test_type, vector
+           types for the test sub-sample
     """
     np.random.seed()
 
@@ -218,7 +221,7 @@ def core_cross_val(data, types, user_choices):
         k = 0
         while k < user_choices['gamma_nparticles']:
             try:
-                results.append(calc_scores(matrix2, ncomp, dist))
+                results.append(calc_scores(matrix2, ncomp, dist, test_type))
 
                 # update counter
                 k = k + 1
