@@ -232,7 +232,7 @@ def read_SNANA_lc(params):
     quality_indx = raw_data[par].index(params['quality_flag'][0]) + 1
 
     # build measurement list for each filter
-    mdata = dict([[item, np.array([[float(line[ mjd_indx]),
+    mdata = dict([[item, np.array([[float(line[mjd_indx]),
                                     float(line[photon_indx]),
                                     float(line[photonerr_indx]),
                                     float(line[quality_indx])]
@@ -307,12 +307,12 @@ def choose_sn(params, output_file='snlist.dat'):
                 sample_surv = True
 
             # store only if all requirements are satisfied
-            if type_surv == True and sample_surv == True:
+            if type_surv and sample_surv:
                 final_list.append(name)
 
     op2 = open(output_file, 'w')
     for item in final_list:
-        op2.write(item  + '\n')
+        op2.write(item + '\n')
     op2.close()
 
     screen('Found ' + str(len(final_list)) +
@@ -337,47 +337,51 @@ def read_fitted(lc_data):
         lin1 = op1.readlines()
         op1.close()
 
-        d1 = [elem.split() for elem in lin1]
+        data1 = [elem.split() for elem in lin1]
 
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
-            loaded['realizations'][fil] = [[float(d1[kk][jj])
-                                            for kk in xrange(len(d1))
-                                            if d1[kk][0] == fil]
+            loaded['realizations'][fil] = [[float(data1[kk][jj])
+                                            for kk in xrange(len(data1))
+                                            if data1[kk][0] == fil]
                                             for jj in xrange(2,
                                             int(lc_data['n_samples'][0]) + 2)]
 
             loaded['xarr'][fil] = []
-            for i1 in xrange(len(d1)):
-                if d1[i1][0] == fil:
-                    loaded['xarr'][fil].append(float(d1[i1][1]))
+            for i in xrange(len(data1)):
+                if data1[i][0] == fil:
+                    loaded['xarr'][fil].append(float(data1[i][1]))
 
     op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] +
                lc_data['SNID:'][0] + '_mean.dat', 'r')
     lin2 = op2.readlines()
     op2.close()
 
-    d2 = [elem.split() for elem in lin2]
+    data2 = [elem.split() for elem in lin2]
 
     loaded['GP_std'] = {}
     loaded['GP_fit'] = {}
     loaded['xarr'] = {}
     for fil in lc_data['filters']:
-        loaded['xarr'][fil] = [float(d2[j][1]) for j in xrange(1,len(d2))
-                               if d2[j][0] == fil]
+        loaded['xarr'][fil] = [float(data2[j][1]) 
+                              for j in xrange(1, len(data2))
+                              if data2[j][0] == fil]
 
-        loaded['GP_fit'][fil] = [float(d2[j][2]) for j in xrange(1,len(d2))
-                                 if d2[j][0] == fil]
+        loaded['GP_fit'][fil] = [float(data2[j][2]) 
+                                for j in xrange(1, len(data2))
+                                if data2[j][0] == fil]
 
-        loaded['GP_std'][fil] = [float(d2[j][3]) for j in xrange(1,len(d2))
-                                 if d2[j][0] == fil]
+        loaded['GP_std'][fil] = [float(data2[j][3]) 
+                                for j in xrange(1, len(data2))
+                                if data2[j][0] == fil]
 
     return loaded
 
 
 def main():
-    print(__doc__)
+    "Print docstring."
+    print __doc__
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()    
