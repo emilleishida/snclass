@@ -62,7 +62,7 @@ def check_reduction(params):
             updated dictionary of input parameters
     """
     if 'dim_reduction_func' in params.keys():
-        if  params['dim_reduction_func'][0] == 'kpca':
+        if params['dim_reduction_func'][0] == 'kpca':
             from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
 
@@ -242,8 +242,8 @@ def read_SNANA_lc(params):
                    line[filter_indx] == item and
                    float(line[photon_indx]) >= 0.0 and
                    float(line[quality_indx]) >=
-                   float(params['quality_cut'][0])])]
-                        for item in params['filters']])
+                   float(params['quality_cut'][0])])] 
+            for item in params['filters']])
 
     # add usefull header information to output dictionary
     for item in params['header']:
@@ -285,7 +285,7 @@ def choose_sn(params, output_file='snlist.dat'):
                     header[line[0]] = line[1:]
 
             # check for request SN type
-            if  params['type_cut'][0] != 'None':
+            if params['type_cut'][0] != 'None':
                 if header[params['type_flag'][0]][0] in params['type_cut']:
                     type_surv = True
 
@@ -297,8 +297,8 @@ def choose_sn(params, output_file='snlist.dat'):
             # check for requested SN sample
             if params['sample_cut'][0] != 'None':
 
-                if str(header[params['sample_flag'][0]][0]) in \
-                              params['sample_cut']:
+                par = params['sample_flag'][0]  
+                if str(header[par][0]) in params['sample_cut']:
                     sample_surv = True
                 else:
                     sample_surv = False
@@ -342,11 +342,11 @@ def read_fitted(lc_data):
         loaded['realizations'] = {}
         loaded['xarr'] = {}
         for fil in lc_data['filters']:
+            par = lc_data['n_samples'][0] 
             loaded['realizations'][fil] = [[float(data1[kk][jj])
                                             for kk in xrange(len(data1))
                                             if data1[kk][0] == fil]
-                                            for jj in xrange(2,
-                                            int(lc_data['n_samples'][0]) + 2)]
+                                            for jj in xrange(2, int(par) + 2)]
 
             loaded['xarr'][fil] = []
             for i in xrange(len(data1)):
@@ -364,17 +364,16 @@ def read_fitted(lc_data):
     loaded['GP_fit'] = {}
     loaded['xarr'] = {}
     for fil in lc_data['filters']:
-        loaded['xarr'][fil] = [float(data2[j][1]) 
+        loaded['xarr'][fil] = [float(data2[j][1])
+                               for j in xrange(1, len(data2))
+                               if data2[j][0] == fil]
+
+        loaded['GP_fit'][fil] = [float(data2[j][2])
                               for j in xrange(1, len(data2))
                               if data2[j][0] == fil]
 
-        loaded['GP_fit'][fil] = [float(data2[j][2]) 
-                                for j in xrange(1, len(data2))
-                                if data2[j][0] == fil]
-
-        loaded['GP_std'][fil] = [float(data2[j][3]) 
-                                for j in xrange(1, len(data2))
-                                if data2[j][0] == fil]
+        loaded['GP_std'][fil] = [float(data2[j][3])
+        for j in xrange(1, len(data2)) if data2[j][0] == fil]
 
     return loaded
 
