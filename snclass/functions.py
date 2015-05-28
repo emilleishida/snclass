@@ -70,7 +70,7 @@ def kpca(data_matrix, pars, transform=False):
             collumns are projections over different kPCs.
     """
     obj_kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'],
-                     n_components=pars['ncomp'])
+                         n_components=pars['ncomp'])
     x_kpca = obj_kpca.fit_transform(data_matrix)
 
     if transform:
@@ -133,6 +133,7 @@ def set_types(types):
 
     return np.array(new_type)
 
+
 def core_cross_val(data, types, user_choices):
     """
     Perform 1/3 validation.
@@ -153,10 +154,9 @@ def core_cross_val(data, types, user_choices):
     np.random.seed()
 
     # split sample in 3
-    indx_list1 = [np.random.randint(0, len(data))
-                  for j in xrange(int(2*len(data)/3))]
+    indx_list1 = np.random.randint(0, len(data), size=int(2 * len(data) / 3))
     indx_list2 = [elem for elem in xrange(len(data))
-                  if (elem not in indx_list1)]
+                  if elem not in indx_list1]
 
     # set train data matrix and types
     matrix2 = snclass.DataMatrix()
@@ -177,7 +177,7 @@ def core_cross_val(data, types, user_choices):
 
         screen('... ncomp = ' + str(ncomp), user_choices)
 
-        k=0
+        k = 0
         while k < user_choices['gamma_nparticles']:
             try:
                 # reduce dimensionality
@@ -186,14 +186,14 @@ def core_cross_val(data, types, user_choices):
 
                 screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
                        user_choices)
-    
+
                 matrix2.reduce_dimension()
 
-                # project test 
+                # project test
                 test_proj = matrix2.transf_test.transform(matrix2.data_test)
 
                 # classify
-                new_label = nn(test_proj, matrix2.low_dim_matrix, 
+                new_label = nn(test_proj, matrix2.low_dim_matrix,
                                matrix2.sntype, matrix2.user_choices)
 
                 # calculate score
@@ -202,15 +202,14 @@ def core_cross_val(data, types, user_choices):
                 # store
                 results.append([ncomp, matrix2.user_choices['gamma'], score])
 
-                #update counter
+                # update counter
                 k = k + 1
 
             except ArpackNoConvergence:
                 screen('Arparck fail to converge!', user_choices)
-                pass
 
     results = np.array(results)
-    indx_max = list(results[:,-1]).index(max(results[:,-1]))
+    indx_max = list(results[:, -1]).index(max(results[:, -1]))
 
     return results[indx_max]
 
