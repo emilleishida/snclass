@@ -200,15 +200,14 @@ def read_user_input(filename):
 
 def read_SNANA_lc(params):
     """
-    Read light curve in SNANA format and returns a dictionary with the
-    variables chosen in the user input file.
+    Read light curve in SNANA format and returns a dictionary.
 
     input:     params -> dictionary of input parameters
 
     output:    mdata -> data from light curve
     """
 
-    #read light curve data
+    # read light curve data
     op1 = open(params['path_to_obs'][0] + params['path_to_lc'][0], 'r')
     lin1 = op1.readlines()
     op1.close()
@@ -218,16 +217,16 @@ def read_SNANA_lc(params):
 
     par = params['param_list'][0]
 
-    #determine MJD index
+    # determine MJD index
     mjd_indx = raw_data[par].index(params['mjd_flag'][0]) + 1
 
-    #determine filter index
+    # determine filter index
     filter_indx = raw_data[par].index(params['filter_flag'][0]) + 1
 
-    #determine photon count index
+    # determine photon count index
     photon_indx = raw_data[par].index(params['photon_flag'][0]) + 1
 
-    #determine photon count error index
+    # determine photon count error index
     photonerr_indx = raw_data[par].index(params['photonerr_flag'][0]) + 1
 
     #determine quality criteria index
@@ -277,21 +276,21 @@ def choose_sn(params, output_file='snlist.dat'):
         if params['file_root'][0] in name:
 
             #read light curve data
-            op1 = open( params['path_to_obs'][0] + name, 'r')
+            op1 = open(params['path_to_obs'][0] + name, 'r')
             lin1 = op1.readlines()
             op1.close()
 
-            data1 = [ elem.split() for elem in lin1 ]
+            data1 = [elem.split() for elem in lin1]
 
             #take header parameters
             header = {}
             for line in data1:
-                if len( line ) > 1 and line[0] in params['header']:
-                    header[ line[0] ] = line[1:]
+                if len(line) > 1 and line[0] in params['header']:
+                    header[line[0]] = line[1:]
 
             #check for request SN type
             if  params['type_cut'][0]  != 'None':
-                if header[ params['type_flag'][0]][0] in params['type_cut']:
+                if header[params['type_flag'][0]][0] in params['type_cut']:
                     type_surv = True
 
                 else:
@@ -313,22 +312,21 @@ def choose_sn(params, output_file='snlist.dat'):
 
             #store only if all requirements are satisfied
             if type_surv == True and sample_surv == True:
-                final_list.append( name )
+                final_list.append(name)
 
-    op2 = open( output_file, 'w' )
+    op2 = open(output_file, 'w')
     for item in final_list:
-        op2.write( item  + '\n')
+        op2.write(item  + '\n')
     op2.close()
 
-    screen('Found ' + str( len( final_list ) ) + \
+    screen('Found ' + str(len(final_list)) + \
            ' SN satisfying sample and type cuts.', params)
     screen('Surviving objects are listed in file ' + output_file, params)
 
 
 def read_fitted(lc_data):
     """
-    Read GP results previously calculated and populate the
-    correct keywords in the parameter dictionary.
+    Read GP results and populate dictionary parameters.
 
     input:  user_input, dic
             output from read_SNANA_lc()
