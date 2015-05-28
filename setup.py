@@ -1,28 +1,31 @@
+"""Configure snclass instalation."""
+
 from setuptools import setup
-import snclass.__init__ as snclass
+import snclass
 
 def readme():
-    with open('README.md') as f:
-        return f.read()
+    """Return README.md file."""
+    with open('README.md') as my_doc:
+        return my_doc.read()
 
-setup(name = 'snclass',
-      version = snclass.__version__,
-      description = 'Python SN photometric classifier',
-      long_description = readme(),
-      url = 'https://github.com/COINtoolbox/CosmoABC',
-      author = snclass.__author__,
-      author_email = snclass.__email__,
-      license = 'GNU Public License',
-      packages = ['snclass'],
+setup(name='snclass',
+      version=snclass.__version__,
+      description='Python SN photometric classifier',
+      long_description=readme(),
+      url='https://github.com/emilleishida/snclass',
+      author=snclass.__author__,
+      author_email=snclass.__email__,
+      license='GPL3',
+      packages=['snclass'],
       install_requires=[
                       'numpy>=1.8.2',
-                      'matplotlib>=1.3.1',        
-                      'gptools>=0.1'      
+                      'matplotlib>=1.3.1',
+                      'gptools>=0.1'
       ],
       scripts=['snclass/bin/fit_plot_lc.py'],
-      package_dir= {'snclass': 'snclass', 'examples':'snclass/examples'},
+      package_dir={'snclass': 'snclass', 'examples':'snclass/examples'},
       zip_safe=False,
-      classifiers = [
+      classifiers=[
         'Programming Language :: Python',
         'Natural Language :: English',
         'Environment :: X11 Applications',
