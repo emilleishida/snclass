@@ -62,7 +62,7 @@ def check_reduction(params):
             updated dictionary of input parameters
     """
     if 'dim_reduction_func' in params.keys():
-        if  params['dim_reduction_func'][0]=='kpca':
+        if  params['dim_reduction_func'][0] == 'kpca':
             from snclass.functions import kpca
             params['dim_reduction_func'] = kpca
 
@@ -80,6 +80,7 @@ def check_reduction(params):
             params['dim_reduction_func'] = None
 
     return params
+
 
 def check_classifier(params):
     """
@@ -112,6 +113,7 @@ def check_classifier(params):
 
     return params
 
+
 def check_types(params):
     """
     Check set types function input choices.
@@ -130,6 +132,7 @@ def check_types(params):
             params['transform_types_func'][0] = None
 
     return params
+
 
 def check_crossval(params):
     """
@@ -199,6 +202,7 @@ def read_user_input(filename):
 
     return params
 
+
 def read_SNANA_lc( params ):
     """
     Reads light curve in SNANA format and returns a dictionary with the
@@ -255,6 +259,7 @@ def read_SNANA_lc( params ):
             mdata[item] = raw_data[item]
 
     return mdata
+
 
 def choose_sn(params, output_file='snlist.dat'):
     """
@@ -324,6 +329,7 @@ def choose_sn(params, output_file='snlist.dat'):
            ' SN satisfying sample and type cuts.', params)
     screen('Surviving objects are listed in file ' + output_file, params)
 
+
 def read_fitted(lc_data):
     """
     Read GP results previously calculated and populate the
@@ -378,6 +384,7 @@ def read_fitted(lc_data):
                                                  if d2[j][0] == fil]
 
     return loaded
+
 
 def main():
     print(__doc__)
