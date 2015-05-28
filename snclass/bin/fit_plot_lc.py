@@ -46,7 +46,7 @@ def main(args):
         screen('Fitting SN' + lc_data['SNID:'][0], user_input)
 
         # fit lc
-        lc_data = fit_LC(lc_data, samples=bool(int(lc_data['n_samples'][0])),
+        lc_data = fit_lc(lc_data, samples=bool(int(lc_data['n_samples'][0])),
                          screen=out)
     else:
 
