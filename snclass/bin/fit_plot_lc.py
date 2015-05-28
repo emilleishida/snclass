@@ -1,11 +1,26 @@
+"""
+Created by Emille Ishida in May, 2015.
+
+Fit and plot a light curve using Gaussian Process. 
+
+usage: 
+
+    In order to fit a GP and plot the result, do
+
+    $ fit_plot_lc.py -i <user.input> -c 1
+
+    in case you are only interested in plotting a previously calculated
+    result, 
+
+    $ fit_plot_lc.py -i <user.input> -c 0
+"""
+
 #!/usr/bin/env python
 
 from __future__ import division
 
 import argparse
 import matplotlib.pyplot as plt
-import numpy as np
-import sys
 
 from snclass import read_user_input, read_snana_lc
 from snclass import fit_LC
@@ -13,7 +28,9 @@ from snclass.functions import screen
 
 
 def main(args):
-
+    """
+    Read user input, fit and plot a GP and the raw data.
+    """
     # read_user_input
     user_input = read_user_input(args.input) 
 
@@ -75,7 +92,7 @@ def main(args):
     for fil in user_input['filters']:
 
         # Plot the samples in data space.
-        ax = plt.subplot(2, len(lc_data['filters'])/2 + 
+        plt.subplot(2, len(lc_data['filters'])/2 + 
                         len(lc_data['filters'])%2, 
                         lc_data['filters'].index(fil) + 1)
         for s in lc_data['realizations'][fil]:
