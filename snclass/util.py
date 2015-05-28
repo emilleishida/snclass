@@ -16,10 +16,13 @@ Miscelaneous functions for supernova classification.
         Check cross-validation function input choices.
 
 - read_user_input:
-        read user choices from input file
+        Read user choices from input file
+
+- build_indx:
+        Build dictionary of index for header variables.
 
 - read_SNANA_lc:
-        read raw SNANA light curve .DAT file
+        Read raw SNANA light curve .DAT file
 
 - compare_type:
         Compare type in user requests with raw SN data.
@@ -28,7 +31,7 @@ Miscelaneous functions for supernova classification.
         Builds a list of SN satifying basic selction criteria
 
 - read_fitted:
-        reads previously calculated GP results
+        Read previously calculated GP results
 """
 
 import numpy as np
@@ -183,6 +186,41 @@ def read_user_input(filename):
     return params
 
 
+def build_indx(params, raw):
+    """
+    Build dictionary of index for header variables. 
+
+    input: params, dict
+           dictionary of user choices
+
+           raw, dict
+           dictionary from raw light curve
+
+    output: indx, dict
+            dictionary of index for header variables
+    """
+    par = params['param_list'][0]
+
+    indx = {}
+
+    # determine MJD index
+    indx['mjd'] = raw_data[par].index(params['mjd_flag'][0]) + 1
+
+    # determine filter index
+    indx['filter'] = raw_data[par].index(params['filter_flag'][0]) + 1
+
+    # determine photon count index
+    indx['photon'] = raw_data[par].index(params['photon_flag'][0]) + 1
+
+    # determine photon count error index
+    indx['photonerr'] = raw_data[par].index(params['photonerr_flag'][0]) + 1
+
+    # determine quality criteria index
+    indx['quality'] = raw_data[par].index(params['quality_flag'][0]) + 1
+
+    return indx
+
+
 def read_SNANA_lc(params):
     """
     Read light curve in SNANA format and returns a dictionary.
@@ -199,36 +237,22 @@ def read_SNANA_lc(params):
     data1 = [elem.split() for elem in lin1]
     raw_data = dict([[line[0], line[1:]] for line in data1 if len(line) > 1])
 
-    par = params['param_list'][0]
-
-    # determine MJD index
-    mjd_indx = raw_data[par].index(params['mjd_flag'][0]) + 1
-
-    # determine filter index
-    filter_indx = raw_data[par].index(params['filter_flag'][0]) + 1
-
-    # determine photon count index
-    photon_indx = raw_data[par].index(params['photon_flag'][0]) + 1
-
-    # determine photon count error index
-    photonerr_indx = raw_data[par].index(params['photonerr_flag'][0]) + 1
-
-    # determine quality criteria index
-    quality_indx = raw_data[par].index(params['quality_flag'][0]) + 1
+    # find correct indexes for header parameters
+    pindx = build_indx(params, raw)
 
     # build measurement list for each filter
     fils = params['filters']
-    mdata = dict([[item, np.array([[float(line[mjd_indx]),
-                                    float(line[photon_indx]),
-                                    float(line[photonerr_indx]),
-                                    float(line[quality_indx])]
+    mdata = dict([[item, np.array([[float(line[pindx['mjd']]),
+                                    float(line[pindx['photon']]),
+                                    float(line[pindx['photonerr']),
+                                    float(line[pindx['quality']])]
                    for line in data1
                    if len(line) > 1 and
                    line[0] == params['epoch_flag'][0] and
-                   line[filter_indx] == item and
-                   float(line[photon_indx]) >= 0.0 and
-                   float(line[quality_indx]) >=
-                   float(params['quality_cut'][0])])] for item in fils])
+                   line[pindx['filter'] == item and
+                   float(line[pindx['photon']]) >= 0.0 and
+                   float(line[pindx['quality']]) >=
+                   float(params[pindx['quality']][0])])] for item in fils])
 
     # add usefull header information to output dictionary
     for item in params['header']:
@@ -244,7 +268,7 @@ def compare_type(params, header):
 
     input:  params, dict
             dictionary of user choices
- 
+
             header, dict
             dictionary of header variables
 
@@ -268,7 +292,7 @@ def compare_sample(params, header):
 
     input:  params, dict
             dictionary of user choices
- 
+
             header, dict
             dictionary of header variables
 
