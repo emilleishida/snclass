@@ -255,14 +255,12 @@ def read_SNANA_lc(params):
 
 def choose_sn(params, output_file='snlist.dat'):
     """
-    Read through all files within a given directory and
-    select those satisfying criteria in user input file.
+    Select objects satisfying criterias in user input file.
 
     input:  params (dict)
 
     output: txt file with the name of objects surviving selections cuts.
     """
-
     # take all file names in data directory
     filename = os.listdir(params['path_to_obs'][0])
 
@@ -287,7 +285,7 @@ def choose_sn(params, output_file='snlist.dat'):
                     header[line[0]] = line[1:]
 
             # check for request SN type
-            if  params['type_cut'][0]  != 'None':
+            if  params['type_cut'][0] != 'None':
                 if header[params['type_flag'][0]][0] in params['type_cut']:
                     type_surv = True
 
