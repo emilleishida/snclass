@@ -28,9 +28,7 @@ from snclass.functions import screen
 
 
 def main(args):
-    """
-    Read user input, fit and plot a GP and the raw data.
-    """
+    """Read user input, fit and plot a GP and the raw data."""
     # read_user_input
     user_input = read_user_input(args.input) 
 
