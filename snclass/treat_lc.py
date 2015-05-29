@@ -45,7 +45,7 @@ class LC(object):
     """
 
     def __init__(self, raw_data, user_choices):
-        """"
+        """
         Set parameters.
 
         input: raw_data -> output from util.read_snana_lc
@@ -63,24 +63,25 @@ class LC(object):
         """
         Check selection cuts which must be satisfied before any calculation.
 
-        self.basic_cuts is set to True if object passes basic selection cuts 
+        self.basic_cuts is set to True if object passes basic selection cuts
         (no calculations at this point, only headers)
         """
-        #check if we have observed epochs in all filters
+        # check if we have observed epochs in all filters
         filters_cut = all(item in self.raw.keys()
                           for item in self.user_choices['filters'])
 
         if filters_cut:
 
-            #apply SNR cuts
+            # apply SNR cuts
             pop = {}
             for fil in self.user_choices['filters']:
                 pop[fil] = []
                 for line in self.raw[fil]:
-                    if float(line[-1]) >= float(self.user_choices['quality_cut'][0]):
+                    quality = float(self.user_choices['quality_cut'][0])
+                    if float(line[-1]) >= quality:
                         pop[fil].append(line)
 
-            #check if there are at least 3 epochs in each filter
+            # check if there are at least 3 epochs in each filter
             epoch_cut = all(len(pop[fil]) > 2
                             for fil in self.user_choices['filters'])
 
@@ -98,37 +99,35 @@ class LC(object):
 
         self.fitted -> dictionary of fitted parameters
         """
-        #add extra keys
+        # add extra keys
         self.raw.update(self.user_choices)
 
-        #fit light curve
+        # fit light curve
         self.fitted = fit_lc(self.raw, **kwargs)
 
     def load_fit_GP(self):
-        """
-         Load previously calculated GP fit.
-        """
-        #add extra keys
+        """Load previously calculated GP fit."""
+        # add extra keys
         self.raw.update(self.user_choices)
 
-        #load
+        # load
         self.fitted = read_fitted(self.raw)
 
     def normalize(self, samples=False):
-        "Normalize according to maximum flux in all filters."
-
-        #determine maximum flux
+        """Normalize according to maximum flux in all filters."""
+        # determine maximum flux
         self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item])
-                            for item in self.user_choices['filters']])
+                                       for item in 
+                                       self.user_choices['filters']])
 
-        #normalize
+        # normalize
         self.fitted['norm_fit'] = {}
         self.fitted['norm_realizations'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['norm_fit'][fil] = np.array([elem/self.fitted['max_flux']
+            self.fitted['norm_fit'][fil] = np.array([elem / self.fitted['max_flux']
                                             for elem in self.fitted['GP_fit'][fil]])
 
-            #check if  realizations were calculated
+            # check if  realizations were calculated
             if samples and int(self.user_choices['n_samples'][0]) > 0:
                 self.fitted['norm_realizations'][fil] = \
                 np.array([elem/self.fitted['max_flux']
@@ -136,7 +135,7 @@ class LC(object):
 
     def mjd_shift(self):
         """Determine day of maximum and shift all epochs."""
-        #determine day of maximum
+        # determine day of maximum
         self.fitted['peak_mjd_fil'] = [fil for fil in
                                        self.user_choices['filters'] if 1.0 in
                                        self.fitted['norm_fit'][fil]][0]
@@ -145,7 +144,7 @@ class LC(object):
         self.fitted['peak_mjd'] = self.fitted['xarr']\
                                  [self.fitted['peak_mjd_fil']][pkmjd_indx]
 
-        #shift light curve
+        # shift light curve
         self.fitted['xarr_shifted'] = {}
         for fil in self.user_choices['filters']:
             self.fitted['xarr_shifted'][fil] = np.array([elem -
@@ -153,7 +152,7 @@ class LC(object):
 
     def check_epoch(self):
         """Check if all filters satisfy epoch coverage requirements."""
-        #store epoch flags
+        # store epoch flags
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
@@ -171,11 +170,11 @@ class LC(object):
         """Build lines for the initial data matrix."""
         for fil in self.user_choices['filters']:
 
-            #create function interpolating previous results
+            # create function interpolating previous results
             self.func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
                                              self.fitted['norm_fit'][fil])
 
-            #create new horizontal axis
+            # create new horizontal axis
             self.xnew = np.arange(float(self.user_choices['epoch_cut'][0]),
                              float(self.user_choices['epoch_cut'][1]),
                              float(self.user_choices['epoch_bin'][0]))
@@ -193,7 +192,7 @@ class LC(object):
 
         output: if file_out is str -> plot wrote to file
         """
-        #set the number of samples variable according to input
+        # set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
 
         xmin = float(self.user_choices['epoch_cut'][0])
@@ -213,7 +212,7 @@ class LC(object):
             plt.plot(self.fitted['xarr_shifted'][fil],
                      self.fitted['norm_fit'][fil], color='red')
 
-            #plot samples
+            # plot samples
             if samples == True:
                 for s in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil],
@@ -263,7 +262,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
     if not os.path.exists(user_choices['samples_dir'][0]):
         os.makedirs(user_choices['samples_dir'][0])
 
-    #read list of SN in sample
+    # read list of SN in sample
     op = open(user_choices['snlist'][0], 'r')
     lin = op.readlines()
     op.close()
@@ -272,25 +271,25 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
     for sn in snlist:
 
-        #update object
+        # update object
         user_choices['path_to_lc'] = [sn]
 
         #read light curve raw data
         raw = read_snana_lc(user_choices)
 
-        #initiate light curve object
+        # initiate light curve object
         lc = LC(raw, user_choices)
 
         screen('Fitting SN' + raw['SNID:'][0], user_choices)
 
-        #perform basic check
+        # perform basic check
         lc.check_basic()
 
-        #check if satisfy minimum cut
+        # check if satisfy minimum cut
         if lc.basic_cuts:
             screen('... Passed basic cuts', user_choices)
 
-            #fit
+            # fit
             lc.fit_GP(mean=calc_mean, samples=calc_samp)
 
             if plot == True:
