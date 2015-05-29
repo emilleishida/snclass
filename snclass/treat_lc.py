@@ -129,13 +129,15 @@ class LC(object):
             max_f = self.fitted['max_flux']
             gp_fit = self.fitted['GP_fit'][fil]
             self.fitted['norm_fit'][fil] = np.array([elem / max_f
-                                            for elem in gp_fit])
+                                                     for elem in gp_fit])
 
             # check if  realizations were calculated
             if samples and int(self.user_choices['n_samples'][0]) > 0:
-                self.fitted['norm_realizations'][fil] = \
-                np.array([elem / self.fitted['max_flux']
-                          for elem in self.fitted['realizations'][fil]])
+                max_f = self.fitted['max_flux']
+                gp_fitted = self.fitted['realizations'][fil]
+                self.fitted['norm_realizations'][fil] = np.array([elem / max_f
+                                                                  for elem in
+                                                                  gp_fitted])
 
     def mjd_shift(self):
         """Determine day of maximum and shift all epochs."""
@@ -143,17 +145,17 @@ class LC(object):
         self.fitted['peak_mjd_fil'] = [fil for fil in
                                        self.user_choices['filters'] if 1.0 in
                                        self.fitted['norm_fit'][fil]][0]
-        pkmjd_indx = list(self.fitted['norm_fit']
-                          [self.fitted['peak_mjd_fil']]).index(1.0)
-        self.fitted['peak_mjd'] = self.fitted['xarr']\
-                                 [self.fitted['peak_mjd_fil']][pkmjd_indx]
+
+        max_fil = self.fitted['peak_mjd_fil']
+        pkmjd_indx = list(self.fitted['norm_fit'][max_fil]).index(1.0)
+        self.fitted['peak_mjd'] = self.fitted['xarr'][max_fil][pkmjd_indx]
 
         # shift light curve
         self.fitted['xarr_shifted'] = {}
         for fil in self.user_choices['filters']:
             pkmjd = self.fitted['peak_mjd']
             xlist = self.fitted['xarr'][fil]
-            self.fitted['xarr_shifted'][fil] = np.array([elem - pkmjd 
+            self.fitted['xarr_shifted'][fil] = np.array([elem - pkmjd
                                                          for elem in xlist])
 
     def check_epoch(self):
@@ -162,9 +164,9 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if (min(self.fitted['xarr_shifted'][fil]) <= 
+            if (min(self.fitted['xarr_shifted'][fil]) <=
                int(self.user_choices['epoch_cut'][0])) and \
-               (max(self.fitted['xarr_shifted'][fil]) >= 
+               (max(self.fitted['xarr_shifted'][fil]) >=
                int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
             else:
@@ -219,10 +221,10 @@ class LC(object):
                      self.fitted['norm_fit'][fil], color='red')
 
             # plot samples
-            if samples == True:
-                for s in self.fitted['realizations'][fil]:
+            if samples:
+                for curve in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil],
-                             np.array(s) / self.fitted['max_flux'],
+                             np.array(curve) / self.fitted['max_flux'],
                              color='gray', alpha=0.3)
             plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
                          self.raw[fil][:, 1] / self.fitted['max_flux'],
