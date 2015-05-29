@@ -12,7 +12,7 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 
 from snclass.fit_lc_gptools import fit_lc
-from snclass.util import read_fitted, read_user_input, read_snana_lc
+from snclass.util import read_fitted, read_snana_lc
 from snclass.functions import screen
 
 ##############################################################
@@ -20,7 +20,29 @@ from snclass.functions import screen
 
 class LC(object):
 
-    """Light curve object."""
+    """
+    Light curve object.
+
+    Methods:
+        - check_basic: Check selection cuts from raw curve.
+        - fit_gp: Perform Gaussian Process Fit.
+        - load_fit_GP: Load previously calculated GP fit.
+        - normalize: Normalize according to maximum flux in all filters.
+        - mjd_shift: Determine day of maximum and shift all epochs.
+        - check_epoch: Check if all filters satisfy epoch requirements.
+        - build_steps: Build lines for the initial data matrix.
+        - plot_fitted: Plotted light curve as it enters the data matrix.
+
+    Attributes:
+        - raw, dict: raw data
+        - user_choices, dict: user input choices
+        - basic_cuts, bool: basic cuts flag
+        - fitted, dict: results from GP fit
+        - epoch_cuts, bool: epoch cuts flag
+        - flux_for_matrix, dict: results for data matrix lines
+        - xnew: data matrix cadence
+        - func: interpolation function from GP results
+    """
 
     def __init__(self, raw_data, user_choices):
         """"
@@ -29,9 +51,13 @@ class LC(object):
         input: raw_data -> output from util.read_snana_lc
                user_choices -> output from util.read_user_input
         """
-
         self.raw = raw_data
         self.user_choices = user_choices
+        self.basic_cuts = None
+        self.fitted = None
+        self.epoch_cuts = None
+        self.flux_for_matrix = {}
+        self.func = None
 
     def check_basic(self):
         """
@@ -40,9 +66,8 @@ class LC(object):
         self.basic_cuts is set to True if object passes basic selection cuts 
         (no calculations at this point, only headers)
         """
-
         #check if we have observed epochs in all filters
-        filters_cut = all(item in self.raw.keys() 
+        filters_cut = all(item in self.raw.keys()
                           for item in self.user_choices['filters'])
 
         if filters_cut:
@@ -56,7 +81,7 @@ class LC(object):
                         pop[fil].append(line)
 
             #check if there are at least 3 epochs in each filter
-            epoch_cut = all(len(pop[fil]) > 2 
+            epoch_cut = all(len(pop[fil]) > 2
                             for fil in self.user_choices['filters'])
 
             if epoch_cut:
@@ -112,7 +137,7 @@ class LC(object):
     def mjd_shift(self):
         """Determine day of maximum and shift all epochs."""
         #determine day of maximum
-        self.fitted['peak_mjd_fil'] = [fil for fil in 
+        self.fitted['peak_mjd_fil'] = [fil for fil in
                                        self.user_choices['filters'] if 1.0 in
                                        self.fitted['norm_fit'][fil]][0]
         pkmjd_indx = list(self.fitted['norm_fit']\
@@ -123,12 +148,11 @@ class LC(object):
         #shift light curve
         self.fitted['xarr_shifted'] = {}
         for fil in self.user_choices['filters']:
-            self.fitted['xarr_shifted'][fil] = np.array([elem - 
+            self.fitted['xarr_shifted'][fil] = np.array([elem -
             self.fitted['peak_mjd'] for elem in self.fitted['xarr'][fil]])
 
     def check_epoch(self):
-        "Check if all filters satisfy epoch coverage requirements."
-
+        """Check if all filters satisfy epoch coverage requirements."""
         #store epoch flags
         epoch_flags = []
 
@@ -144,11 +168,7 @@ class LC(object):
         self.epoch_cuts = all(test == True for test in epoch_flags)
 
     def build_steps(self):
-        "Build lines for the initial data matrix"
-
-        #create dictionary to store results
-        self.flux_for_matrix = {}
- 
+        """Build lines for the initial data matrix."""
         for fil in self.user_choices['filters']:
 
             #create function interpolating previous results
@@ -173,7 +193,6 @@ class LC(object):
 
         output: if file_out is str -> plot wrote to file
         """
-
         #set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
 
@@ -197,8 +216,8 @@ class LC(object):
             #plot samples
             if samples == True:
                 for s in self.fitted['realizations'][fil]:
-                    plt.plot(self.fitted['xarr_shifted'][fil], 
-                             np.array(s)/self.fitted['max_flux'], 
+                    plt.plot(self.fitted['xarr_shifted'][fil],
+                             np.array(s)/self.fitted['max_flux'],
                              color='gray', alpha=0.3)
             plt.errorbar(self.raw[fil][:,0] - self.fitted['peak_mjd'],
                         self.raw[fil][:,1]/self.fitted['max_flux'],
@@ -210,7 +229,7 @@ class LC(object):
                      max(self.raw[fil][:,0] - self.fitted['peak_mjd'])+1.0)
             plt.vlines(xmin, ax.get_ylim()[0], func(xmin), color='black',
                        linestyles='dashed')
-            plt.vlines(xmax, ax.get_ylim()[0], func(xmax), color='black', 
+            plt.vlines(xmax, ax.get_ylim()[0], func(xmax), color='black',
                        linestyles='dashed')
 
         f.tight_layout()
@@ -280,7 +299,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
         else:
             screen('Failed to pass basic cuts!\n', user_choices)
 
-        
+
 def main():
     """Print documentation."""
     print __doc__
