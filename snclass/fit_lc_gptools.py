@@ -15,7 +15,7 @@ import gptools
 import os
 
 
-def imp_gptools(data, fil):
+def imp_gptools(data, fil, mcmc=False):
     """
     Perform Gaussian Process with gptools through MCMC.
 
@@ -26,6 +26,10 @@ def imp_gptools(data, fil):
 
            fil, str
            filter
+        
+           mcmc, bool, optional
+           if True, optimize kernel parameters using mcmc
+           Default is False
 
     output: data, dict
             updated dictionary with GP results
@@ -43,14 +47,20 @@ def imp_gptools(data, fil):
 
     data['xarr'][fil] = np.arange(min(mjd), max(mjd), 0.2)
 
-    out = gp_obj.predict(data['xarr'][fil], use_MCMC=True,
-                         num_proc=int(data['n_proc'][0]), nsamp=200,
-                         plot_posterior=False,
-                         plot_chains=False, burn=100, thin=10)
+    if mcmc:
+        out = gp_obj.predict(data['xarr'][fil], use_MCMC=True,
+                             num_proc=int(data['n_proc'][0]), nsamp=200,
+                             plot_posterior=False,
+                             plot_chains=False, burn=100, thin=10)
+
+        data['GP_obj'][fil] = gp_obj 
+
+    else:
+        out = gp.predict(x_star, use_MCMC=False)
+        data['GP_obj'] = gp.k.params
 
     data['GP_fit'][fil] = out[0]
-    data['GP_std'][fil] = out[1]
-    data['GP_obj'][fil] = gp_obj
+    data['GP_std'][fil] = out[1]    
 
     return data
 
@@ -105,7 +115,7 @@ def save_result(data, mean=True, samples=False):
         op2.close()
 
 
-def fit_lc(data, mean=True, samples=False, screen=False):
+def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=False):
     """
     Gaussian Process fit using gptools.
 
@@ -125,6 +135,10 @@ def fit_lc(data, mean=True, samples=False, screen=False):
                       if True, print calculation steps into screen
                       Default is False
 
+            do_mcmc -> bool, optional
+                    if True, optimize kernel parameters using mcmc
+                    Default is False
+
     output: data -> update dictionary with new keyword:
                     realizations
     """
@@ -139,7 +153,7 @@ def fit_lc(data, mean=True, samples=False, screen=False):
             print '... filter: ' + fil
 
         if mean:
-            data = imp_gptools(data, fil)
+            data = imp_gptools(data, fil, mcmc=do_mcmc)
 
         if samples and int(data['n_samples'][0]) > 0:
             if screen:

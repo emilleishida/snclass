@@ -277,6 +277,8 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
     snlist = [elem.split()[0] for elem in lin]
 
+    fit_method = bool(int(user_choices['do_mcmc'][0]))
+
     for supernova in snlist:
 
         # update object
@@ -298,10 +300,13 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
             screen('... Passed basic cuts', user_choices)
 
             # fit
-            my_lc.fit_GP(mean=calc_mean, samples=calc_samp)
+            my_lc.fit_GP(mean=calc_mean, samples=calc_samp, 
+                         do_mcmc=fit_method)
 
             if plot:
                 my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
+
+            print '\n'
 
         else:
             screen('Failed to pass basic cuts!\n', user_choices)
