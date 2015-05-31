@@ -22,8 +22,8 @@ from __future__ import division
 import argparse
 import matplotlib.pyplot as plt
 
-from snclass import read_user_input, read_snana_lc
-from snclass import fit_lc
+from snclass.util import read_user_input, read_snana_lc
+from snclass.fit_lc_gptools import fit_lc
 from snclass.functions import screen
 
 

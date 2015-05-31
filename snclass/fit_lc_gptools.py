@@ -53,14 +53,12 @@ def imp_gptools(data, fil, mcmc=False):
                              plot_posterior=False,
                              plot_chains=False, burn=100, thin=10)
 
-        data['GP_obj'][fil] = gp_obj 
-
     else:
-        out = gp.predict(x_star, use_MCMC=False)
-        data['GP_obj'] = gp.k.params
+        out = gp_obj.predict(data['xarr'][fil], use_MCMC=False)
 
     data['GP_fit'][fil] = out[0]
-    data['GP_std'][fil] = out[1]    
+    data['GP_std'][fil] = out[1]
+    data['GP_obj'][fil] = gp_obj
 
     return data
 
