@@ -15,7 +15,7 @@ import gptools
 import os
 
 
-def imp_gptools(data, fil, mcmc=False):
+def imp_gptools(data, fil, mcmc=True):
     """
     Perform Gaussian Process with gptools through MCMC.
 
@@ -29,7 +29,7 @@ def imp_gptools(data, fil, mcmc=False):
         
            mcmc, bool, optional
            if True, optimize kernel parameters using mcmc
-           Default is False
+           Default is True
 
     output: data, dict
             updated dictionary with GP results
@@ -113,7 +113,7 @@ def save_result(data, mean=True, samples=False):
         op2.close()
 
 
-def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=False):
+def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True):
     """
     Gaussian Process fit using gptools.
 
@@ -135,7 +135,7 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=False):
 
             do_mcmc -> bool, optional
                     if True, optimize kernel parameters using mcmc
-                    Default is False
+                    Default is True
 
     output: data -> update dictionary with new keyword:
                     realizations
