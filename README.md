@@ -68,7 +68,7 @@ import snclass
 user_input=snclass.read_user_input('user.input')
 
 # read raw data
-lc_data = snclass.read_SNANA_lc(user_input)
+lc_data = snclass.read_snana_lc(user_input)
 
 # update data object
 lc_data.update(user_input)
@@ -167,7 +167,7 @@ Make sure that the keyword ``samples_dir`` is also properly set, as the output f
 After you have all your desired light curves already fitted through a GP, with means saved in the ``samples_dir`` directory, you can easily build the data matrix using
 
 ```python
-from snclass import DataMatrix
+from snclass.matrix import DataMatrix
 
 d = DataMatrix('user.input')
 d.build(file_out='matrix.dat')
@@ -202,7 +202,7 @@ This can be a set of diverse objects or a number of realizations from the final 
 The classifier is given as a separate function, which in the case implemented so far requires the following keywords
 
 ```python
-classifier_func  = nn          # classifier function
+classifier_func  = nneighbor   # classifier function
 classifier_pars  = n weights   # classifier parameters
 classifier_val   = 1 distance  # values for classifier parameters
 ```
@@ -210,9 +210,9 @@ classifier_val   = 1 distance  # values for classifier parameters
 In order to classify the test sample, based on the KernelPCA space from the training sample, do
 
 ```python
-from snclass.functions import nn
+from snclass.functions import nneighbor
 
-new_label = nn(test_LCs, d.datam, d.user_choices)
+new_label = nneighbor(test_LCs, d.datam, d.user_choices)
 ```
 
 ## Requirements
@@ -221,6 +221,7 @@ new_label = nn(test_LCs, d.datam, d.user_choices)
 * numpy >=1.8.2
 * matplotlib >= 1.3.1
 * argparse >= 1.1
+* multiprocessing >= 0.70a1
 * gptools >= 0.1
 
 ## License
