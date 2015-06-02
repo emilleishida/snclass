@@ -107,13 +107,18 @@ class LC(object):
         # fit light curve
         self.fitted = fit_lc(self.raw, **kwargs)
 
-    def load_fit_GP(self):
-        """Load previously calculated GP fit."""
+    def load_fit_GP(self, mean_file):
+        """
+        Load previously calculated GP fit.
+
+        input: mean_file, str
+               file with previously fitted GP result
+        """
         # add extra keys
         self.raw.update(self.user_choices)
 
         # load
-        self.fitted = read_fitted(self.raw)
+        self.fitted = read_fitted(self.raw, mean_file)
 
     def normalize(self, samples=False):
         """Normalize according to maximum flux in all filters."""

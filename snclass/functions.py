@@ -171,7 +171,7 @@ def calc_scores(matrix2, ncomp, dist):
     # calculate score
     score = sum(new_label == matrix2.test_type)
 
-    return [ncomp, matrix2.user_choices['gamma'], score]
+    return int(ncomp), matrix2.user_choices['gamma'], score
 
 
 def core_cross_val(data, types, user_choices):
@@ -197,7 +197,7 @@ def core_cross_val(data, types, user_choices):
                   if elem not in indx_list1]
 
     # set train data matrix and types
-    matrix2 = snclass.DataMatrix()
+    matrix2 = snclass.matrix.DataMatrix()
     matrix2.user_choices = user_choices
     matrix2.datam = np.array([data[indx] for indx in indx_list1])
     matrix2.sntype = np.array([types[indx] for indx in indx_list1])

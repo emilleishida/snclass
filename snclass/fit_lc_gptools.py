@@ -104,16 +104,26 @@ def save_result(data, mean=True, samples=False):
     if mean:
         op2 = open(data['samples_dir'][0] + data['file_root'][0] +
                    data['SNID:'][0] + '_mean.dat', 'w')
-        op2.write('filter    MJD    GP_fit     GP_std\n')
+        op2.write('filter    MJD    GP_fit     GP_std')
+        if 'SIM_NON1a:' in data.keys():
+                op2.write('    type\n')
+        else:
+            op2.write('\n')
+
         for fil in data['filters']:
             for k in xrange(len(data['xarr'][fil])):
                 op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
                           '    ' + str(data['GP_fit'][fil][k]) +
-                          '    ' + str(data['GP_std'][fil][k]) + '\n')
+                          '    ' + str(data['GP_std'][fil][k]))
+                if 'SIM_NON1a:' in data.keys():
+                    op2.write('    ' + str(data['SIM_NON1a:'][0]) + '\n')
+                else:
+                    op2.write('\n')
         op2.close()
 
 
-def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True):
+def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
+           save_mean=True, save_samples=False):
     """
     Gaussian Process fit using gptools.
 
@@ -134,8 +144,16 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True):
                       Default is False
 
             do_mcmc -> bool, optional
-                    if True, optimize kernel parameters using mcmc
-                    Default is True
+                       if True, optimize kernel parameters using mcmc
+                       Default is True
+
+            save_mean -> bool, optional
+                         if True save mean GP fit to file
+                         Default is True
+
+            save_samples -> bool, optional
+                            if True save GP draws to file
+                            Default is False
 
     output: data -> update dictionary with new keyword:
                     realizations
@@ -163,7 +181,7 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True):
 
             data['realizations'][fil] = draws.T
 
-    save_result(data, mean=mean, samples=samples)
+    save_result(data, mean=save_mean, samples=save_samples)
 
     if screen:
         print '\n'

@@ -38,6 +38,7 @@ import numpy as np
 import os
 
 from snclass.functions import screen
+import sys
 
 #########################################
 
@@ -84,9 +85,9 @@ def check_classifier(params):
             updated dictionary of input parameters
     """
     if 'classifier_func' in params.keys():
-        if params['classifier_func'][0] == 'nn':
-            from snclass.functions import nn
-            params['classifier_func'] = nn
+        if params['classifier_func'][0] == 'nneighbor':
+            from snclass.functions import nneighbor
+            params['classifier_func'] = nneighbor
             for i in xrange(len(params['classifier_pars'])):
                 pvar = params['classifier_pars'][i]
                 try:
@@ -175,6 +176,7 @@ def read_user_input(filename):
     params = check_reduction(params)
     params = check_classifier(params)
     params = check_crossval(params)
+    params = check_types(params)
 
     params['GP_fit'] = {}
     params['realizations'] = {}
@@ -366,12 +368,15 @@ def choose_sn(params, output_file='snlist.dat'):
     screen('Surviving objects are listed in file ' + output_file, params)
 
 
-def read_fitted(lc_data):
+def read_fitted(lc_data, mean_file):
     """
     Read GP results and populate dictionary parameters.
 
     input:  user_input, dic
-            output from read_snana_lc()
+            output from snclass.util.read_user_choices
+
+            mean_file, str
+            name of file storing previous calculated GP results.
 
     output: updated dictionary of parameters.
     """
@@ -399,8 +404,7 @@ def read_fitted(lc_data):
                 if data1[i][0] == fil:
                     loaded['xarr'][fil].append(float(data1[i][1]))
 
-    op2 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] +
-               lc_data['SNID:'][0] + '_mean.dat', 'r')
+    op2 = open(mean_file, 'r')
     lin2 = op2.readlines()
     op2.close()
 

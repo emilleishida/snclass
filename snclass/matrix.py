@@ -64,16 +64,24 @@ class DataMatrix(object):
                  file of raw data for 1 supernova
         """
         # take object identifier
-        name = filename[len('DES_SN'):-len('_mean.dat')]
+        name = filename[len(self.user_choices['file_root'][0]):
+                        -len('_mean.dat')]
 
         screen('Fitting SN' + name, self.user_choices)
 
-        if len(name) == 5:
-            name = '0' + name
-        elif len(name) == 4:
-            name = '00' + name
+        if 'X' in name:
+            name = name[name.index('X') + 1:]
 
-        self.user_choices['path_to_lc'] = ['DES_SN' + name + '.DAT']
+        if len(name) == 5:
+            name2 = '0' + name
+        elif len(name) == 4:
+            name2 = '00' + name
+        elif len(name) == 3:
+            name2 = '000' + name
+        else:
+            name2 = name
+
+        self.user_choices['path_to_lc'] = ['DES_SN' + name2 + '.DAT']
 
         # read light curve raw data
         raw = read_snana_lc(self.user_choices)
@@ -82,7 +90,7 @@ class DataMatrix(object):
         lc_obj = LC(raw, self.user_choices)
 
         # load GP fit
-        lc_obj.load_fit_GP()
+        lc_obj.load_fit_GP(self.user_choices['samples_dir'][0] + filename)
 
         # normalize
         lc_obj.normalize()
@@ -114,6 +122,7 @@ class DataMatrix(object):
 
         else:
             screen('... Failed to pass epoch cuts!', self.user_choices)
+            screen('\n', self.user_choices)
             return None
 
     def store_training(self, file_out):
@@ -165,14 +174,7 @@ class DataMatrix(object):
         self.store_training(file_out)
 
     def reduce_dimension(self):
-        """
-        Perform dimensionality reduction with user defined funciton.
-
-        input: pars - dict
-               Dictionary of parameters.
-               Must include all keywords required by
-               self.user_choices['dim_reduction_func']() function.
-        """
+        """Perform dimensionality reduction with user defined function."""
         # define dimensionality reduction function
         func = self.user_choices['dim_reduction_func']
 
@@ -186,7 +188,7 @@ class DataMatrix(object):
         """Optimize the hyperparameters for RBF kernel and ncomp."""
         # correct type parameters if necessary
         types_func = self.user_choices['transform_types_func']
-        if self.user_choices['transform_types_func'] is not None:
+        if types_func is not None:
             self.sntype = types_func(self.sntype)
 
         # initialize parameters
@@ -212,10 +214,12 @@ class DataMatrix(object):
 
         else:
             number = self.user_choices['n_cross_val_particles']
-            results = core_cross_val(data, types, choices) * number
-            results = np.array(results)
+            results = np.array([core_cross_val(data, types, choices) 
+                                for item in xrange(number)])
 
-        indx_max = list(results[:, -1]).index(max(results[:, -1]))
+        flist = list(results[:,len(results[0])-1])
+        max_success = max(flist)
+        indx_max = flist.index(max_success)
 
         self.final = {}
         for i in xrange(len(self.user_choices['cross_val_par'])):
