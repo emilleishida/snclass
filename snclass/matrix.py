@@ -233,7 +233,7 @@ class DataMatrix(object):
         #update low dimensional matrix
         self.reduce_dimension()       
 
-    def plot(self, pcs, file_out, show=False):
+    def plot(self, pcs, file_out, show=False, test=None):
         """
         Plot 2-dimensional scatter of data matrix in kPCA space.
 
@@ -246,6 +246,11 @@ class DataMatrix(object):
                show, bool, optional
                if True show plot in screen
                Default is False
+
+               test, dict, optional
+               keywords: data, type
+               if not None plot the projection of 1 photometric object
+               Default is None
         """
         #define vectors to plot
         xdata = self.low_dim_matrix[:,pcs[0]]
@@ -255,11 +260,14 @@ class DataMatrix(object):
         nonIa = self.sntype == '1'
 
         plt.figure()
-        plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o', label='Ia')
-        plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s', label='non-Ia')
+        plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o', label='spec Ia')
+        plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s', label='spec non-Ia')
+        if test is not None:
+            plt.scatter(test['data'][:,pcs[0]], test['data'][:,pcs[1]], marker='*', 
+                        color='red', label='test - ' + test['type'])
         plt.xlabel('kPC' + str(pcs[0] + 1), fontsize=14)
         plt.ylabel('kPC' + str(pcs[1] + 1), fontsize=14)
-        plt.legend(title='Spec', fontsize=12)
+        plt.legend(fontsize=12)
         if show:
             plt.show()
         if file_out is not None:
