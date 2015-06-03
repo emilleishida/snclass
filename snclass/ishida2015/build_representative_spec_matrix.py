@@ -1,5 +1,6 @@
 from snclass.matrix import DataMatrix
 from snclass.functions import screen
+from snclass.util import translate_snid
 import snclass
 import os
 import asciitable
@@ -82,8 +83,23 @@ gp_objs = {}
 for key in draw_spec_samples.keys():
     cont = 0
     fail = 0
-    while cont < draw_spec_samples[key]:
 
+    ready = []
+    for obj in surv_spec_names[key]:
+        obj_id = translate_snid(obj)
+        for j in xrange(draw_spec_samples[key]):
+            mean_file = synthetic_dir + '/' + \
+                              user_choices['file_root'][0] + str(j) + \
+                              'X' + obj_id + '_mean.dat'
+            if os.path.isfile(mean_file) and mean_file not in ready:
+                cont = cont + 1
+                ready.append(mean_file)
+                screen('Found ready SN ' + str(cont) + 'X' + obj_id, user_choices)
+
+    screen('\n', user_choices)
+
+    while cont < draw_spec_samples[key]:
+        
         indx = np.random.randint(0, surv_spec_pop[key])
         name = surv_spec_names[key][indx]
 
@@ -122,8 +138,8 @@ for key in draw_spec_samples.keys():
 
             screen('... Passed epoch cuts', user_choices)
             screen('... ... This is SN type ' +  raw['SIM_NON1a:'][0] + \
-                  ' number ' + str(cont + 1) + ' of ' + \
-                  str(draw_spec_samples[key], user_choices)
+                   ' number ' + str(cont + 1) + ' of ' + 
+                   str(draw_spec_samples[key]), user_choices)
 
             key_list = ['realizations', 'xarr', 'GP_std', 'GP_obj']
 
@@ -140,7 +156,7 @@ for key in draw_spec_samples.keys():
                                                              mcmc=fit_method)
                     new_obj = raw['GP_obj'][fil]
                     draws = new_obj.draw_sample(raw['xarr'][fil],
-                                            num_samp=1)
+                                                num_samp=1)
                     raw['GP_fit'][fil] = [line[0] for line in draws]
                 else:
                     new_obj = gp_objs[raw['SNID:'][0]][fil]
