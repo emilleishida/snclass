@@ -156,9 +156,6 @@ def calc_scores(matrix2, ncomp, dist):
     matrix2.user_choices['gamma'] = dist.rvs()
     matrix2.user_choices['ncomp'] = ncomp
 
-    screen('... ... gamma = ' + str(matrix2.user_choices['gamma']),
-           matrix2.user_choices)
-
     matrix2.reduce_dimension()
 
     # project test

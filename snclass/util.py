@@ -42,6 +42,52 @@ import sys
 
 #########################################
 
+def translate_snid(snid):
+    """
+    Translate a general sn id between SNANA and raw SNID format
+
+    input: snid, str
+           name of file or other string containing sind
+
+    output: raw snana file name and/or shorten snid
+    """
+    if 'mean' in snid:
+        name1 = snid[:-len('_mean.dat')]
+    elif 'samples' in snid:
+        name1 = snid[:-len('_samples.dat')]
+    elif '.DAT' in snid:
+        name1 = snid[:-len('.DAT')]
+    else:
+        name1 = snid
+
+    if 'X' in name1:
+        name2 = name1[name1.index('X') + 1:]
+    elif 'DES_SN' in snid:
+        name2 = name1[len('DES_SN'):]
+    else:
+        name2 = name1
+
+    if snid[:len('DES_SN')] == 'DES_SN' and snid[-len('.DAT'):] == '.DAT' \
+    and len(name2) == 6:
+        if '0' in name2:
+            name3 = name2.lstrip('0')
+        else:
+            name3 = name2
+
+        return name3
+
+    else:
+        if len(name2) == 6:
+            name3 =  name2
+        elif len(name2) == 5:
+            name3 = '0' + name2
+        elif len(name2) == 4:
+            name3 = '00' + name2
+        elif len(name2) == 3:
+            name3 = '000' + name2
+
+        return 'DES_SN' + name3 + '.DAT', name2
+
 
 def check_reduction(params):
     """

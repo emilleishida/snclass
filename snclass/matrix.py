@@ -5,13 +5,13 @@ Class to implement calculations on data matrix.
 """
 
 import os
-import sys
 
+import matplotlib.pylab as plt
 import numpy as np
 from multiprocessing import Pool
 
 from snclass.treat_lc import LC
-from snclass.util import read_user_input, read_snana_lc
+from snclass.util import read_user_input, read_snana_lc, translate_snid
 from snclass.functions import core_cross_val, screen
 
 ##############################################
@@ -56,32 +56,21 @@ class DataMatrix(object):
         if input_file is not None:
             self.user_choices = read_user_input(input_file)
 
-    def check_file(self, filename):
+    def check_file(self, filename, epoch=True):
         """
         Construct one line of the data matrix.
 
         input:   filename, str
                  file of raw data for 1 supernova
-        """
-        # take object identifier
-        name = filename[len(self.user_choices['file_root'][0]):
-                        -len('_mean.dat')]
 
+                 epoch, bool - optional
+                 If true, check if SN satisfies epoch cuts
+                 Default is True
+        """
         screen('Fitting SN' + name, self.user_choices)
 
-        if 'X' in name:
-            name = name[name.index('X') + 1:]
-
-        if len(name) == 5:
-            name2 = '0' + name
-        elif len(name) == 4:
-            name2 = '00' + name
-        elif len(name) == 3:
-            name2 = '000' + name
-        else:
-            name2 = name
-
-        self.user_choices['path_to_lc'] = ['DES_SN' + name2 + '.DAT']
+        # translate identifier
+        self.user_choices['path_to_lc'] = [translate_snid(filename)[0]]
 
         # read light curve raw data
         raw = read_snana_lc(self.user_choices)
@@ -98,8 +87,11 @@ class DataMatrix(object):
         # shift to peak mjd
         lc_obj.mjd_shift()
 
-        # check epoch requirements
-        lc_obj.check_epoch()
+        if epoch:
+            # check epoch requirements
+            lc_obj.check_epoch()
+        else:
+            lc_obj.epoch_cuts = True
 
         if lc_obj.epoch_cuts:
             # build data matrix lines
@@ -144,12 +136,16 @@ class DataMatrix(object):
                 op1.write('\n')
             op1.close()
 
-    def build(self, file_out=None):
+    def build(self, file_out=None, check_epoch=True):
         """
         Build data matrix according to user input file specifications.
 
         input:   file_out -> str, optional
                  file to store data matrix (str). Default is None
+
+                 check_epoch -> bool, optional
+                 If True check if SN satisfies epoch cuts
+                 Default is True
         """
         # list all files in sample directory
         file_list = os.listdir(self.user_choices['samples_dir'][0])
@@ -160,7 +156,7 @@ class DataMatrix(object):
 
         for obj in file_list:
             if 'mean' in obj:
-                sn_char = self.check_file(obj)
+                sn_char = self.check_file(obj, epoch=check_epoch)
                 if sn_char is not None:
                     datam.append(sn_char[0])
                     redshift.append(sn_char[1])
@@ -225,6 +221,48 @@ class DataMatrix(object):
         for i in xrange(len(self.user_choices['cross_val_par'])):
             par_list = self.user_choices['cross_val_par']
             self.final[par_list[i]] = results[indx_max][i]
+
+    def final_configuration(self):
+        """Determine final configuraton based on cross-validation results."""
+        #update optimized hyper-parameters
+        for par in self.user_choices['cross_val_par']:
+            indx = self.user_choices['cross_val_par'].index(par)
+            self.user_choices[par] = self.final[par]
+
+        #update low dimensional matrix
+        self.reduce_dimension()
+
+    def plot(self, pcs, file_out, show=False):
+        """
+        Plot 2-dimensional scatter of data matrix in kPCA space.
+
+        input: pcs, vector of int
+               kernel PCs to be used as horizontal and vertical axis
+
+               file_out, str
+               file name to store final plot
+
+               show, bool, optional
+               if True show plot in screen
+               Default is False
+        """
+        #define vectors to plot
+        xdata = self.low_dim_matrix[:,pcs[0]]
+        ydata = self.low_dim_matrix[:,pcs[1]]
+
+        snIa = self.sntype == '0'
+        nonIa = self.sntype == '1'
+
+        plt.figure()
+        plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o', label='Ia')
+        plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s', label='non-Ia')
+        plt.xlabel('kPC' + str(pcs[0] + 1), fontsize=14)
+        plt.ylabel('kPC' + str(pcs[1] + 1), fontsize=14)
+        plt.legend(title='Spec', fontsize=12)
+        if show:
+            plt.show()
+        if file_out is not None:
+            plt.savefig(file_out)
 
 
 def main():
