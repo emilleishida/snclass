@@ -149,7 +149,7 @@ No calculations were made in the raw data.
 In order to select a smaller subset satisfying selection cuts which require treatment, use the ``matrix.build`` module.
 ***
 
-### Fitting a set of SN
+## Fitting a set of SN
 
 You can also fit a set of SN sequentially.
 In this case, build a ``sn.list`` file, which contains the name of the raw files for all objects you want to fit.
@@ -189,15 +189,20 @@ kpca_pars          = kernel gamma ncomp   # parameters for dimensionality reduct
 kpca_val           = rbf  1.0   2         # value for dimensionality reduction parameters
 ```
 
-Having these keywords in the ``user.input`` file, we can reduce the dimensionality of the data matrix simply doing
+Then, we can reduce the dimensionality of the data matrix simply doing
 
 ```python
 d.reduce_dimension()
 ```
 
 This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs.
-Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit.
-This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
+Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit. This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
+First we need to project them using the low dimension space built from the spectroscopic sample. 
+
+```python
+# project test
+test_projections = d.transf_test.transform(test_LCs)
+```
 
 The classifier is given as a separate function, which in the case implemented so far requires the following keywords
 
@@ -215,14 +220,49 @@ from snclass.functions import nneighbor
 new_label = nneighbor(test_LCs, d.datam, d.user_choices)
 ```
 
+## Cross-validation
+
+In most cases, the dimensionality reduction phase will depend on a few hyperparameters which should be optimized before the actual classification takes place. This is the case for the KernelPCA algorithm. The optimization is done through a [repeated random sub-sampling validation](http://en.wikipedia.org/wiki/Cross-validation_%28statistics%29), where 1/3 of the spectroscopic sample is set asside and considered as test sample.
+
+The input file keywords controlling the cross-validation process are::
+
+    cross_validation_func   = cross_val            # name of cross-validation function
+    n_cross_val_particles   = 10                   # number of times to separate training/test set 
+    cross_val_par           = ncomp  gamma         # cross_validation parameters
+    ncomp_lim               = 2 11                 # limits on number of components to be tested
+    gamma_lim               = 0.05  20.0           # limits on parameter hyper_par gamma
+    gamma_nparticles        = 100                  # number of gamma random values to be tested
+
+The complete cross-validation process is performed through
+
+```python
+from snclass.matrix import DataMatrix
+
+# initiate data matrix object
+my_matrix = DataMatrix('user.input')
+
+# build matrix using all data in samples_dir directory
+my_matrix.build()
+
+# perform cross-validation
+my_matrix.cross_val()
+
+# use optimize hyper-parameters and build final low dimension representation
+my_matrix.final_configuration()
+
+# plot scatter spec sample in PCs 0 and 1
+my_matrix.plot([0,1],file_out=None, show=True)
+```
+
 ## Requirements
 
 * Python 2.7
-* numpy >=1.8.2
-* matplotlib >= 1.3.1
 * argparse >= 1.1
-* multiprocessing >= 0.70a1
 * gptools >= 0.1
+* matplotlib >= 1.3.1
+* multiprocessing >= 0.70a1
+* numpy >=1.8.2
+* scikit-learn >= 0.16.0
 
 ## License
 
