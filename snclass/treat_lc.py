@@ -206,11 +206,11 @@ class LC(object):
         if samples:
             self.samples_for_matrix = []
             fini = self.user_choices['filters'][0]
-            for j in xrange(len(self.fitted['norm_realizations'][fni])):   
+            for j in xrange(len(self.fitted['norm_realizations'][fini])):   
                 line = [] 
                 for fil in self.user_choices['filters']:
                     xaxis2 = self.fitted['xarr_shifted'][fil]
-                    item = self.fitted['norm_realizations'][fni][j]
+                    item = self.fitted['norm_realizations'][fil][j]
                     # create function interpolating previous results
                     func_samp = interpolate.interp1d(xaxis2, item)
 
