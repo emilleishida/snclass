@@ -52,6 +52,7 @@ class DataMatrix(object):
         self.low_dim_matrix = None
         self.transf_test = None
         self.final = None
+        self.test_projection = []
 
         if input_file is not None:
             self.user_choices = read_user_input(input_file)
@@ -67,7 +68,7 @@ class DataMatrix(object):
                  If true, check if SN satisfies epoch cuts
                  Default is True
         """
-        screen('Fitting SN' + name, self.user_choices)
+        screen('Fitting SN' + filename, self.user_choices)
 
         # translate identifier
         self.user_choices['path_to_lc'] = [translate_snid(filename)[0]]
@@ -230,7 +231,7 @@ class DataMatrix(object):
             self.user_choices[par] = self.final[par]
 
         #update low dimensional matrix
-        self.reduce_dimension()
+        self.reduce_dimension()       
 
     def plot(self, pcs, file_out, show=False):
         """

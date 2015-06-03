@@ -41,8 +41,7 @@ class LC(object):
         - epoch_cuts, bool: epoch cuts flag
         - flux_for_matrix, dict: results for data matrix lines
         - xnew: data matrix cadence
-        - func: interpolation function from GP results
-        - xnew: epoch axis for data matrix
+        - samples_for_matrix: normalized random GP realizations
     """
 
     def __init__(self, raw_data, user_choices):
@@ -60,6 +59,7 @@ class LC(object):
         self.flux_for_matrix = {}
         self.func = None
         self.xnew = None
+        self.samples_for_matrix = {}
 
     def check_basic(self):
         """
@@ -179,20 +179,49 @@ class LC(object):
 
         self.epoch_cuts = all(test for test in epoch_flags)
 
-    def build_steps(self):
-        """Build lines for the initial data matrix."""
+    def build_steps(self, samples=False):
+        """
+        Build lines for the initial data matrix.
+
+        input: samples, bool, optional
+               if True built steps for normalized realizations
+               default is False
+        """
         for fil in self.user_choices['filters']:
 
+
+            xaxis = self.fitted['xarr_shifted'][fil]
+            yaxis = self.fitted['norm_fit'][fil]
             # create function interpolating previous results
-            self.func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
-                                             self.fitted['norm_fit'][fil])
+            func = interpolate.interp1d(xaxis, yaxis)
 
             # create new horizontal axis
-            self.xnew = np.arange(float(self.user_choices['epoch_cut'][0]),
-                                  float(self.user_choices['epoch_cut'][1]),
-                                  float(self.user_choices['epoch_bin'][0]))
+            xmin = float(self.user_choices['epoch_cut'][0])
+            xmax = float(self.user_choices['epoch_cut'][1])
+            xstep = float(self.user_choices['epoch_bin'][0])
+            xnew = np.arange(xmin, xmax, xstep)
 
-            self.flux_for_matrix[fil] = self.func(self.xnew)
+            self.flux_for_matrix[fil] = func(xnew)
+
+        if samples:
+            self.samples_for_matrix = []
+            fini = self.user_choices['filters'][0]
+            for j in xrange(len(self.fitted['norm_realizations'][fni])):   
+                line = [] 
+                for fil in self.user_choices['filters']:
+                    xaxis2 = self.fitted['xarr_shifted'][fil]
+                    item = self.fitted['norm_realizations'][fni][j]
+                    # create function interpolating previous results
+                    func_samp = interpolate.interp1d(xaxis2, item)
+
+                    # calculate sample grid in epochs
+                    new_grid = func_samp(xnew)
+
+                    # store
+                    for element in new_grid:
+                        line.append(element)
+                self.samples_for_matrix.append(line)
+                
 
     def plot_fitted(self, file_out=None):
         """
