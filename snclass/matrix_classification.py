@@ -119,7 +119,9 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
             updated with test projections and probability of being Ia
     """
     # update path to raw light curve
-    user_input['path_to_lc'] = [translate_snid(test_name)[0]]
+    if '/' in test_name:
+        test_name2 = test_name[test_name.index('/') + 1:]
+    user_input['path_to_lc'] = [translate_snid(test_name2)[0]]
 
     # store number of samples for latter tests
     nsamples = user_input['n_samples'][0]
@@ -132,7 +134,7 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
 
     # load GP fit and test epoch cuts
     new_lc = LC(raw, user_input)
-    new_lc.load_fit_GP('fake_spec_SNR_v3/' + test_name)
+    new_lc.load_fit_GP(test_name)
     new_lc.normalize()
     new_lc.mjd_shift()
     new_lc.check_epoch()
@@ -148,7 +150,7 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
         new_lc.user_choices['n_samples'] = [nsamples]
 
         # fit GP
-        test_matrix = test_samples(new_lc, calc_samples=csamples)
+        test_matrix = test_samples(new_lc, calc_samples=bool(csamples))
 
         # project test
         new_lc.test_proj = matrix.transf_test.transform(test_matrix)
@@ -161,4 +163,7 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
                        if item == '0'])/float(nsamples)
 
         return new_lc
+
+    else:
+        return None
 

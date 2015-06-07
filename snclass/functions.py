@@ -208,7 +208,7 @@ def core_cross_val(data, types, user_choices):
     dist = uniform(loc=ploc, scale=pscale)
 
     results = []
-    for ncomp in xrange(2, 11):
+    for ncomp in xrange(2, int(matrix2.user_choices['ncomp_lim'][1])):
 
         screen('... ncomp = ' + str(ncomp), user_choices)
 

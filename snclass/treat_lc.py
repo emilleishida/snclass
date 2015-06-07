@@ -95,17 +95,42 @@ class LC(object):
         else:
             self.basic_cuts = False
 
-    def fit_GP(self, **kwargs):
+    def fit_GP(self, mean=True, samples=False, screen=False, do_mcmc=True,
+               save_mean=True, save_samples=False):
         """
         Perform Gaussian Process Fit.
 
-        self.fitted -> dictionary of fitted parameters
+        input: mean -> bool, optional
+                       if True, calculate mean GP fit
+                       Default is True
+
+               samples -> bool, optional
+                          if True, calculate samples from the final GP
+                          Default is False
+
+              screen -> bool, optional
+                        if True, print calculation steps into screen
+                        Default is False
+
+              do_mcmc -> bool, optional
+                         if True, optimize kernel parameters using mcmc
+                         Default is True
+
+              save_mean -> bool, optional
+                           if True save mean GP fit to file
+                           Default is True
+
+              save_samples -> bool, optional
+                              if True save GP draws to file
+                              Default is False
         """
         # add extra keys
         self.raw.update(self.user_choices)
 
         # fit light curve
-        self.fitted = fit_lc(self.raw, **kwargs)
+        self.fitted = fit_lc(self.raw, mean=True, samples=False,
+                             screen=False, do_mcmc=True,
+                             save_mean=True, save_samples=False)
 
     def load_fit_GP(self, mean_file):
         """
@@ -321,29 +346,36 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
         # read light curve raw data
         raw = read_snana_lc(user_choices)
 
-        # initiate light curve object
-        my_lc = LC(raw, user_choices)
+        if not os.path.isfile(user_choices['samples_dir'][0] + \
+                              user_choices['file_root'][0] + \
+                              raw['SNID:'][0] + '_mean.dat'):
 
-        screen('Fitting SN' + raw['SNID:'][0], user_choices)
+            # initiate light curve object
+            my_lc = LC(raw, user_choices)
 
-        # perform basic check
-        my_lc.check_basic()
+            screen('Fitting SN' + raw['SNID:'][0], user_choices)
 
-        # check if satisfy minimum cut
-        if my_lc.basic_cuts:
-            screen('... Passed basic cuts', user_choices)
+            # perform basic check
+            my_lc.check_basic()
 
-            # fit
-            my_lc.fit_GP(mean=calc_mean, samples=calc_samp, 
-                         do_mcmc=fit_method)
+            # check if satisfy minimum cut
+            if my_lc.basic_cuts:
+                screen('... Passed basic cuts', user_choices)
 
-            if plot:
-                my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
+                # fit
+                my_lc.fit_GP(mean=calc_mean, samples=calc_samp, 
+                             do_mcmc=fit_method)
 
-            print '\n'
+                if plot:
+                    my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
+
+                print '\n'
+
+            else:
+                screen('Failed to pass basic cuts!\n', user_choices)
 
         else:
-            screen('Failed to pass basic cuts!\n', user_choices)
+            screen('Found fitted SN' + raw['SNID:'][0], user_choices)
 
 
 def main():

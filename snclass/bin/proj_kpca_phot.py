@@ -7,7 +7,7 @@ and project one photometric object.
 Usage:
 
 $ proj_kpca_phot.py -i <user_input_file> -t <mean_GP_fit_file_for_photo_obj>
-                    -c X - p Y
+                    -d <output_directory> -c X - p Y
 
 if X == 1, calculate samples, otherwise read them from file
 if Y == 1, generate output plot file (this is optional)
@@ -58,6 +58,7 @@ if __name__=='__main__':
                         help='File with GP mean fit for test obj.', required=True) 
     parser.add_argument('-c', '--calc', 
                         help='If true, calculate samples', required=True)
+    parser.add_argument('-d', '--dir', help='Output directory.', required=True)
     parser.add_argument('-p', '--plot',
                              help='If true, generate plot', required=False)
     args = parser.parse_args()
