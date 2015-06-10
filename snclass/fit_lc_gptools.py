@@ -182,21 +182,32 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
 
                 # update hyperparameters values
                 sampler = new_obj.sample_hyperparameter_posterior()
+                flat_trace = sampler.chain[:, 100::10, :]
+                flat_trace = flat_trace.reshape((-1, flat_trace.shape[2]))
 
                 draws = []
+                indx = 0
                 while len(draws) < int(data['n_samples'][0]):
 
-                    indx = np.random.randint(0, sampler.chain.shape[0])
-
-                    # get mean behavior for a random chain
-                    par1 = np.mean(sampler.chain[indx][:,0])
-                    par2 = np.mean(sampler.chain[indx][:,1])
+                    par1 = flat_trace[indx][0]
+                    par2 = flat_trace[indx][1]
                     par3 = new_obj.update_hyperparameters(np.array([par1,par2]))
+    
+                    new_out = new_obj.draw_sample(data['xarr'][fil]).T[0]
+                    
+                    flag = 0
+                    for l in xrange(len(data['xarr'][fil])):
+	                vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
+                        vmax = data['GP_fit'][fil][l] + data['GP_std'][fil][l]
+                        if new_out[l] < vmin and new_out[l] > vmax:
+	                   flag = flag + 1
 
-                    # draw a sample from posterior
-                    new_draw = new_obj.draw_sample(data['xarr'][fil])
-
-                    draws.append(new_draw.T[0])
+                    if flag == 0:    
+                        draws.append(new_out)
+                    elif screen:
+			print 'Discharged!'
+        
+                    indx = indx + 1
                     
                 draws = np.array(draws)
             
