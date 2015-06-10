@@ -14,7 +14,6 @@ import numpy as np
 import gptools
 import os
 
-
 def imp_gptools(data, fil, mcmc=True):
     """
     Perform Gaussian Process with gptools through MCMC.
@@ -54,6 +53,7 @@ def imp_gptools(data, fil, mcmc=True):
                              plot_chains=False, burn=100, thin=10)
 
     else:
+	gp_obj.optimize_hyperparameters()
         out = gp_obj.predict(data['xarr'][fil], use_MCMC=False)
 
     data['GP_fit'][fil] = out[0]
@@ -172,14 +172,41 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             data = imp_gptools(data, fil, mcmc=do_mcmc)
 
         if samples and int(data['n_samples'][0]) > 0:
-            if screen:
-                print '... ... calculate samples'
 
-            new_obj = data['GP_obj'][fil]
-            draws = new_obj.draw_sample(data['xarr'][fil],
-                                        num_samp=int(data['n_samples'][0]))
+            # get GP object
+	    new_obj = data['GP_obj'][fil]
+	    
+	    if do_mcmc:
+                if screen:
+                    print '... ... calculate samples'
 
-            data['realizations'][fil] = draws.T
+                # update hyperparameters values
+                sampler = new_obj.sample_hyperparameter_posterior()
+
+                draws = []
+                while len(draws) < int(data['n_samples'][0]):
+
+                    indx = np.random.randint(0, sampler.chain.shape[0])
+
+                    # get mean behavior for a random chain
+                    par1 = np.mean(sampler.chain[indx][:,0])
+                    par2 = np.mean(sampler.chain[indx][:,1])
+                    par3 = new_obj.update_hyperparameters(np.array([par1,par2]))
+
+                    # draw a sample from posterior
+                    new_draw = new_obj.draw_sample(data['xarr'][fil])
+
+                    draws.append(new_draw.T[0])
+                    
+                draws = np.array(draws)
+            
+            
+            else:
+		new_obj.optimize_hyperparameters()
+                draws = new_obj.draw_sample(data['xarr'][fil],
+                                            num_samp=int(data['n_samples'][0])).T
+
+            data['realizations'][fil] = draws
 
     save_result(data, mean=save_mean, samples=save_samples)
 
