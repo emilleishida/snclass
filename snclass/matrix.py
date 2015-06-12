@@ -5,6 +5,7 @@ Class to implement calculations on data matrix.
 """
 
 import os
+import sys
 
 import matplotlib.pylab as plt
 import numpy as np
@@ -194,11 +195,18 @@ class DataMatrix(object):
         choices = self.user_choices
 
         nparticles = self.user_choices['n_cross_val_particles']
-        parameters = [data, types, choices] * nparticles
+        parameters = []
+        for i in xrange(nparticles):
+            pars = {}
+            pars['data'] = data
+            pars['types'] = types
+            pars['user_choices'] = choices
+
+            parameters.append(pars)
 
         if int(self.user_choices['n_proc'][0]) > 0:
             cv_func = self.user_choices['cross_validation_func']
-            pool = Pool(processes=int(self.user_choices['nproc'][0]))
+            pool = Pool(processes=int(self.user_choices['n_proc'][0]))
             my_pool = pool.map_async(cv_func, parameters)
             try:
                 results = my_pool.get(0xFFFF)
@@ -211,8 +219,8 @@ class DataMatrix(object):
 
         else:
             number = self.user_choices['n_cross_val_particles']
-            results = np.array([core_cross_val(data, types, choices) 
-                                for item in xrange(number)])
+            results = np.array([core_cross_val(pars) 
+                                for pars in parameters])
 
         flist = list(results[:,len(results[0])-1])
         max_success = max(flist)

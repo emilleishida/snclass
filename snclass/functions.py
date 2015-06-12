@@ -23,6 +23,7 @@ Stand alone functions for supernova classification.
 """
 
 from __future__ import division
+import sys
 
 import numpy as np
 from scipy.stats import uniform
@@ -171,37 +172,40 @@ def calc_scores(matrix2, ncomp, dist):
     return int(ncomp), matrix2.user_choices['gamma'], score
 
 
-def core_cross_val(data, types, user_choices):
+def core_cross_val(pars):
     """
     Perform 1/3 validation.
 
-    input: data, array
-           data matrix
+    input: pars, dict
+           dictionary of input parameters
+           keywords: 
+                   data, array
+                   data matrix
 
-           types, vector
-           vector of types
+                   types, vector
+                   vector of types
 
-           user_choices, dict
-           output from read_user_input()
+                   user_choices, dict
+                   output from read_user_input()
 
     output: vector of floats
             parameters with higher classification success
             [n_components, gamma, n_successes]
     """
     # split sample in 3
-    indx_list1 = np.random.randint(0, len(data), size=int(2 * len(data) / 3))
-    indx_list2 = [elem for elem in xrange(len(data))
+    indx_list1 = np.random.randint(0, len(pars['data']), size=int(2 * len(pars['data']) / 3))
+    indx_list2 = [elem for elem in xrange(len(pars['data']))
                   if elem not in indx_list1]
 
     # set train data matrix and types
     matrix2 = snclass.matrix.DataMatrix()
-    matrix2.user_choices = user_choices
-    matrix2.datam = np.array([data[indx] for indx in indx_list1])
-    matrix2.sntype = np.array([types[indx] for indx in indx_list1])
+    matrix2.user_choices = pars['user_choices']
+    matrix2.datam = np.array([pars['data'][indx] for indx in indx_list1])
+    matrix2.sntype = np.array([pars['types'][indx] for indx in indx_list1])
 
     # set test data matrix and types
-    matrix2.data_test = np.array([data[indx] for indx in indx_list2])
-    matrix2.test_type = np.array([types[indx] for indx in indx_list2])
+    matrix2.data_test = np.array([pars['data'][indx] for indx in indx_list2])
+    matrix2.test_type = np.array([pars['types'][indx] for indx in indx_list2])
 
     ploc = matrix2.user_choices['gamma_lim'][0]
     pscale = matrix2.user_choices['gamma_lim'][1] - ploc
@@ -210,10 +214,10 @@ def core_cross_val(data, types, user_choices):
     results = []
     for ncomp in xrange(2, int(matrix2.user_choices['ncomp_lim'][1])):
 
-        screen('... ncomp = ' + str(ncomp), user_choices)
+        screen('... ncomp = ' + str(ncomp), pars['user_choices'])
 
         k = 0
-        while k < user_choices['gamma_nparticles']:
+        while k < pars['user_choices']['gamma_nparticles']:
             try:
                 results.append(calc_scores(matrix2, ncomp, dist))
 
@@ -221,7 +225,7 @@ def core_cross_val(data, types, user_choices):
                 k = k + 1
 
             except ArpackNoConvergence:
-                screen('Arparck fail to converge!', user_choices)
+                screen('Arparck fail to converge!', pars['user_choices'])
 
     results = np.array(results)
     indx_max = list(results[:, -1]).index(max(results[:, -1]))
