@@ -14,7 +14,6 @@ import numpy as np
 import gptools
 import os
 
-
 def imp_gptools(data, fil, mcmc=True):
     """
     Perform Gaussian Process with gptools through MCMC.
@@ -54,6 +53,7 @@ def imp_gptools(data, fil, mcmc=True):
                              plot_chains=False, burn=100, thin=10)
 
     else:
+	gp_obj.optimize_hyperparameters()
         out = gp_obj.predict(data['xarr'][fil], use_MCMC=False)
 
     data['GP_fit'][fil] = out[0]
@@ -172,14 +172,52 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             data = imp_gptools(data, fil, mcmc=do_mcmc)
 
         if samples and int(data['n_samples'][0]) > 0:
-            if screen:
-                print '... ... calculate samples'
 
-            new_obj = data['GP_obj'][fil]
-            draws = new_obj.draw_sample(data['xarr'][fil],
-                                        num_samp=int(data['n_samples'][0]))
+            # get GP object
+	    new_obj = data['GP_obj'][fil]
+	    
+	    if do_mcmc:
+                if screen:
+                    print '... ... calculate samples'
 
-            data['realizations'][fil] = draws.T
+                # update hyperparameters values
+                sampler = new_obj.sample_hyperparameter_posterior()
+                flat_trace = sampler.chain[:, 100::10, :]
+                flat_trace = flat_trace.reshape((-1, flat_trace.shape[2]))
+
+                draws = []
+                indx = 0
+                while len(draws) < int(data['n_samples'][0]):
+
+                    par1 = flat_trace[indx][0]
+                    par2 = flat_trace[indx][1]
+                    par3 = new_obj.update_hyperparameters(np.array([par1,par2]))
+    
+                    new_out = new_obj.draw_sample(data['xarr'][fil]).T[0]
+                    
+                    flag = 0
+                    for l in xrange(len(data['xarr'][fil])):
+	                vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
+                        vmax = data['GP_fit'][fil][l] + data['GP_std'][fil][l]
+                        if new_out[l] < vmin and new_out[l] > vmax:
+	                   flag = flag + 1
+
+                    if flag == 0:    
+                        draws.append(new_out)
+                    elif screen:
+			print 'Discharged!'
+        
+                    indx = indx + 1
+                    
+                draws = np.array(draws)
+            
+            
+            else:
+		new_obj.optimize_hyperparameters()
+                draws = new_obj.draw_sample(data['xarr'][fil],
+                                            num_samp=int(data['n_samples'][0])).T
+
+            data['realizations'][fil] = draws
 
     save_result(data, mean=save_mean, samples=save_samples)
 
