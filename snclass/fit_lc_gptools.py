@@ -200,12 +200,12 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
 	                vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
                         vmax = data['GP_fit'][fil][l] + data['GP_std'][fil][l]
                         if new_out[l] < vmin and new_out[l] > vmax:
-	                   flag = flag + 1
+	                        flag = flag + 1
 
                     if flag == 0:    
                         draws.append(new_out)
                     elif screen:
-			print 'Discharged!'
+             			print 'Discharged!'
         
                     indx = indx + 1
                     
@@ -213,7 +213,7 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             
             
             else:
-		new_obj.optimize_hyperparameters()
+	        	new_obj.optimize_hyperparameters()
                 draws = new_obj.draw_sample(data['xarr'][fil],
                                             num_samp=int(data['n_samples'][0])).T
 
