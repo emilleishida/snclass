@@ -62,19 +62,21 @@ In order to decide if a given object satisfy all requirements stated in the user
 
 ```python
 import numpy as np
-import snclass
+
+from snclass.util import read_user_input, read_snana_lc
+from snclass.treat_lc import LC
 
 # read user input file
-user_input=snclass.read_user_input('user.input')
+user_input = read_user_input('user.input')
 
 # read raw data
-lc_data = snclass.read_snana_lc(user_input)
+lc_data = read_snana_lc(user_input)
 
 # update data object
 lc_data.update(user_input)
 
 # create LC object
-lc = snclass.LC(lc_data, user_input)
+lc = LC(lc_data, user_input)
 
 # check SNR and number of epochs cuts
 lc.check_basic()
@@ -133,10 +135,10 @@ Analogously, in order to construct a list of photometric-only SNe, your user inp
 The list is created iteractively with
 
 ```python
-import snclass
+from snclass.util import read_user_input, choose_sn
 
-user_choices = snclass.read_user_input("user.input")
-snclass.choose_sn(user_choices, output_file='my_sample.list')
+user_choices = read_user_input("user.input")
+choose_sn(user_choices, output_file='my_sample.list')
 ```
 
 The list of all SNe satisfying your selection cuts will be stored in ``my_sample.list``.

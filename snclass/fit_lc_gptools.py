@@ -53,7 +53,7 @@ def imp_gptools(data, fil, mcmc=True):
                              plot_chains=False, burn=100, thin=10)
 
     else:
-	gp_obj.optimize_hyperparameters()
+        gp_obj.optimize_hyperparameters()
         out = gp_obj.predict(data['xarr'][fil], use_MCMC=False)
 
     data['GP_fit'][fil] = out[0]
@@ -172,11 +172,10 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             data = imp_gptools(data, fil, mcmc=do_mcmc)
 
         if samples and int(data['n_samples'][0]) > 0:
-
             # get GP object
-	    new_obj = data['GP_obj'][fil]
-	    
-	    if do_mcmc:
+            new_obj = data['GP_obj'][fil]
+
+            if do_mcmc:
                 if screen:
                     print '... ... calculate samples'
 
@@ -192,28 +191,27 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
                     par1 = flat_trace[indx][0]
                     par2 = flat_trace[indx][1]
                     par3 = new_obj.update_hyperparameters(np.array([par1,par2]))
-    
+
                     new_out = new_obj.draw_sample(data['xarr'][fil]).T[0]
-                    
+
                     flag = 0
                     for l in xrange(len(data['xarr'][fil])):
-	                vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
+                        vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
                         vmax = data['GP_fit'][fil][l] + data['GP_std'][fil][l]
                         if new_out[l] < vmin and new_out[l] > vmax:
-	                        flag = flag + 1
+                            flag = flag + 1
 
-                    if flag == 0:    
+                    if flag == 0:
                         draws.append(new_out)
                     elif screen:
-             			print 'Discharged!'
-        
+                        print 'Discharged!'
+
                     indx = indx + 1
-                    
+
                 draws = np.array(draws)
-            
-            
+
             else:
-	        	new_obj.optimize_hyperparameters()
+                new_obj.optimize_hyperparameters()
                 draws = new_obj.draw_sample(data['xarr'][fil],
                                             num_samp=int(data['n_samples'][0])).T
 

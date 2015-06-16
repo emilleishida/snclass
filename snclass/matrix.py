@@ -217,6 +217,8 @@ class DataMatrix(object):
             pool.close()
             pool.join()
 
+            results = np.array(results)
+
         else:
             number = self.user_choices['n_cross_val_particles']
             results = np.array([core_cross_val(pars) 
