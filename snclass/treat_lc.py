@@ -128,9 +128,9 @@ class LC(object):
         self.raw.update(self.user_choices)
 
         # fit light curve
-        self.fitted = fit_lc(self.raw, mean=True, samples=False,
-                             screen=False, do_mcmc=True,
-                             save_mean=True, save_samples=False)
+        self.fitted = fit_lc(self.raw, mean=mean, samples=samples,
+                             screen=screen, do_mcmc=do_mcmc,
+                             save_mean=save_mean, save_samples=save_samples)
 
     def load_fit_GP(self, mean_file):
         """
@@ -165,7 +165,7 @@ class LC(object):
             if samples and int(self.user_choices['n_samples'][0]) > 0:
                 max_f = self.fitted['max_flux']
                 gp_fitted = self.fitted['realizations'][fil]
-                self.fitted['norm_realizations'][fil] = np.array([elem / max_f
+                self.fitted['norm_realizations'][fil] = np.array([np.array(elem) / max_f
                                                                   for elem in
                                                                   gp_fitted])
 
@@ -212,6 +212,7 @@ class LC(object):
                if True built steps for normalized realizations
                default is False
         """
+        self.mean_for_matrix = []
         for fil in self.user_choices['filters']:
 
 
@@ -227,6 +228,9 @@ class LC(object):
             xnew = np.arange(xmin, xmax, xstep)
 
             self.flux_for_matrix[fil] = func(xnew)
+
+            for item in self.flux_for_matrix[fil]:
+                self.mean_for_matrix.append(item)
 
         if samples:
             self.samples_for_matrix = []

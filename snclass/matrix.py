@@ -283,6 +283,7 @@ class DataMatrix(object):
         if file_out is not None:
             plt.savefig(file_out)
 
+        plt.close()
 
 def main():
     """Print documentation."""

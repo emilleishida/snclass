@@ -71,7 +71,8 @@ def test_samples(new_lc, calc_samples=True):
         test_matrix = store_test_matrix(new_lc)
 
     else:
-        fname = new_lc.user_choices['file_root'][0] + \
+        fname = new_lc.user_choices['samples_dir'] + \
+                new_lc.user_choices['file_root'][0] + \
                 new_lc.raw['SNID:'][0] + '_mean.dat'
 
         op1 = open(fname, 'r')
@@ -119,8 +120,6 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
             updated with test projections and probability of being Ia
     """
     # update path to raw light curve
-    if '/' in test_name:
-        test_name2 = test_name[test_name.index('/') + 1:]
     user_input['path_to_lc'] = [translate_snid(test_name2)[0]]
 
     # store number of samples for latter tests

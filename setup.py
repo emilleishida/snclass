@@ -22,7 +22,8 @@ setup(name='snclass',
                       'matplotlib>=1.3.1',
                       'gptools>=0.1'
       ],
-      scripts=['snclass/bin/fit_plot_lc.py', 'snclass/bin/proj_kpca_phot.py'],
+      scripts=['snclass/bin/fit_plot_lc.py', 
+               'snclass/bin/build_synthetic_spec.py'],
       package_dir={'snclass': 'snclass', 'examples':'snclass/examples'},
       zip_safe=False,
       classifiers=[

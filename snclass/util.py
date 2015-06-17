@@ -418,8 +418,8 @@ def read_fitted(lc_data, mean_file):
     """
     Read GP results and populate dictionary parameters.
 
-    input:  user_input, dic
-            output from snclass.util.read_user_choices
+    input:  lc_data, LC object
+            updated with user choices
 
             mean_file, str
             name of file storing previous calculated GP results.
