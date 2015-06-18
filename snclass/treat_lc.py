@@ -199,10 +199,13 @@ class LC(object):
                (max(self.fitted['xarr_shifted'][fil]) >=
                int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
+                print True
             else:
                 epoch_flags.append(False)
+                print False
 
         self.epoch_cuts = all(test for test in epoch_flags)
+        print '\n' + str(self.epoch_cuts) + '\n'
 
     def build_steps(self, samples=False):
         """
@@ -311,7 +314,8 @@ class LC(object):
             plt.show()
 
 
-def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
+def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
+             save_samp=False):
     """
     Perform a GP fit in a set of objects.
 
@@ -328,6 +332,10 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
            calc_samp - bool, optional
            rather or not to calulate realizations of the final fit
+           default is False
+
+           save_samp - bool, optional
+           rather or not to save realizations of the final fit
            default is False
     """
     if not os.path.exists(user_choices['samples_dir'][0]):
@@ -368,7 +376,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False):
 
                 # fit
                 my_lc.fit_GP(mean=calc_mean, samples=calc_samp, 
-                             do_mcmc=fit_method)
+                             do_mcmc=fit_method, save_samples=save_samp)
 
                 if plot:
                     my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
