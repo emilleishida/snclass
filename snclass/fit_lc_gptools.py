@@ -84,18 +84,19 @@ def save_result(data, mean=True, samples=False):
     if not os.path.exists(data['samples_dir'][0]):
         os.makedirs(data['samples_dir'][0])
 
-    if bool(int(data['save_samples'][0])) and samples:
+    if samples:
         op1 = open(data['samples_dir'][0] + data['file_root'][0] +
                    data['SNID:'][0] + '_samples.dat', 'w')
         op1.write('filter    MJD    ')
-        for j in xrange(int(data['n_samples'][0])):
-            op1.write('samp' + str(j + 1))
+        xfil = data['filters'][0]
+        for j in xrange(len(data['realizations'][xfil])):
+            op1.write('samp' + str(j + 1) + '    ')
         op1.write('\n')
         for fil in data['filters']:
             for i in xrange(len(data['xarr'][fil])):
                 op1.write(fil + '    ' +
                           str(data['xarr'][fil][i]) + '    ')
-                for j in xrange(int(data['n_samples'][0])):
+                for j in xrange(len(data['realizations'][xfil])):
                     op1.write(str(data['realizations'][fil][j][i]) +
                               '    ')
                 op1.write('\n')

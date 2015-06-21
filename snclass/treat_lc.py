@@ -376,7 +376,8 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
 
                 # fit
                 my_lc.fit_GP(mean=calc_mean, samples=calc_samp, 
-                             do_mcmc=fit_method, save_samples=save_samp)
+                             do_mcmc=fit_method, save_samples=save_samp, 
+                             screen=bool(int(user_choices['screen'][0])))
 
                 if plot:
                     my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
