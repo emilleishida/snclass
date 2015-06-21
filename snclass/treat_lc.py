@@ -199,10 +199,8 @@ class LC(object):
                (max(self.fitted['xarr_shifted'][fil]) >=
                int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
-                print True
             else:
                 epoch_flags.append(False)
-                print False
 
         self.epoch_cuts = all(test for test in epoch_flags)
         print '\n' + str(self.epoch_cuts) + '\n'
