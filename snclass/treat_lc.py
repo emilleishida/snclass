@@ -145,12 +145,25 @@ class LC(object):
         # load
         self.fitted = read_fitted(self.raw, mean_file)
 
-    def normalize(self, samples=False):
-        """Normalize according to maximum flux in all filters."""
+    def normalize(self, samples=False, ref_filter=None):
+        """
+        Normalize GP fit and samples.
+
+        input: samples, bool - optional
+               if True, normalize realizations from the GP as well
+               Default is False
+
+               ref_filter, str - optional
+               Reference filter for normalization
+               Default is None
+        """
         # determine maximum flux
-        self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item])
-                                       for item in
-                                       self.user_choices['filters']])
+        if ref_filter == None:
+            self.fitted['max_flux'] = max([max(self.fitted['GP_fit'][item])
+                                           for item in
+                                           self.user_choices['filters']])
+        else:
+            self.fitted['max_flux'] = max(self.fitted['GP_fit'][ref_filter])
 
         # normalize
         self.fitted['norm_fit'] = {}
@@ -203,7 +216,6 @@ class LC(object):
                 epoch_flags.append(False)
 
         self.epoch_cuts = all(test for test in epoch_flags)
-        print '\n' + str(self.epoch_cuts) + '\n'
 
     def build_steps(self, samples=False):
         """

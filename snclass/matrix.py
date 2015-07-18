@@ -58,7 +58,7 @@ class DataMatrix(object):
         if input_file is not None:
             self.user_choices = read_user_input(input_file)
 
-    def check_file(self, filename, epoch=True):
+    def check_file(self, filename, epoch=True, ref_filter=None):
         """
         Construct one line of the data matrix.
 
@@ -68,6 +68,10 @@ class DataMatrix(object):
                  epoch, bool - optional
                  If true, check if SN satisfies epoch cuts
                  Default is True
+
+                 ref_filter, str - optional
+                 Reference filter for peak MJD calculation
+                 Default is None
         """
         screen('Fitting SN' + filename, self.user_choices)
 
@@ -84,7 +88,7 @@ class DataMatrix(object):
         lc_obj.load_fit_GP(self.user_choices['samples_dir'][0] + filename)
 
         # normalize
-        lc_obj.normalize()
+        lc_obj.normalize(ref_filter=ref_filter)
 
         # shift to peak mjd
         lc_obj.mjd_shift()
@@ -138,7 +142,7 @@ class DataMatrix(object):
                 op1.write('\n')
             op1.close()
 
-    def build(self, file_out=None, check_epoch=True):
+    def build(self, file_out=None, check_epoch=True, ref_filter=None):
         """
         Build data matrix according to user input file specifications.
 
@@ -148,6 +152,10 @@ class DataMatrix(object):
                  check_epoch -> bool, optional
                  If True check if SN satisfies epoch cuts
                  Default is True
+
+                 ref_filter -> str, optional
+                 Reference filter for MJD calculation
+                 Default is None
         """
         # list all files in sample directory
         file_list = os.listdir(self.user_choices['samples_dir'][0])
@@ -158,7 +166,8 @@ class DataMatrix(object):
 
         for obj in file_list:
             if 'mean' in obj:
-                sn_char = self.check_file(obj, epoch=check_epoch)
+                sn_char = self.check_file(obj, epoch=check_epoch,
+                                          ref_filter=ref_filter)
                 if sn_char is not None:
                     datam.append(sn_char[0])
                     redshift.append(sn_char[1])
@@ -266,15 +275,33 @@ class DataMatrix(object):
         xdata = self.low_dim_matrix[:,pcs[0]]
         ydata = self.low_dim_matrix[:,pcs[1]]
 
-        snIa = self.sntype == '0'
-        nonIa = self.sntype == '1'
+        if '0' in self.sntype:
+            snIa = self.sntype == '0'
+            nonIa = self.sntype == '1'
+        else:
+            snIa = self.sntype == 'Ia'
+            snIbc = self.sntype == 'Ibc'
+            snII = self.sntype == 'II'
 
         plt.figure()
-        plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o', label='spec Ia')
-        plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s', label='spec non-Ia')
+        if '0' in self.sntype:
+            plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s',
+                        label='spec non-Ia')
+            plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o',
+                        label='spec Ia')
+        else:
+            plt.scatter(xdata[snII], ydata[snII], color='purple', marker='s',
+                        label='spec II')
+            plt.scatter(xdata[snIbc], ydata[snIbc], color='green', marker='^',
+                        s=30, label='spec Ibc')
+            plt.scatter(xdata[snIa], ydata[snIa], color='blue', marker='o',
+                        label='spec Ia')
+
         if test is not None:
-            plt.scatter(test['data'][:,pcs[0]], test['data'][:,pcs[1]], marker='*', 
-                        color='red', label='test - ' + test['type'])
+            plt.title('prob_Ia = ' + str(round(test['prob_Ia'], 2)))
+            plt.scatter(test['data'][:,pcs[0]], test['data'][:,pcs[1]],
+                        marker='*', color='red', 
+                        label='test - ' + test['type'])
         plt.xlabel('kPC' + str(pcs[0] + 1), fontsize=14)
         plt.ylabel('kPC' + str(pcs[1] + 1), fontsize=14)
         plt.legend(fontsize=12)
@@ -282,7 +309,6 @@ class DataMatrix(object):
             plt.show()
         if file_out is not None:
             plt.savefig(file_out)
-
         plt.close()
 
 def main():

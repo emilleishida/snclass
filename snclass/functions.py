@@ -58,12 +58,9 @@ def kpca(data_matrix, pars, transform=False):
 
     input: data_matrix, array
 
-           other arguments are passed directly to
-           sklearn.decomposition.KernelPCA rotine.
-
            pars, dict
            dictionary of parameters.
-           keywords: 'kernel', 'gamma'
+           keywords: 'kernel', 'gamma', 'ncomp'
 
            transform, bool
            if True return the kpca object for further projections.
@@ -212,7 +209,8 @@ def core_cross_val(pars):
     dist = uniform(loc=ploc, scale=pscale)
 
     results = []
-    for ncomp in xrange(2, int(matrix2.user_choices['ncomp_lim'][1])):
+    for ncomp in xrange(int(matrix2.user_choices['ncomp_lim'][0]), 
+                        int(matrix2.user_choices['ncomp_lim'][1])):
 
         screen('... ncomp = ' + str(ncomp), pars['user_choices'])
 

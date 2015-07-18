@@ -41,24 +41,28 @@ def imp_gptools(data, fil, mcmc=True):
     # setup GP
     k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
                                              (0, np.std(mjd))])
-    gp_obj = gptools.GaussianProcess(k_obj)
-    gp_obj.add_data(mjd, flux, err_y=fluxerr)
+    data['GP_obj'][fil] = gptools.GaussianProcess(k_obj)
+    data['GP_obj'][fil].add_data(mjd, flux, err_y=fluxerr)
 
     data['xarr'][fil] = np.arange(min(mjd), max(mjd), 0.2)
 
     if mcmc:
-        out = gp_obj.predict(data['xarr'][fil], use_MCMC=True,
-                             num_proc=int(data['n_proc'][0]), nsamp=200,
-                             plot_posterior=False,
-                             plot_chains=False, burn=100, thin=10)
+        out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=True,
+                                          num_proc=int(data['n_proc'][0]),
+                                          nsamp=200,
+                                          plot_posterior=False,
+                                          plot_chains=False, burn=100,
+                                          thin=10)
 
     else:
-        gp_obj.optimize_hyperparameters()
-        out = gp_obj.predict(data['xarr'][fil], use_MCMC=False)
+        data['GP_obj'][fil].optimize_hyperparameters()
+        out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=False)
 
     data['GP_fit'][fil] = out[0]
     data['GP_std'][fil] = out[1]
-    data['GP_obj'][fil] = gp_obj
+
+    del out
+    del k_obj
 
     return data
 
@@ -123,6 +127,70 @@ def save_result(data, mean=True, samples=False):
         op2.close()
 
 
+def samp_mcmc(fil, data, screen=False):
+
+    if screen:
+        print '... ... calculate samples'
+
+    # update hyperparameters values
+    sampler = data['GP_obj'][fil].sample_hyperparameter_posterior()
+    flat_trace = sampler.chain[:, 100::10, :]
+    flat_trace = flat_trace.reshape((-1, flat_trace.shape[2]))
+
+    draws = []
+    indx = 0
+    while len(draws) < int(data['n_samples'][0]):
+
+        indx = indx + 1
+        par1 = flat_trace[indx][0]
+        par2 = flat_trace[indx][1]
+        par3 = data['GP_obj'][fil].update_hyperparameters(np.array([par1,par2]))
+
+        new_out = data['GP_obj'][fil].draw_sample(data['xarr'][fil]).T[0]
+
+        flag = 0
+        for l in xrange(len(data['xarr'][fil])):
+            vmin = data['GP_fit'][fil][l] - data['GP_std'][fil][l]
+            vmax = data['GP_fit'][fil][l] + data['GP_std'][fil][l]
+            if new_out[l] < vmin and new_out[l] > vmax:
+                flag = flag + 1
+
+        if flag == 0:
+            draws.append(new_out)
+        elif screen:
+            print 'Discharged!'
+
+        del new_out
+
+    del sampler
+    del flat_trace
+
+    return np.array(draws)
+
+
+def run_filters(data, fil, do_mcmc, screen=False, mean=True, samples=False):
+
+    if screen:
+        print '... filter: ' + fil
+
+    if mean:
+        data = imp_gptools(data, fil, mcmc=do_mcmc)
+
+    if samples and int(data['n_samples'][0]) > 0:
+
+        if do_mcmc:
+            draws = samp_mcmc(fil, data, screen=screen)
+        else:
+            data['GP_obj'][fil].optimize_hyperparameters()
+            draws = data['GP_obj'][fil].draw_sample(data['xarr'][fil],
+                                        num_samp=int(data['n_samples'][0])).T
+
+        data['realizations'][fil] = draws
+
+    return data
+
+           
+
 def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
            save_mean=True, save_samples=False):
     """
@@ -166,6 +234,9 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             data[name] = {}
 
     for fil in data['filters']:
+        data = run_filters(data, fil, do_mcmc=do_mcmc, screen=screen,
+                           mean=mean, samples=samples)
+        """
         if screen:
             print '... filter: ' + fil
 
@@ -177,6 +248,7 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
             new_obj = data['GP_obj'][fil]
 
             if do_mcmc:
+                
                 if screen:
                     print '... ... calculate samples'
 
@@ -210,13 +282,17 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
                     indx = indx + 1
 
                 draws = np.array(draws)
-
+                del sampler
+                del flat_trace
+                
+                draws = samp_mcmc(new_obj, data, screen=screen)
             else:
                 new_obj.optimize_hyperparameters()
                 draws = new_obj.draw_sample(data['xarr'][fil],
                                             num_samp=int(data['n_samples'][0])).T
 
             data['realizations'][fil] = draws
+            """
 
     save_result(data, mean=save_mean, samples=save_samples)
 

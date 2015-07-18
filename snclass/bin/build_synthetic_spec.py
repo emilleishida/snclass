@@ -301,7 +301,9 @@ def main(args):
     # build complete spec list
     screen('Building spectroscopic sample.', user_choices)
     user_choices['sample_cut'] = ['1', '3', '21', '22', '23', '32', '33']
-    spec_list = choose_sn(user_choices, output_file='spec.list')
+    spec_list = choose_sn(user_choices, output_file='spec_' + \
+                          user_choices['epoch_cut'][0] + '_' + \
+                          user_choices['epoch_cut'][1] '.list')
 
     # check population according to type
     spec_pop = check_pop('spec.list', user_choices)
@@ -315,10 +317,12 @@ def main(args):
     #build complete photo list
     screen('Build photometric samples.', user_choices)
     user_choices['sample_cut'] = ['-9']
-    photo_list = choose_sn(user_choices, output_file='photo.list')
+    name_plist = 'photo_' + user_choices['epoch_cut'][0] + '_' + \
+                 user_choices['epoch_cut'][1] '.list'
+    photo_list = choose_sn(user_choices, output_file=name_plist)
 
     # check population according to type
-    photo_pop = check_pop('photo.list', user_choices)
+    photo_pop = check_pop(name_plist, user_choices)
     photo_frac = calc_fraction(photo_pop)
 
     ##########################################################################

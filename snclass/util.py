@@ -85,6 +85,8 @@ def translate_snid(snid):
             name3 = '00' + name2
         elif len(name2) == 3:
             name3 = '000' + name2
+        elif len(name2) == 2:
+            name3 = '0000' + name2
 
         return 'DES_SN' + name3 + '.DAT', name2
 
@@ -429,7 +431,7 @@ def read_fitted(lc_data, mean_file):
     loaded = {}
 
     if bool(int(lc_data['n_samples'][0])):
-        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] +
+        op1 = open(lc_data['samples_dir'][0] + lc_data['file_root'][0] + \
                    lc_data['SNID:'][0] + '_samples.dat', 'r')
         lin1 = op1.readlines()
         op1.close()
@@ -443,7 +445,7 @@ def read_fitted(lc_data, mean_file):
             loaded['realizations'][fil] = [[float(data1[kk][jj])
                                             for kk in xrange(len(data1))
                                             if data1[kk][0] == fil]
-                                           for jj in xrange(2, int(par) + 2)]
+                                            for jj in xrange(2, int(par) + 2)]
 
             loaded['xarr'][fil] = []
             for i in xrange(len(data1)):

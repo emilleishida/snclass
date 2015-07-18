@@ -120,7 +120,7 @@ def classify_test(test_name, matrix, user_input, test_dir='test_samples/',
             updated with test projections and probability of being Ia
     """
     # update path to raw light curve
-    user_input['path_to_lc'] = [translate_snid(test_name2)[0]]
+    user_input['path_to_lc'] = [translate_snid(test_name)[0]]
 
     # store number of samples for latter tests
     nsamples = user_input['n_samples'][0]

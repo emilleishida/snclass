@@ -7,12 +7,8 @@ import asciitable
 import numpy as np
 import shutil
 
-#build complete spec list
-user_choices = snclass.util.read_user_input("fit_lc_input.dat")
-snclass.util.choose_sn(user_choices, output_file='spec.list')
-
 #get population for each SN type in spec sample
-fspec = asciitable.read('spec.list')
+fspec = asciitable.read('spec_3_24.list')
 spec_pop = {}
 for name in fspec:
     user_choices['path_to_lc'] = [name[0]]
@@ -22,12 +18,8 @@ for name in fspec:
     else:
        spec_pop[raw['SIM_NON1a:'][0]] = spec_pop[raw['SIM_NON1a:'][0]] + 1
 
-#build complete photo list
-user_choices['sample_cut'] = ['-9']
-snclass.util.choose_sn(user_choices, output_file='photo.list')
-
 #get population for each SN type in photo sample
-fphoto = asciitable.read('photo.list')
+fphoto = asciitable.read('photo_3_24.list')
 photo_pop = {}
 for name in fphoto:
     user_choices['path_to_lc'] = [name[0]]
@@ -44,7 +36,8 @@ for name in photo_pop.keys():
     photo_frac[name] = photo_pop[name]/float(photo_tot)
 
 #count spec classes surviving selection cuts
-surv_spec = os.listdir('spec_SNR5/')
+surv_spec = os.listdir('/home/emille/Dropbox2/Dropbox/meu_KPCA/' +
+                       'snclass/official/SNR5/fitted_data/spec_SNR5/')
 
 surv_spec_pop = {}
 surv_spec_names = {}
@@ -73,7 +66,9 @@ for item in surv_spec_pop.keys():
     draw_spec_samples[item] = int(diff) if diff > 0 else 0
 
 #construct synthetic spec data directory
-synthetic_dir = 'fake_spec_SNR_v3/'
+synthetic_dir = '/home/emille/Dropbox2/Dropbox/meu_KPCA/' + \
+                'snclass/official/SNR5/fitted_data/synthetic_spec_SNR5/'
+
 if not os.path.isdir(synthetic_dir):
     os.makedirs(synthetic_dir)
 
