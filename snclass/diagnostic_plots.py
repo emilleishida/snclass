@@ -472,6 +472,7 @@ def plot_diagnostics_aftercuts(params):
     """
     import numpy as np
     import pylab as plt
+    import sys
 
     # determine number of bins
     for k in xrange(len(params['eff_bin'])):
@@ -486,7 +487,7 @@ def plot_diagnostics_aftercuts(params):
         ref_filter = params['ref_filter']
 
     # determine horizontal axis for Ishida & de Souza, 2013 results
-    zmax = params['dz'] * nbins
+    zmax = len(params['kpca_spl_dic']['eff']) * 0.2
     xaxis = np.arange(params['dz']/2, zmax, params['dz'])
 
     plt.figure()
@@ -591,7 +592,7 @@ def plot_diagnostics_before_cuts(params):
         ref_filter = params['ref_filter']
 
     # determine horizontal axis for Ishida & de Souza, 2013 results
-    zmax = params['dz'] * nbins
+    zmax = len(params['kpca_spl_dic']['eff']) * 0.2
     xaxis = np.arange(params['dz']/2, zmax, params['dz']) 
 
     plt.figure()
