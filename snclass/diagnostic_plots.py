@@ -321,6 +321,11 @@ def count_pop(params, type_number):
 
     # count original population
     user_input = read_user_input(params['user_input'])
+
+    # check reference filter
+    if 'ref_filter' in params.keys():
+        user_input['ref_filter'] = params['ref_filter']
+
     raw_list = os.listdir(user_input['path_to_obs'][0])
 
     orig_pop = {}
@@ -402,12 +407,13 @@ def read_literature_results(params):
     # determine maximum redshift
     zmax = params['dz'] * params['nbins']
 
-    # Ishida & de Souza, 2013
-    xaxis = np.arange(params['dz']/2, zmax, params['dz'])
-    kpca_spl = np.array(read_file(params['path_Spl']))
-    params['kpca_spl_dic'] = dict([[kpca_spl[0][i] , [float(kpca_spl[j][i]) 
-                                    for j in range(1, len(kpca_spl))]] 
-                                    for i in range(len( kpca_spl[0]))])
+    if params['path_Spl'] is not None:
+        # Ishida & de Souza, 2013
+        xaxis = np.arange(params['dz']/2, zmax, params['dz'])
+        kpca_spl = np.array(read_file(params['path_Spl']))
+        params['kpca_spl_dic'] = dict([[kpca_spl[0][i] , [float(kpca_spl[j][i]) 
+                                        for j in range(1, len(kpca_spl))]] 
+                                        for i in range(len( kpca_spl[0]))])
 
     # Karpenka et al., 2012
     karp_eff_str = read_file(params['path_karp'] + 'eff.dat')
@@ -486,9 +492,10 @@ def plot_diagnostics_aftercuts(params):
     else:
         ref_filter = params['ref_filter']
 
-    # determine horizontal axis for Ishida & de Souza, 2013 results
-    zmax = len(params['kpca_spl_dic']['eff']) * 0.2
-    xaxis = np.arange(params['dz']/2, zmax, params['dz'])
+    if params['path_Spl'] is not None:
+        # determine horizontal axis for Ishida & de Souza, 2013 results
+        zmax = len(params['kpca_spl_dic']['eff']) * 0.2
+        xaxis = np.arange(params['dz']/2, zmax, params['dz'])
 
     plt.figure()
     plt.subplot(1,3,1)
@@ -591,9 +598,10 @@ def plot_diagnostics_before_cuts(params):
     else:
         ref_filter = params['ref_filter']
 
-    # determine horizontal axis for Ishida & de Souza, 2013 results
-    zmax = len(params['kpca_spl_dic']['eff']) * 0.2
-    xaxis = np.arange(params['dz']/2, zmax, params['dz']) 
+    if params['kpca_spl_dic'] is not None:
+        # determine horizontal axis for Ishida & de Souza, 2013 results
+        zmax = len(params['kpca_spl_dic']['eff']) * 0.2
+        xaxis = np.arange(params['dz']/2, zmax, params['dz']) 
 
     plt.figure()
     plt.subplot(1,3,1)
