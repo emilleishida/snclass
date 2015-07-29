@@ -951,7 +951,7 @@ def classify(p1, user_input, type_number, do_plot=False):
         if int(user_input['epoch_cut'][0]) < 0:
             mjd_min = str(abs(int(user_input['epoch_cut'][0])))
         else:
-            mjd_min = 'p' + str(abs(user_input['epoch_cut'][0]))
+            mjd_min = 'p' + str(abs(int(user_input['epoch_cut'][0])))
 
         if int(user_input['epoch_cut'][1]) < 0:
             mjd_max = 'm' + str(abs(int(user_input['epoch_cut'][1]) - 1))
