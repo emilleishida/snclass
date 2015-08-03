@@ -159,7 +159,7 @@ In this case, build a ``sn.list`` file, which contains the name of the raw files
 In the ``user.input`` file, set the keyword ``snlist`` and do
 
 ```python
-snclass.treat_lc.fit_objs(user_input)
+snclass.treat_lc.fit_objs(user_input, calc_samp=True, save_samp=True)
 ```
 
 Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory.
@@ -197,7 +197,57 @@ Then, we can reduce the dimensionality of the data matrix simply doing
 d.reduce_dimension()
 ```
 
-This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs.
+This will only reduce the dimensionality of the training sample and calculate the corresponding projections in ``ncomp`` KernelPCs. 
+The low dimensional training matrix is stored in ``d.low_dim_matrix``.
+As our final goal is to classify a supernova which is not part of the spectroscopic (training) sample, another step is necessary.
+
+Suppose we have a sample of non-classified supernovae which were already fitted with ``snclass.treat_lc.fit_objs`` as explained above. Let's call the directory holding their GP fit results 
+``test_dir``. For each fitted supernova in the test sample, there should be a 
+``<file_root>_SNXXXX_mean.dat`` and a 
+``<file_root>_SNXXXX_samples.dat`` file in the 
+``test_dir`` directory.  The first holds the mean result from the GP fit and the second 
+``n_samples`` draws from the final GP. Here 
+``file_root`` and 
+``n_samples`` are taken from the user input file and XXXX represents the numerical identification of each supernova.
+
+We will now load this result into a LC object and project it in the low dimensional parameter space represented by ``d.low_dim_matrix``.
+This can be done iteractively. Remember to set the input file keyword ``path_to_lc`` to the raw data file you wish to classify.
+
+```python
+from snclass.util import read_user_input, read_snana_lc
+from snclass.treat_lc import LC
+from snclass.algorithm import set_kpca_obj
+
+# read user input file
+user_input = read_user_input('user.input')
+
+# read raw data
+lc_data = read_snana_lc(user_input)
+
+# create a LC object
+test_LC = LC(lc_data, user_input)
+
+#  load the GP fit result
+test_LC.load_fit_GP(test_dir + ``<file_root>_SNXXXX_mean.dat``)
+
+# normalize flux
+# the filter where maximum flux will be determined is set by the user
+test_LC.normalize(samples=True, ref_filter=user_input['ref_filter'][0])
+
+# shift to epoch of max 
+test_LC.mjd_shift()
+
+# check if object satisfies epoch cuts
+test_LC.check_epoch
+
+if test_LC.epoch_cuts:
+
+    # build grid according to spectroscopic matrix configurations
+    test_LC.build_steps(samples=True)
+    
+    # transform draws according 
+```
+
 Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit. This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
 First we need to project them using the low dimension space built from the spectroscopic sample. 
 
