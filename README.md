@@ -228,7 +228,7 @@ lc_data = read_snana_lc(user_input)
 test_LC = LC(lc_data, user_input)
 
 #  load the GP fit result
-test_LC.load_fit_GP(test_dir + ``<file_root>_SNXXXX_mean.dat``)
+test_LC.load_fit_GP(test_dir + '<file_root>_SNXXXX_mean.dat')
 
 # normalize flux
 # the filter where maximum flux will be determined is set by the user
@@ -265,11 +265,15 @@ from snclass.functions import nneighbor
 test_label = nneighbor(test_LC, d.datam, d.user_choices)
 ```
 
-A 2-dimensional visualization of this result is return if we do
+A 2-dimensional visualization of this result is returned if we do
 
 ```python
 d.plot([0,1], 'proj.png', show=True, test=test_LC)
-```
+``
+
+This will produce a scatter plot of the training sample in the parameter space composed by the first and second components. The result plot will be stored in ``proj.png`` (if no record is require just substitute this by ``None``) and the plot will also be shown on screen (this can be avoided by setting ``show=False``).
+ The output will also include the projection of the test object. If you want to visualize only the training sample projection, set ``test=None``.
+
 
 ## Cross-validation
 
@@ -302,8 +306,11 @@ my_matrix.cross_val()
 my_matrix.final_configuration()
 
 # plot scatter spec sample in PCs 0 and 1
-my_matrix.plot([0,1],file_out=None, show=True)
+my_matrix.plot([0,1], None, show=True)
 ```
+
+The parameter values found using the cross-validation procedure are stored in the ``d.final`` dictionary and a 
+
 
 ## Requirements
 
