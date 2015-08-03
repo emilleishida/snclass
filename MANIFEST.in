@@ -2,3 +2,4 @@ include README.rst
 include snclass/examples/fit_lc_input.dat
 include snclass/examples/SN_DES849359.DAT 
 include snclass/examples/gp-results.png
+include snclass/ishida2015/literature_results.tar.gz
