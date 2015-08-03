@@ -63,6 +63,7 @@ def main(args):
 
         # fit lc
         lc_data = fit_lc(lc_data, samples=bool(int(lc_data['n_samples'][0])),
+                         save_samples=bool(int(user_input['save_samples'][0])),
                          screen=out, 
                          do_mcmc=bool(int(user_input['do_mcmc'][0])))
     else:
