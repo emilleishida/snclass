@@ -242,18 +242,11 @@ test_LC.check_epoch
 
 if test_LC.epoch_cuts:
 
-    # build grid according to spectroscopic matrix configurations
+    # build test vector according to spectroscopic matrix configurations
     test_LC.build_steps(samples=True)
     
-    # transform draws according 
-```
-
-Suppose we have a set of photometric light curves (test sample), ``test_LCs``, which was previously submitted to a GP fit. This can be a set of diverse objects or a number of realizations from the final GP for only 1 object.
-First we need to project them using the low dimension space built from the spectroscopic sample. 
-
-```python
-# project test
-test_projections = d.transf_test.transform(test_LCs)
+    # reduce dimensionality of test object
+    test_projections = d.transf_test.transform(test_LC) 
 ```
 
 The classifier is given as a separate function, which in the case implemented so far requires the following keywords
@@ -264,12 +257,18 @@ classifier_pars  = n weights   # classifier parameters
 classifier_val   = 1 distance  # values for classifier parameters
 ```
 
-In order to classify the test sample, based on the KernelPCA space from the training sample, do
+In order to classify the test object, based on the KernelPCA space from the training sample, do
 
 ```python
 from snclass.functions import nneighbor
 
-new_label = nneighbor(test_LCs, d.datam, d.user_choices)
+test_label = nneighbor(test_LC, d.datam, d.user_choices)
+```
+
+A 2-dimensional visualization of this result is return if we do
+
+```python
+d.plot([0,1], 'proj.png', show=True, test=test_LC)
 ```
 
 ## Cross-validation
