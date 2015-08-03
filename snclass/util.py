@@ -64,31 +64,60 @@ def translate_snid(snid):
         name2 = name1[name1.index('X') + 1:]
     elif 'DES_SN' in snid:
         name2 = name1[len('DES_SN'):]
+    elif 'SDSS_SN' in snid:
+        name2 = name1[len('SDSS_SN'):]
     else:
         name2 = name1
 
-    if snid[:len('DES_SN')] == 'DES_SN' and snid[-len('.DAT'):] == '.DAT' \
-    and len(name2) == 6:
-        if '0' in name2:
-            name3 = name2.lstrip('0')
+    if snid[:len('DES_SN')] == 'DES_SN':
+        if snid[-len('.DAT'):] == '.DAT' and len(name2) == 6:
+            if '0' in name2:
+                name3 = name2.lstrip('0')
+            else:
+                name3 = name2
+
+            return name3
+
         else:
-            name3 = name2
+            if len(name2) == 6:
+                name3 =  name2
+            elif len(name2) == 5:
+                name3 = '0' + name2
+            elif len(name2) == 4:
+                name3 = '00' + name2
+            elif len(name2) == 3:
+                name3 = '000' + name2
+            elif len(name2) == 2:
+                name3 = '0000' + name2
 
-        return name3
+            return 'DES_SN' + name3 + '.DAT', name2
 
-    else:
-        if len(name2) == 6:
-            name3 =  name2
-        elif len(name2) == 5:
-            name3 = '0' + name2
-        elif len(name2) == 4:
-            name3 = '00' + name2
-        elif len(name2) == 3:
-            name3 = '000' + name2
-        elif len(name2) == 2:
-            name3 = '0000' + name2
+    elif snid[:len('SDSS_SN')] == 'SDSS_SN':
+        if snid[-len('.DAT'):] == '.DAT' and len(name2) == 8:
+            if '0' in name2:
+                name3 = name2.lstrip('0')
+            else:
+                name3 = name2
 
-        return 'DES_SN' + name3 + '.DAT', name2
+            return name3
+
+        else:
+            if len(name2) == 8:
+                name3 = name2
+            elif len(name2) == 7:
+                name3 = '0' + name2
+            elif len(name2) == 6:
+                name3 =  '00' + name2
+            elif len(name2) == 5:
+                name3 = '000' + name2
+            elif len(name2) == 4:
+                name3 = '0000' + name2
+            elif len(name2) == 3:
+                name3 = '00000' + name2
+            elif len(name2) == 2:
+                name3 = '000000' + name2
+
+            return 'SDSS_SN' + name3 + '.DAT', name2
 
 
 def check_reduction(params):
