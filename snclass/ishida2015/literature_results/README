@@ -1,0 +1,36 @@
+This directory contains results taken from the literature:
+
+
+Files:      ishida_2013_cad1_SNR3.dat
+            ishida_2013_cad1_SNR5.dat
+            ishida_2013_cad7_SNR5.dat
+
+correspond to results from post-SNPCC data presented in 
+Ishida & de Souza, 2013, MNRAS, vol 430, p.509-532
+
+
+
+File:       ishida_2013_cad1_SNR5_oldSNPCC.dat
+
+corresponds to results from original SNPCC data, also presented in 
+Ishida & de Souza, 2013, MNRAS, vol 430, p.509-532
+
+
+Files:      karpenka_eff.dat
+            karpenka_fom.dat
+            karpenda_pur.dat
+
+correspond to results from post-SNPCC data presented in
+Karpenka et al., 2012, MNRAS, vol 429, p.1278-1285
+
+Files:      richards_eff.dat
+            richards_fom.dat
+            richards_pur.dat
+
+correspond to results from post-SNPCC data presented in
+Richards et al., 2011, MNRAS, vol 419, p.1121-1135
+
+File:       sako.dat
+
+corresponds to the best performing algorithm in the original SNPCC data, as presented in
+Kessler et al., 2010, PASP, vol 122, p.1415-1431
