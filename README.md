@@ -269,7 +269,7 @@ A 2-dimensional visualization of this result is returned if we do
 
 ```python
 d.plot([0,1], 'proj.png', show=True, test=test_LC)
-``
+```
 
 This will produce a scatter plot of the training sample in the parameter space composed by the first and second components. The result plot will be stored in ``proj.png`` (if no record is require just substitute this by ``None``) and the plot will also be shown on screen (this can be avoided by setting ``show=False``).
  The output will also include the projection of the test object. If you want to visualize only the training sample projection, set ``test=None``.
@@ -309,7 +309,7 @@ my_matrix.final_configuration()
 my_matrix.plot([0,1], None, show=True)
 ```
 
-The parameter values found using the cross-validation procedure are stored in the ``d.final`` dictionary and a 
+The parameter values found using the cross-validation procedure are stored in the ``d.final`` dictionary.
 
 
 ## Requirements
