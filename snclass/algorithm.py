@@ -1112,7 +1112,7 @@ def classify(p1, user_input, type_number, do_plot=False):
         op2.write('SNID    true_type    prob_Ia\n')
         for line in results:
             for item in line:
-                op2.write(item + '    ')
+                op2.write(str(item) + '    ')
             op2.write('\n')
         op2.close()
 
