@@ -255,7 +255,6 @@ class LC(object):
                     item = self.fitted['norm_realizations'][fil][j]
                     # create function interpolating previous results
                     func_samp = interpolate.interp1d(xaxis2, item)
-
                     # calculate sample grid in epochs
                     new_grid = func_samp(xnew)
 

@@ -27,6 +27,8 @@ Collection of functions to implement supernova photometric classification.
     Read hyperparameters result from cross-validation.
 - set_kpca_obj:
     Set kpca object based on cross-validation results.
+- classify_1obj:
+    Perform classification of 1 supernova.
 - classify:
     Classify all objects in photometric sample.
 """
@@ -898,6 +900,103 @@ def set_kpca_obj(pars, data, sntype, type_number):
 
     return obj_kpca, spec_matrix, labels
 
+def classify_1obj(din):
+    """
+    Perform classification of 1 supernova.
+
+    input: din, dict - keywords, value type: 
+                     user_input, dict -> output from read_user_input
+                     name, str -> name of raw light curve file
+                     type_number, dict -> translate between str and numerical
+                                          classes identification
+                     do_plot, bool -> if True produce plots, default is False
+
+                     p1, dict ->  keywords, value type:
+                         fname_photo_list, str: list of all photometric 
+                                                sample objects
+                         photo_dir, str: directory of GP fitted results
+                                         for photo sample
+                         range_pcs, list: [min_number_PCs, max_number_PCs]
+                                          to be tested through cross-validation
+                         SNR_dir, str: directory to store all results from 
+                                       this SNR cut
+                         out_dir, str: directory to store classification 
+                                       results
+                         plot_proj_dir, str: directory to store 
+                                             projection plots
+                         data_matrix, str: file holding spec data matrix
+
+    output: class_results:
+               list -> [snid, true_type, prob_Ia] 
+    """
+    from snclass.functions import screen, nneighbor
+    from snclass.util import translate_snid, read_snana_lc
+    from snclass.treat_lc import LC
+
+    # update supernova name    
+    din['user_input']['path_to_lc'] = [translate_snid(din['name'])[0]]
+
+    # read raw data
+    raw = read_snana_lc(din['user_input'])
+
+    # set true type
+    for names in din['type_number'].keys():
+        if raw['SIM_NON1a:'][0] in din['type_number'][names]:
+            true_type = names
+
+    # load GP fit and test epoch cuts
+    new_lc = LC(raw, din['user_input'])
+    new_lc.user_choices['samples_dir'] = [din['p1']['photo_dir']]
+    new_lc.load_fit_GP(din['p1']['photo_dir'] + din['name'])
+
+    l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0  else 0 
+          for fil in din['user_input']['filters']]
+
+    fil_choice = din['user_input']['ref_filter'][0]
+    if fil_choice == 'None':
+        fil_choice = None
+
+    if sum(l1) == len(din['user_input']['filters']):
+        new_lc.normalize(samples=True, 
+                         ref_filter=fil_choice)
+        new_lc.mjd_shift()
+        new_lc.check_epoch()
+
+        if new_lc.epoch_cuts:
+
+            screen(new_lc.raw['SNID:'][0], din['user_input'])
+
+            # build matrix lines
+            new_lc.build_steps(samples=True)
+
+            # transform samples
+            small_matrix = new_lc.samples_for_matrix
+            data_test = din['p1']['obj_kpca'].transform(small_matrix)
+
+            #classify samples
+            new_label = nneighbor(data_test, din['p1']['spec_matrix'],
+                                  din['p1']['binary_types'], din['user_input'])
+
+            # calculate final probability
+            ntypes = [1 for item in new_label if item == '0']
+            new_lc.prob_Ia = sum(ntypes) / \
+                             float(din['user_input']['n_samples'][0])
+            
+            if din['do_plot']:
+                plot_proj(din['p1']['spec_matrix'], data_test, din['p1']['labels'],
+                          new_lc, din['p1']['plot_dir'], [0,1], true_type)
+            
+
+            # print result to screen
+            screen('SN' + new_lc.raw['SNID:'][0] + \
+                   ',   True type: ' + true_type + ', prob_Ia = ' + \
+                    str(new_lc.prob_Ia), din['user_input'])
+ 
+            class_results = [new_lc.raw['SNID:'][0], true_type,
+                             new_lc.prob_Ia]
+            return class_results
+
+
 def classify(p1, user_input, type_number, do_plot=False):
     """
     Classify all objects in photometric sample.
@@ -926,12 +1025,14 @@ def classify(p1, user_input, type_number, do_plot=False):
            if True, creature projection plot for all test objects
            default is False
     """
-    from snclass.functions import screen, nneighbor
+    from snclass.functions import screen
     from snclass.util import translate_snid, read_snana_lc
     from snclass.treat_lc import LC
 
     import os
+    import sys
     import numpy as np
+    from multiprocessing import Pool
 
     # read photometric sample
     photo_fname = read_file(p1['fname_photo_list'])
@@ -942,11 +1043,6 @@ def classify(p1, user_input, type_number, do_plot=False):
                                     '_samples.dat') and '~' not in item[0]]
 
     for npcs in xrange(p1['range_pcs'][0], p1['range_pcs'][1]): 
-
-        if user_input['ref_filter'][0] == None:
-            fil_choice = 'global'
-        else:
-            fil_choice = user_input['ref_filter'][0]
 
         if int(user_input['epoch_cut'][0]) < 0:
             mjd_min = str(abs(int(user_input['epoch_cut'][0])))
@@ -981,80 +1077,36 @@ def classify(p1, user_input, type_number, do_plot=False):
         p1['obj_kpca'], p1['spec_matrix'], p1['labels'] = \
             set_kpca_obj(p1['pars'], p1['data'], p1['sntype'], type_number)
 
-
-        # store results
-        class_results = {}
-        op2 = open(p1['out_dir'] +  'class_res_' + str(npcs) + 'PC.dat', 'w')
-        op2.write('SNID    true_type    prob_Ia\n')
-
-        cont = 0
+        pars = []
         for name in photo_list:
-            cont = cont + 1
-            user_input['path_to_lc'] = [translate_snid(name)[0]]
+            ptemp = {}
+            ptemp['p1'] = p1
+            ptemp['name'] = name
+            ptemp['type_number'] = type_number
+            ptemp['user_input'] = user_input
+            ptemp['do_plot'] = do_plot
 
-            # read raw data
-            raw = read_snana_lc(user_input)
+            pars.append(ptemp)
 
-            for names in type_number.keys():
-                if raw['SIM_NON1a:'][0] in type_number[names]:
-                    true_type = names
+        pool = Pool(processes=int(user_input['n_proc'][0]))
+        my_pool = pool.map_async(classify_1obj, pars)
+        try:
+            results = my_pool.get(0xFFFF)
+        except KeyboardInterrupt:
+            print 'Interruputed by the user!'
+            sys.exit()
 
-            # load GP fit and test epoch cuts
-            new_lc = LC(raw, user_input)
-            new_lc.user_choices['samples_dir'] = [p1['photo_dir']]
-            new_lc.load_fit_GP(p1['photo_dir'] + name)
-
-            l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0  else 0 
-                  for fil in user_input['filters']]
-
-            fil_choice = user_input['ref_filter'][0]
-            if fil_choice == 'None':
-                fil_choice = None
-
-            if sum(l1) == len(user_input['filters']):
-                new_lc.normalize(samples=True, 
-                                 ref_filter=fil_choice)
-                new_lc.mjd_shift()
-                new_lc.check_epoch()
-
-                if new_lc.epoch_cuts:
-
-                    screen(new_lc.raw['SNID:'][0], user_input)
-
-                    # build matrix lines
-                    new_lc.build_steps(samples=True)
-
-                    # transform samples
-                    small_matrix = new_lc.samples_for_matrix
-                    data_test = p1['obj_kpca'].transform(small_matrix)
-
-                    #classify samples
-                    new_label = nneighbor(data_test, p1['spec_matrix'],
-                                          p1['binary_types'], user_input)
-
-                    # calculate final probability
-                    ntypes = [1 for item in new_label if item == '0']
-                    new_lc.prob_Ia = sum(ntypes) / \
-                                     float(user_input['n_samples'][0])
-            
-                    if do_plot:
-                        plot_proj(p1['spec_matrix'], data_test, p1['labels'],
-                                  new_lc, p1['plot_dir'], [0,1], true_type)
-            
-
-                    # save result
-                    screen(str(cont) + '. SN' + new_lc.raw['SNID:'][0] + \
-                           ',   True type: ' + true_type + ', prob_Ia = ' + \
-                           str(new_lc.prob_Ia), user_input)
- 
-                    class_results[new_lc.raw['SNID:'][0]] = [true_type,
-                                                             new_lc.prob_Ia]
-
-                    op2.write(new_lc.raw['SNID:'][0] + '    ' + true_type  + \
-                              '    ' + str(new_lc.prob_Ia) + '\n')
+        pool.close()
+        pool.join() 
 
         p1['out_dir'] = out_dir
         p1['plot_proj_dir'] = plot_proj_dir
 
+        op2 = open(p1['out_dir'] +  'class_res_' + str(npcs) + 'PC.dat', 'w')
+        op2.write('SNID    true_type    prob_Ia\n')
+        for line in results:
+            for item in line:
+                op2.write(item + '    ')
+            op2.write('\n')
         op2.close()
 
