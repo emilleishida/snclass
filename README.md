@@ -159,14 +159,16 @@ In this case, build a ``sn.list`` file, which contains the name of the raw files
 In the ``user.input`` file, set the keyword ``snlist`` and do
 
 ```python
-snclass.treat_lc.fit_objs(user_input, calc_samp=True, save_samp=True)
+from snclass.treat_lc import fit_objs
+
+fit_objs(user_input, calc_samp=True, save_samp=True)
 ```
 
 Make sure that the keyword ``samples_dir`` is also properly set, as the output files with mean and samples results will be stored in this directory.
 
 ## Building a data matrix
 
-After you have all your desired light curves already fitted through a GP, with means saved in the ``samples_dir`` directory, you can easily build the data matrix using
+After you have all your training light curves already fitted through a GP, with means saved in the ``samples_dir`` directory, you can easily build the data matrix using
 
 ```python
 from snclass.matrix import DataMatrix
@@ -174,6 +176,12 @@ from snclass.matrix import DataMatrix
 d = DataMatrix('user.input')
 d.build(file_out='matrix.dat')
 ```
+
+***
+**WARNING**
+
+When building your spectroscopic sample matrix, remember to set ``n_samples=0`` in the user input file. Otherwise the code will look for the GP fitted samples which are not necessary in this step.
+***
 
 This will store the complete training data matrix (one row for each object, each row a concatenation of light curves in different filters) in ``d.datam``, the corresponding objects classification in ``d.sntypes`` and will print the complete table in ``matrix.dat`` file.
 
@@ -201,7 +209,7 @@ This will only reduce the dimensionality of the training sample and calculate th
 The low dimensional training matrix is stored in ``d.low_dim_matrix``.
 As our final goal is to classify a supernova which is not part of the spectroscopic (training) sample, another step is necessary.
 
-Suppose we have a sample of non-classified supernovae which were already fitted with ``snclass.treat_lc.fit_objs`` as explained above. Let's call the directory holding their GP fit results 
+Suppose we have a sample of non-classified supernovae which were already fitted with ``fit_objs`` as explained above. Let's call the directory holding their GP fit results 
 ``test_dir``. For each fitted supernova in the test sample, there should be a 
 ``<file_root>_SNXXXX_mean.dat`` and a 
 ``<file_root>_SNXXXX_samples.dat`` file in the 
