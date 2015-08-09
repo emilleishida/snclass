@@ -83,6 +83,7 @@ def set_lclist(params):
     from snclass.treat_lc import LC
     from snclass.util import translate_snid, read_snana_lc
     from snclass.functions import screen
+    import sys
 
     # create plot directory
     if params['plot_dir'] is not None and \
@@ -109,13 +110,15 @@ def set_lclist(params):
             raw = read_snana_lc(params['user_choices'])
             new_lc = LC(raw, params['user_choices'])
 
-            if ('DES_SN' + raw['SNID:'][0] + '_samples.dat' in flist):
+            if (params['user_choices']['file_root'][0] + raw['SNID:'][0] + \
+               '_samples.dat' in flist):
                 new_lc.user_choices['n_samples'] = ['100']
                 new_lc.user_choices['samples_dir'] = [params['fitted_data_dir']]
                 new_lc.load_fit_GP(params['fitted_data_dir'] + obj)
 
                 l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0 else 0
                           for fil in params['user_choices']['filters']]
+
                 if sum(l1) == len(params['user_choices']['filters']):
                     if rfil == 'None':
                         new_lc.normalize()
@@ -143,6 +146,9 @@ def set_lclist(params):
                     screen('SN' + raw['SNID:'][0] + ' does not exist in ' + \
                            'all filters!\n', params['user_choices'])
                     cont = cont + 1
+            else:
+                screen('Samples not found for SN' + raw['SNID:'][0], 
+                       params['user_choices'])
 
         else:
             cont = cont + 1
