@@ -93,6 +93,7 @@ def set_lclist(params):
     flist = os.listdir(params['fitted_data_dir'])
 
     photo_list = []
+    problem = []
     cont = 0
 
     rfil = params['user_choices']['ref_filter'][0]
@@ -114,38 +115,44 @@ def set_lclist(params):
                '_samples.dat' in flist):
                 new_lc.user_choices['n_samples'] = ['100']
                 new_lc.user_choices['samples_dir'] = [params['fitted_data_dir']]
-                new_lc.load_fit_GP(params['fitted_data_dir'] + obj)
 
-                l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0 else 0
+                try:
+                    new_lc.load_fit_GP(params['fitted_data_dir'] + obj)                 
+                    l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0 else 0
                           for fil in params['user_choices']['filters']]
 
-                if sum(l1) == len(params['user_choices']['filters']):
-                    if rfil == 'None':
-                        new_lc.normalize()
-                    else:
-                        new_lc.normalize(ref_filter=rfil)
-                    new_lc.mjd_shift()
-                    new_lc.check_epoch()
+                    if sum(l1) == len(params['user_choices']['filters']):
+                        if rfil == 'None':
+                            new_lc.normalize()
+                        else:
+                            new_lc.normalize(ref_filter=rfil)
+                        new_lc.mjd_shift()
+                        new_lc.check_epoch()
 
-                    if new_lc.epoch_cuts:
-                         photo_list.append(rname)
+                        if new_lc.epoch_cuts:
+                             photo_list.append(rname)
 
-                         # only plot if not already done
-                         if params['plot_dir'] is not None and \
-                         not os.path.isfile(params['plot_dir'] + 'SN' + \
-                                            raw['SNID:'][0] + '.png'):
-                             new_lc.plot_fitted(file_out=\
-                                                params['plot_dir'] + \
-                                                'SN' + raw['SNID:'][0] + \
-                                                '.png')
+                             # only plot if not already done
+                             if params['plot_dir'] is not None and \
+                             not os.path.isfile(params['plot_dir'] + 'SN' + \
+                                                raw['SNID:'][0] + '.png'):
+                                 new_lc.plot_fitted(file_out=\
+                                                    params['plot_dir'] + \
+                                                    'SN' + raw['SNID:'][0] + \
+                                                    '.png')
+                        else:
+                            screen('SN' + raw['SNID:'][0] + ' did not satisfy' + \
+                                   ' epoch cuts!\n', params['user_choices'])
+                            cont = cont + 1
                     else:
-                        screen('SN' + raw['SNID:'][0] + ' did not satisfy' + \
-                               ' epoch cuts!\n', params['user_choices'])
+                        screen('SN' + raw['SNID:'][0] + ' does not exist in ' + \
+                               'all filters!\n', params['user_choices'])
                         cont = cont + 1
-                else:
-                    screen('SN' + raw['SNID:'][0] + ' does not exist in ' + \
-                           'all filters!\n', params['user_choices'])
+
+                except ValueError:
+                    problem.append(rname)
                     cont = cont + 1
+
             else:
                 screen('Samples not found for SN' + raw['SNID:'][0], 
                        params['user_choices'])
@@ -154,6 +161,14 @@ def set_lclist(params):
             cont = cont + 1
 
     screen('Missed ' + str(cont) + ' SN.', params['user_choices'])
+
+    # store list of problematic fits
+    if len(problem) > 0:
+        op2 = open('problematic_fits.dat', 'w')
+        for obj in problem:
+            op2.write(obj + '\n')
+        op2.close()
+        sys.exit()
 
     # set parameter for file name
     if int(params['user_choices']['epoch_cut'][0]) < 0:
@@ -230,10 +245,10 @@ def build_sample(params):
 
                 # load GP fit
                 if sn_set == photo_list:
-                    new_lc.load_fit_GP(photo_dir + 'DES_SN' + 
+                    new_lc.load_fit_GP(photo_dir + params['user_choices']['file_root'][0] + 
                                        raw['SNID:'][0] + '_mean.dat')
                 else:
-                    new_lc.load_fit_GP(spec_dir + 'DES_SN' + raw['SNID:'][0] +
+                    new_lc.load_fit_GP(spec_dir + params['user_choices']['file_root'][0] + raw['SNID:'][0] +
                                        '_mean.dat')
 
                 l1 = [1  if len(new_lc.fitted['GP_fit'][fil]) > 0  else 0 
@@ -287,7 +302,7 @@ def sample_pop(user_choices, params, type_number):
         user_choices['path_to_lc'] = [name[0]]
         raw = read_snana_lc(user_choices)
         for type_name in type_number.keys():
-            if raw['SIM_NON1a:'][0] in type_number[type_name]:       
+            if raw[user_choices['type_flag'][0]][0] in type_number[type_name]:       
                 if  type_name not in sample_pop.keys():
                     sample_pop[type_name] = 1
                 else:
@@ -298,7 +313,7 @@ def sample_pop(user_choices, params, type_number):
     return sample_pop
 
 
-def photo_frac(spec_pop, photo_pop, representation):
+def photo_frac(spec_pop, photo_pop, representation, real=False):
     """
     Determine the fraction of each class in photo sample.
 
@@ -315,19 +330,36 @@ def photo_frac(spec_pop, photo_pop, representation):
            if 'representative' final spec sample resambles the proportions in
                photometric sample
 
+           real, bool
+           if True, correspond to real data analysis
+           Default is False           
+
     output: photo_frac, dict
             keywords -> final classes
             values -> fraction in photometric (test) sample
     """
+    import sys
+
     # get fraction of each type in photo sample
     photo_frac = {}
-    for name in photo_pop.keys():
-        if representation == 'original':
-            photo_frac[name] = spec_pop[name]/float(spec_pop['tot'])
-        elif representation == 'balanced':
-            photo_frac[name] = 1.0/(len(spec_pop.keys()) - 1)
-        elif representation == 'representative':
-            photo_frac[name] = photo_pop[name]/float(photo_pop['tot'])
+    if not real:
+        for name in photo_pop.keys():
+            if representation == 'original':
+                photo_frac[name] = spec_pop[name]/float(spec_pop['tot'])
+            elif representation == 'balanced':
+                photo_frac[name] = 1.0/(len(spec_pop.keys()) - 1)
+            elif representation == 'representative':
+                photo_frac[name] = photo_pop[name]/float(photo_pop['tot'])
+
+    else:
+        for name in spec_pop.keys():
+            if representation == 'original':
+                photo_frac[name] = spec_pop[name]/float(spec_pop['tot'])
+            elif representation == 'balanced':
+                photo_frac[name] = 1.0/(len(spec_pop.keys()) - 1)
+            elif representation == 'representative':
+                print 'No representative option for real data!'
+                sys.exit()
 
     return  photo_frac
 
@@ -362,7 +394,7 @@ def get_names(user_choices, params, type_number):
 
         try_lc = read_snana_lc(user_choices)
 
-        stype = try_lc['SIM_NON1a:'][0]
+        stype = try_lc[user_choices['type_flag'][0]][0]
         for type_name in type_number.keys():
             if stype in type_number[type_name]:   
                 if type_name not in surv_spec_names.keys():   
@@ -430,7 +462,8 @@ def set_parameters(params):
     # copy all mean files to synthetic directory
     fsample = read_file(params['list_name'])
     for fname in fsample:
-        new_name = 'DES_SN' + translate_snid(fname[0]) + '_mean.dat'
+        new_name = params['user_choices']['file_root'][0] + \
+                   translate_snid(fname[0]) + '_mean.dat'
         shutil.copy2(params['fitted_data_dir'] + new_name, 
                      params['synthetic_dir'] + new_name)
 
@@ -496,7 +529,7 @@ def select_GP(params, user_choices):
             # read light curve raw data
             raw = read_snana_lc(user_choices)
 
-            if os.path.isfile(params['fitted_data_dir'] + 'DES_SN' + \
+            if os.path.isfile(params['fitted_data_dir'] + user_choices['file_root'][0] + \
                               raw['SNID:'][0] + '_samples.dat'):
 
                 # initiate light curve object
@@ -507,7 +540,7 @@ def select_GP(params, user_choices):
                 # load GP fit
                 my_lc.user_choices['n_samples'] = ['100']
                 my_lc.user_choices['samples_dir'] = [params['fitted_data_dir']]
-                my_lc.load_fit_GP(params['fitted_data_dir'] + 'DES_SN' + \
+                my_lc.load_fit_GP(params['fitted_data_dir'] + user_choices['file_root'][0] + \
                                   raw['SNID:'][0] + '_mean.dat')
   
 
@@ -527,7 +560,7 @@ def select_GP(params, user_choices):
                     if my_lc.epoch_cuts:
 
                         screen('... Passed epoch cuts', user_choices)
-                        screen('... ... This is SN type ' +  raw['SIM_NON1a:'][0] + \
+                        screen('... ... This is SN type ' +  raw[user_choices['type_flag'][0]][0] + \
                                ' number ' + str(cont + 1) + ' of ' + 
                                str(params['draw_spec_samples'][key]), user_choices)
 
@@ -668,7 +701,7 @@ def build_spec_matrix(params, type_number):
 
         # optimize hyperparameters
         d.user_choices['ncomp_lim'] = [str(npcs), str(npcs + 1)]
-        d.sntype = set_types(d.sntype)
+        d.sntype = set_types(d.sntype, Ia_flag=type_number['Ia'])
         d.cross_val()
 
         screen('Hyperparameter for ' + str(npcs) + ' PCs:', d.user_choices)
@@ -722,9 +755,11 @@ def plot_proj(spec_matrix, data_test, labels, new_lc, plot_dir, pcs,
            pcs, list
            PCs to be plotted
 
-           true_type, str 
+           true_type, str  
            type label of test object
     """
+    import pylab as plt
+
     # create type flags
     snIa = labels == 'Ia'
     snIbc = labels == 'Ibc'
@@ -743,12 +778,15 @@ def plot_proj(spec_matrix, data_test, labels, new_lc, plot_dir, pcs,
     plt.savefig(plot_dir +  '/proj_SN' + new_lc.raw['SNID:'][0] + '.png')
     plt.close()
 
-def read_matrix(data_matrix, convert_types=True):
+def read_matrix(data_matrix, Ia_codes, convert_types=True):
     """
     Read spectroscopic sample matrix.
 
     input: data_matrix, str
            file holding spectroscopic matrix
+
+           Ia_codes, list
+           list of all codes corresponding to SNIa
 
            convert_types, bool
            if True use set_types function to convert labels to binary
@@ -787,7 +825,7 @@ def read_matrix(data_matrix, convert_types=True):
     data = np.array(datam)
 
     if convert_types:
-        binary_types = set_types(sntype)
+        binary_types = set_types(sntype, Ia_flag=Ia_codes)
     else:
         binary_types = None
 
@@ -947,7 +985,7 @@ def classify_1obj(din):
 
     # set true type
     for names in din['type_number'].keys():
-        if raw['SIM_NON1a:'][0] in din['type_number'][names]:
+        if raw[din['user_input']['type_flag'][0]][0] in din['type_number'][names]:
             true_type = names
 
     # load GP fit and test epoch cuts
@@ -1042,10 +1080,11 @@ def classify(p1, user_input, type_number, do_plot=False):
 
     # read photometric sample
     photo_fname = read_file(p1['fname_photo_list'])
-    photo_list = ['DES_SN' + translate_snid(item[0]) + '_mean.dat'
+    photo_list = [user_input['file_root'][0] + translate_snid(item[0]) + \
+                  '_mean.dat'
                   for item in photo_fname 
                   if os.path.isfile(p1['photo_dir'] + 
-                                    'DES_SN' + translate_snid(item[0]) + 
+                                    user_input['file_root'][0] + translate_snid(item[0]) + 
                                     '_samples.dat') and '~' not in item[0]]
 
     for npcs in xrange(p1['range_pcs'][0], p1['range_pcs'][1]): 
@@ -1079,7 +1118,7 @@ def classify(p1, user_input, type_number, do_plot=False):
 
         p1['pars'], p1['alphas'] = read_hyperpar(p1)
         p1['data'], p1['sntype'], p1['binary_types'] = \
-            read_matrix(p1['data_matrix'])
+            read_matrix(p1['data_matrix'], Ia_codes=type_number['Ia'])
         p1['obj_kpca'], p1['spec_matrix'], p1['labels'] = \
             set_kpca_obj(p1['pars'], p1['data'], p1['sntype'], type_number)
 
@@ -1094,21 +1133,30 @@ def classify(p1, user_input, type_number, do_plot=False):
 
             pars.append(ptemp)
 
-        pool = Pool(processes=int(user_input['n_proc'][0]))
-        my_pool = pool.map_async(classify_1obj, pars)
-        try:
-            results = my_pool.get(0xFFFF)
-        except KeyboardInterrupt:
-            print 'Interruputed by the user!'
-            sys.exit()
+        if int(user_input['n_proc'][0]) > 1:
+            pool = Pool(processes=int(user_input['n_proc'][0]))
+            my_pool = pool.map_async(classify_1obj, pars)
+            try:
+                results = my_pool.get(0xFFFF)
+            except KeyboardInterrupt:
+                print 'Interruputed by the user!'
+                sys.exit()
 
-        pool.close()
-        pool.join() 
+            pool.close()
+            pool.join()
+
+        else:
+            results = []
+            for element in pars:
+                results.append(classify_1obj(element))
 
         p1['out_dir'] = out_dir
         p1['plot_proj_dir'] = plot_proj_dir
 
-        op2 = open(p1['out_dir'] +  'class_res_' + str(npcs) + 'PC.dat', 'w')
+        if not os.path.isdir(p1['out_dir'] + str() + 'PC/'):
+            os.makedirs(p1['out_dir'] + str() + 'PC/')
+
+        op2 = open(p1['out_dir'] + str(npcs) + 'PC/class_res_' + str(npcs) + 'PC.dat', 'w')
         op2.write('SNID    true_type    prob_Ia\n')
         for line in results:
             for item in line:
