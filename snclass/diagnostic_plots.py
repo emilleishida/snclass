@@ -115,9 +115,9 @@ def calc_ROC(params, plot=False):
 
     # determine number of pcs
     n_pcs_max_auc = [i for i in xrange(len(auc_set)) if auc_set[i] == max_auc]
-    min_npcs = min(n_pcs_max_auc) + 2
+    min_npcs = min(n_pcs_max_auc)
 
-    params['final_npcs'] = min_npcs 
+    params['final_npcs'] = min_npcs + 1
 
     return params
 
@@ -133,13 +133,14 @@ def det_threshold(params):
     from snclass.functions import screen
 
     # calculate distance for best auc curve
-    dist = [params['tpr_set'][3][i] - params['fpr_set'][3][i] 
-            for i in xrange(len(params['tpr_set'][3]))]
+    dist = [np.sqrt((params['tpr_set'][params['final_npcs'] - 1][i] - 1.0) ** 2 + \
+                    (params['fpr_set'][params['final_npcs'] - 1][i] ** 2))
+            for i in xrange(len(params['tpr_set'][params['final_npcs'] - 1]))
 
-    max_dist = max(dist)
-    threshold_indx = dist.index(max_dist)
+    min_dist = min(dist)
+    threshold_indx = dist.index(min_dist)
 
-    threshold_result = params['threshold_set'][3][threshold_indx]
+    threshold_result = params['threshold_set'][params['final_npcs'] - 1][threshold_indx]
 
     # read gamma
     data2 = read_file(params['class_res_dir'] + str(params['final_npcs']) + \

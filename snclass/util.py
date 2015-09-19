@@ -362,6 +362,9 @@ def compare_type(params, header):
             type_surv = True
         else:
             type_surv = False
+            print 'params[type_flag][0] = ' + params['type_flag'][0]
+            print 'params[type_cut] = ' + str(params['type_cut'])
+            print 'type_surv = ' + str(type_surv)
     else:
         type_surv = True
 
@@ -387,7 +390,6 @@ def compare_sample(params, header):
             sample_surv = True
         else:
             sample_surv = False
-
     else:
         sample_surv = True
 

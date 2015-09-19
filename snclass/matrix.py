@@ -73,7 +73,7 @@ class DataMatrix(object):
                  Reference filter for peak MJD calculation
                  Default is None
         """
-        screen('Fitting SN' + filename, self.user_choices)
+        screen('Fitting ' + filename, self.user_choices)
 
         # translate identifier
         self.user_choices['path_to_lc'] = [translate_snid(filename)[0]]
@@ -196,7 +196,7 @@ class DataMatrix(object):
         # correct type parameters if necessary
         types_func = self.user_choices['transform_types_func']
         if types_func is not None:
-            self.sntype = types_func(self.sntype)
+            self.sntype = types_func(self.sntype, Ia_flag=self.user_choices['Ia_flag'])
 
         # initialize parameters
         data = self.datam
