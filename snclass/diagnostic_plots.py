@@ -117,7 +117,7 @@ def calc_ROC(params, plot=False):
     n_pcs_max_auc = [i for i in xrange(len(auc_set)) if auc_set[i] == max_auc]
     min_npcs = min(n_pcs_max_auc)
 
-    params['final_npcs'] = min_npcs + 1
+    params['final_npcs'] = min_npcs + 2
 
     return params
 
@@ -131,16 +131,20 @@ def det_threshold(params):
     """
     from snclass.algorithm import read_file
     from snclass.functions import screen
+    import numpy as np
 
     # calculate distance for best auc curve
-    dist = [np.sqrt((params['tpr_set'][params['final_npcs'] - 1][i] - 1.0) ** 2 + \
-                    (params['fpr_set'][params['final_npcs'] - 1][i] ** 2))
-            for i in xrange(len(params['tpr_set'][params['final_npcs'] - 1]))
+    dist = [np.sqrt((params['tpr_set'][params['final_npcs'] - 2][i] - 1.0) ** 2 + \
+                    (params['fpr_set'][params['final_npcs'] - 2][i]) ** 2)
+            for i in xrange(len(params['tpr_set'][params['final_npcs'] - 2]))]
+
+    params['dist_set'] = dist
 
     min_dist = min(dist)
     threshold_indx = dist.index(min_dist)
 
-    threshold_result = params['threshold_set'][params['final_npcs'] - 1][threshold_indx]
+    #threshold_result = params['threshold_set'][params['final_npcs'] - 2][threshold_indx]
+    threshold_result = 1.0
 
     # read gamma
     data2 = read_file(params['class_res_dir'] + str(params['final_npcs']) + \

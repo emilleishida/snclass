@@ -277,7 +277,7 @@ class DataMatrix(object):
 
         if '0' in self.sntype:
             snIa = self.sntype == '0'
-            nonIa = self.sntype == '1'
+            nonIa = self.sntype != '0'
         else:
             snIa = self.sntype == 'Ia'
             snIbc = self.sntype == 'Ibc'

@@ -39,8 +39,12 @@ def imp_gptools(data, fil, mcmc=True):
     fluxerr = data[fil][:, 2]
 
     # setup GP
-    k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
-                                             (0, np.std(mjd))])
+    #k_noise = gptools.DiagonalNoiseKernel(noise_bound=[0, np.mean(fluxerr)])
+
+    hp = gptools.UniformJointPrior(0, 3 * max(flux)) * gptools.GammaJointPriorAlt(0, 3 * np.std(mjd))
+    #k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
+    #                                         (0, np.std(mjd))])
+    k_obj = gptools.SquaredExponentialKernel(hyperprior=hp)
     data['GP_obj'][fil] = gptools.GaussianProcess(k_obj)
     data['GP_obj'][fil].add_data(mjd, flux, err_y=fluxerr)
 
@@ -49,10 +53,10 @@ def imp_gptools(data, fil, mcmc=True):
     if mcmc:
         out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=True,
                                           num_proc=int(data['n_proc'][0]),
-                                          nsamp=200,
+                                          nsamp=int(data['nsamp_mcmc'][0]),
                                           plot_posterior=False,
-                                          plot_chains=False, burn=100,
-                                          thin=10)
+                                          plot_chains=False, burn=int(data['burn'][0]),
+                                          thin=int(data['thin'][0]))
 
     else:
         data['GP_obj'][fil].optimize_hyperparameters()
@@ -134,7 +138,7 @@ def samp_mcmc(fil, data, screen=False):
 
     # update hyperparameters values
     sampler = data['GP_obj'][fil].sample_hyperparameter_posterior()
-    flat_trace = sampler.chain[:, 100::10, :]
+    flat_trace = sampler.chain[:, int(data['nsamp_mcmc'][0])::int(data['burn'][0]), :]
     flat_trace = flat_trace.reshape((-1, flat_trace.shape[2]))
 
     draws = []
