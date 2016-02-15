@@ -111,7 +111,7 @@ def nneighbor(test, data_matrix, types, pars):
     return new_label
 
 
-def set_types(types, Ia_flag):
+def set_types(types, snIa_flag):
     """
     Transform the original vector of types.
 
@@ -121,7 +121,7 @@ def set_types(types, Ia_flag):
     input: type - vector of str
            type of each object in the data matrix
 
-           Ia_flag - list
+           snIa_flag - list
            list of all codes correspondng to SNIa
 
     output: new_type - vector of str
@@ -129,7 +129,7 @@ def set_types(types, Ia_flag):
     """
     new_type = []
     for item in types:
-        if item in Ia_flag:
+        if item in snIa_flag:
             new_type.append('0')
         else:
             new_type.append('1')
