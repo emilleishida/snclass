@@ -41,7 +41,7 @@ def imp_gptools(data, fil, mcmc=True):
     # setup GP
     #k_noise = gptools.DiagonalNoiseKernel(noise_bound=[0, np.mean(fluxerr)])
 
-    hp = gptools.UniformJointPrior(0, 3 * max(flux)) * gptools.GammaJointPriorAlt(0, 3 * np.std(mjd))
+    hp = gptools.UniformJointPrior((0, 3 * max(flux)) * gptools.GammaJointPriorAlt(0, 3 * np.std(mjd))
     #k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
     #                                         (0, np.std(mjd))])
     k_obj = gptools.SquaredExponentialKernel(hyperprior=hp)
