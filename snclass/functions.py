@@ -177,7 +177,7 @@ def core_cross_val(pars):
 
     input: pars, dict
            dictionary of input parameters
-           keywords: 
+           keywords:
                    data, array
                    data matrix
 
@@ -192,7 +192,8 @@ def core_cross_val(pars):
             [n_components, gamma, n_successes]
     """
     # split sample in 3
-    indx_list1 = np.random.randint(0, len(pars['data']), size=int(2 * len(pars['data']) / 3))
+    indx_list1 = np.random.randint(0, len(pars['data']), 
+                                   size=int(2 * len(pars['data']) / 3))
     indx_list2 = [elem for elem in xrange(len(pars['data']))
                   if elem not in indx_list1]
 
@@ -211,7 +212,7 @@ def core_cross_val(pars):
     dist = uniform(loc=ploc, scale=pscale)
 
     results = []
-    for ncomp in xrange(int(matrix2.user_choices['ncomp_lim'][0]), 
+    for ncomp in xrange(int(matrix2.user_choices['ncomp_lim'][0]),
                         int(matrix2.user_choices['ncomp_lim'][1])):
 
         screen('... ncomp = ' + str(ncomp), pars['user_choices'])
