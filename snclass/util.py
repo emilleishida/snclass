@@ -38,13 +38,11 @@ import numpy as np
 import os
 
 from snclass.functions import screen
-import sys
 
-#########################################
 
 def translate_snid(snid):
     """
-    Translate a general sn id between SNANA and raw SNID format
+    Translate a general sn id between SNANA and raw SNID format.
 
     input: snid, str
            name of file or other string containing sind
@@ -80,7 +78,7 @@ def translate_snid(snid):
 
         else:
             if len(name2) == 6:
-                name3 =  name2
+                name3 = name2
             elif len(name2) == 5:
                 name3 = '0' + name2
             elif len(name2) == 4:
@@ -107,7 +105,7 @@ def translate_snid(snid):
             elif len(name2) == 7:
                 name3 = '0' + name2
             elif len(name2) == 6:
-                name3 =  '00' + name2
+                name3 = '00' + name2
             elif len(name2) == 5:
                 name3 = '000' + name2
             elif len(name2) == 4:
