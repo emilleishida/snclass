@@ -20,7 +20,8 @@ setup(name='snclass',
       install_requires=[
                       'numpy>=1.8.2',
                       'matplotlib>=1.3.1',
-                      'gptools>=0.1'
+                      'gptools>=0.1',
+                      'sklearn>=0.17'
       ],
       scripts=['snclass/bin/fit_plot_lc.py', 
                'snclass/bin/build_synthetic_spec.py'],
