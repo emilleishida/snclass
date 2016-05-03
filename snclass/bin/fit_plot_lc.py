@@ -76,13 +76,16 @@ def main(args):
 
             d1 = [elem.split() for elem in lin1]
 
-        for fil in lc_data['filters']:
-            lc_data['xarr'][fil] = []
-            lc_data['realizations'][fil] = [[float(d1[kk][jj]) 
-                                             for kk in xrange(len(d1)) 
-                                             if d1[kk][0]==fil] 
-                                             for jj in xrange(2, 
-                                             int(lc_data['n_samples'][0]) + 2)]
+
+            for fil in lc_data['filters']:
+                lc_data['xarr'][fil] = []
+
+                if bool(int(lc_data['n_samples'][0])):
+                    lc_data['realizations'][fil] = [[float(d1[kk][jj]) 
+                                                     for kk in xrange(len(d1)) 
+                                                     if d1[kk][0]==fil] 
+                                                     for jj in xrange(2, 
+                                                     int(lc_data['n_samples'][0]) + 2)]
  
             for i1 in xrange(len(d1)):
                 if d1[i1][0] == fil:
@@ -97,10 +100,13 @@ def main(args):
 
         lc_data['GP_std'] = {}
         for fil in lc_data['filters']:
+            lc_data['xarr'][fil] = []
             lc_data['GP_fit'][fil] = [float(d2[j][2]) 
                                       for j in xrange(1,len(d2)) if d2[j][0] == fil]
             lc_data['GP_std'][fil] = [float(d2[j][3]) 
                                       for j in xrange(1,len(d2)) if d2[j][0] == fil]
+            lc_data['xarr'][fil] = [float(d2[j][1])
+                                    for j in xrange(1,len(d2)) if d2[j][0] == fil]
 
     #initiate figure
     f = plt.figure()
@@ -111,8 +117,9 @@ def main(args):
         plt.subplot(2, len(lc_data['filters'])/2 + 
                         len(lc_data['filters'])%2, 
                         lc_data['filters'].index(fil) + 1)
-        for s in lc_data['realizations'][fil]:
-            plt.plot(lc_data['xarr'][fil], s, color="gray", alpha=0.3)
+        if bool(int(lc_data['n_samples'][0])):
+            for s in lc_data['realizations'][fil]:
+                plt.plot(lc_data['xarr'][fil], s, color="gray", alpha=0.3)
         plt.errorbar(lc_data[fil][:,0], lc_data[fil][:,1], 
                      yerr=lc_data[fil][:,2], fmt="o", color='blue', label=fil)
         plt.plot(lc_data['xarr'][fil], lc_data['GP_fit'][fil], 
