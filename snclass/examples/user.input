@@ -1,5 +1,5 @@
 path_to_obs	 = ~data_dir/                                   # path to data directory
-path_to_lc   = DES_SN625208.DAT                             # path to raw SN light curve
+path_to_lc   = DES_SN077317.DAT                             # path to raw SN light curve
 snlist       = spec.list                                    # name of file with SN list
 file_root	 = DES_SN 								        # root common to all files containing SN light curves	
 
