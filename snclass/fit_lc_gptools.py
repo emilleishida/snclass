@@ -41,22 +41,23 @@ def imp_gptools(data, fil, mcmc=True):
     # setup GP
     #k_noise = gptools.DiagonalNoiseKernel(noise_bound=[0, np.mean(fluxerr)])
 
-    hp = gptools.UniformJointPrior((0, 3 * max(flux)) * gptools.GammaJointPriorAlt(0, 3 * np.std(mjd))
-    #k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
-    #                                         (0, np.std(mjd))])
-    k_obj = gptools.SquaredExponentialKernel(hyperprior=hp)
+    #hp = gptools.UniformJointPrior((0, 3 * max(flux) * gptools.GammaJointPrior(0, 3 * np.std(mjd))))
+    k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
+                                             (0, np.std(mjd))])
+    #k_obj = gptools.SquaredExponentialKernel(hyperprior=hp)
     data['GP_obj'][fil] = gptools.GaussianProcess(k_obj)
     data['GP_obj'][fil].add_data(mjd, flux, err_y=fluxerr)
 
     data['xarr'][fil] = np.arange(min(mjd), max(mjd), 0.2)
 
     if mcmc:
-        out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=True,
-                                          num_proc=int(data['n_proc'][0]),
-                                          nsamp=int(data['nsamp_mcmc'][0]),
-                                          plot_posterior=False,
-                                          plot_chains=False, burn=int(data['burn'][0]),
-                                          thin=int(data['thin'][0]))
+        out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=True, full_MC=True)
+                                          #num_proc=int(data['n_proc'][0]))
+                                          #nsamp=int(data['nsamp_mcmc'][0])
+                                          #plot_posterior=False,
+                                          #plot_chains=False, burn=int(data['burn'][0]),
+                                          #thin=int(data['thin'][0])
+                                          #)
 
     else:
         data['GP_obj'][fil].optimize_hyperparameters()
