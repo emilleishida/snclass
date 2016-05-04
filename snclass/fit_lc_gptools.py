@@ -121,9 +121,14 @@ def save_result(data, mean=True, samples=False):
 
         for fil in data['filters']:
             for k in xrange(len(data['xarr'][fil])):
-                op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
-                          '    ' + str(data['GP_fit'][fil][k]) +
-                          '    ' + str(data['GP_std'][fil][k]))
+                if data['GP_fit'][data['filters'][0]][0] > 0:
+                    op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
+                              '    ' + str(data['GP_fit'][fil][k]) +
+                              '    ' + str(data['GP_std'][fil][k]))
+                else:
+                    op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
+                              '    ' + str(-data['GP_fit'][fil][k]) +
+                              '    ' + str(data['GP_std'][fil][k]))
                 if 'SIM_NON1a:' in data.keys():
                     op2.write('    ' + str(data['SIM_NON1a:'][0]) + '\n')
                 else:
