@@ -38,8 +38,10 @@ def imp_gptools(data, fil, mcmc=True):
     flux = data[fil][:, 1]
     fluxerr = data[fil][:, 2]
 
+    absflux = [abs(item) for item in flux]
+
     # setup GP
-    k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(flux)),
+    k_obj = gptools.SquaredExponentialKernel(param_bounds=[(0, max(absflux)),
                                              (0, np.std(mjd))])
     data['GP_obj'][fil] = gptools.GaussianProcess(k_obj)
     data['GP_obj'][fil].add_data(mjd, flux, err_y=fluxerr)
