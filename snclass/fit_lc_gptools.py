@@ -104,9 +104,14 @@ def save_result(data, mean=True, samples=False):
             for i in xrange(len(data['xarr'][fil])):
                 op1.write(fil + '    ' +
                           str(data['xarr'][fil][i]) + '    ')
-                for j in xrange(len(data['realizations'][xfil])):
-                    op1.write(str(data['realizations'][fil][j][i]) +
-                              '    ')
+                if data['GP_fit'][data['filters'][0]][0] > 0:
+                    for j in xrange(len(data['realizations'][xfil])):
+                        op1.write(str(data['realizations'][fil][j][i]) +
+                                  '    ')
+                else:
+                    for j in xrange(len(data['realizations'][xfil])):
+                        op1.write(str(-data['realizations'][fil][j][i]) +
+                                      '    ')
                 op1.write('\n')
         op1.close()
 
