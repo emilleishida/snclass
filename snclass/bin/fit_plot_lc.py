@@ -61,11 +61,22 @@ def main(args):
        
         screen('Fitting SN' + lc_data['SNID:'][0], user_input)
 
+        if user_input['measurement'][0] == 'flux':
+            p1 = [int(user_input['epoch_predict'][0]), 
+                  int(user_input['epoch_predict'][1])]
+            sign = 1.0
+            ylabel = 'flux'
+        else:
+            p1 = None
+            sign = -1.0
+            ylabel = 'magnitude'
+
         # fit lc
         lc_data = fit_lc(lc_data, samples=bool(int(lc_data['n_samples'][0])),
                          save_samples=bool(int(user_input['save_samples'][0])),
                          screen=out, 
-                         do_mcmc=bool(int(user_input['do_mcmc'][0])))
+                         do_mcmc=bool(int(user_input['do_mcmc'][0])),
+                         predict=p1)
     else:
 
         if bool(int(lc_data['n_samples'][0])):
@@ -119,15 +130,19 @@ def main(args):
                         lc_data['filters'].index(fil) + 1)
         if bool(int(lc_data['n_samples'][0])):
             for s in lc_data['realizations'][fil]:
-                plt.plot(lc_data['xarr'][fil], s, color="gray", alpha=0.3)
-        plt.errorbar(lc_data[fil][:,0], lc_data[fil][:,1], 
+                plt.plot(lc_data['xarr'][fil], sign * np.array(s), color="gray", alpha=0.3)
+        plt.errorbar(lc_data[fil][:,0], sign * lc_data[fil][:,1], 
                      yerr=lc_data[fil][:,2], fmt="o", color='blue', label=fil)
-        plt.plot(lc_data['xarr'][fil], lc_data['GP_fit'][fil], 
+        plt.plot(lc_data['xarr'][fil], sign * lc_data['GP_fit'][fil], 
                  color='red', linewidth=2)
-        plt.ylabel("FLUXCAL")
+        plt.ylabel(ylabel)
         plt.xlabel("MJD")
         plt.legend()
-        plt.xlim(min(lc_data[fil][:,0]) - 1.0, max(lc_data[fil][:,0]) + 1.0)
+        plt.xlim(min(lc_data['xarr'][fil]) - 1.0, max(lc_data['xarr'][fil]) + 1.0)
+        if sign == -1.0:
+            plt.ylim(min(sign * lc_data[fil][:,1]) - 1.5*max(lc_data[fil][:,2]),max(sign * lc_data[fil][:,1]) + 1.5*max(lc_data[fil][:,2]))  
+            ax = plt.gca()
+            ax.invert_yaxis()
 
     f.tight_layout()
     plt.savefig("gp-SN" + lc_data['SNID:'][0] + ".png", dpi=350)

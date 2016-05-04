@@ -80,7 +80,10 @@ class LC(object):
                 pop[fil] = []
                 for line in self.raw[fil]:
                     quality = float(self.user_choices['quality_cut'][0])
-                    if float(line[-1]) >= quality:
+                    if float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'flux':
+                        pop[fil].append(line)
+                    elif float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'mag' and
+                    float(line[1]) < 50.0 and float(line[2]) < 50.0:
                         pop[fil].append(line)
 
             # check if there are at least 3 epochs in each filter
@@ -128,9 +131,16 @@ class LC(object):
         self.raw.update(self.user_choices)
 
         # fit light curve
+        if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+            p1 = [int(self.user_choices['epoch_predict'][0]), 
+                  int(self.user_choices['epoch_predict'][1])] 
+        else:
+            p1 = None
+
         self.fitted = fit_lc(self.raw, mean=mean, samples=samples,
                              screen=screen, do_mcmc=do_mcmc,
-                             save_mean=save_mean, save_samples=save_samples)
+                             save_mean=save_mean, save_samples=save_samples,
+                             predict=p1)
 
     def load_fit_GP(self, mean_file):
         """
@@ -207,11 +217,15 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if (min(self.fitted['xarr_shifted'][fil]) <=
+            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+                epoch_flags.append(True)
+
+            elif (min(self.fitted['xarr_shifted'][fil]) <=
                int(self.user_choices['epoch_cut'][0])) and \
                (max(self.fitted['xarr_shifted'][fil]) >=
                int(self.user_choices['epoch_cut'][1])):
                 epoch_flags.append(True)
+
             else:
                 epoch_flags.append(False)
 
@@ -235,8 +249,16 @@ class LC(object):
             func = interpolate.interp1d(xaxis, yaxis)
 
             # create new horizontal axis
-            xmin = float(self.user_choices['epoch_cut'][0])
-            xmax = float(self.user_choices['epoch_cut'][1])
+            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+                xmin = float(self.user_choices['epoch_predict'][0])
+                xmax = float(self.user_choices['epoch_predict'][1])
+            elif  self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'mag':
+                xmin = min(xaxis)
+                xmax = max(xaxis)
+            else:
+                xmin = float(self.user_choices['epoch_cut'][0])
+                xmax = float(self.user_choices['epoch_cut'][1])
+         
             xstep = float(self.user_choices['epoch_bin'][0])
             xnew = np.arange(xmin, xmax, xstep)
 
@@ -278,8 +300,13 @@ class LC(object):
         # set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
 
-        xmin = float(self.user_choices['epoch_cut'][0])
-        xmax = float(self.user_choices['epoch_cut'][1])
+        if self.user_choices['measurements'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
+            xmin = float(self.user_choices['epoch_predict'][0])
+            xmax = float(self.user_choices['epoch_predict'][1])
+            sign = 1.0
+
+        elif self.user_choices['measurements'][0] == 'mag':
+            sign = -1.0
 
         my_fig = plt.figure()
         for i in xrange(len(self.user_choices['filters'])):
@@ -299,20 +326,26 @@ class LC(object):
             if samples:
                 for curve in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil],
-                             np.array(curve) / self.fitted['max_flux'],
+                             sign * np.array(curve) / self.fitted['max_flux'],
                              color='gray', alpha=0.3)
             plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
-                         self.raw[fil][:, 1] / self.fitted['max_flux'],
+                         sign * self.raw[fil][:, 1] / self.fitted['max_flux'],
                          yerr=self.raw[fil][:, 2] / self.fitted['max_flux'],
                          color='blue', fmt='o')
             plt.xlabel('days since maximum', fontsize=15)
             plt.ylabel('normalized flux', fontsize=15)
-            plt.xlim(min(self.raw[fil][:, 0] - self.fitted['peak_mjd']) - 1.0,
-                     max(self.raw[fil][:, 0] - self.fitted['peak_mjd']) + 1.0)
-            plt.vlines(xmin, my_axis.get_ylim()[0], func(xmin), color='black',
-                       linestyles='dashed')
-            plt.vlines(xmax, my_axis.get_ylim()[0], func(xmax), color='black',
-                       linestyles='dashed')
+            plt.xlim(min(self.fitted['xarr_shifted'][fil]) - 1.0,
+                     max(self.fitted['xarr_shifted'][fil]) + 1.0)
+            if self.user_choices['measurements'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
+                plt.vlines(xmin, my_axis.get_ylim()[0], func(xmin), color='black',
+                           linestyles='dashed')
+                plt.vlines(xmax, my_axis.get_ylim()[0], func(xmax), color='black',
+                           linestyles='dashed')
+
+            if sign == -1.0:
+                plt.ylim(min(sign * self.raw[fil][:, 1]) - 1.5*max(self.raw[fil][:, 2]),max(sign *self.raw[fil][:, 1]) + 1.5*max(self.raw[fil][:, 2]))  
+                ax = plt.gca()
+                ax.invert_yaxis()
 
         my_fig.tight_layout()
 
