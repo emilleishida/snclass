@@ -82,8 +82,7 @@ class LC(object):
                     quality = float(self.user_choices['quality_cut'][0])
                     if float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'flux':
                         pop[fil].append(line)
-                    elif float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'mag' and
-                    float(line[1]) < 50.0 and float(line[2]) < 50.0:
+                    elif float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'mag' and float(line[1]) < 50.0 and float(line[2]) < 50.0:
                         pop[fil].append(line)
 
             # check if there are at least 3 epochs in each filter

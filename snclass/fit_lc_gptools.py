@@ -102,7 +102,7 @@ def save_result(data, mean=True, samples=False):
 
     if samples:
         op1 = open(data['samples_dir'][0] + data['file_root'][0] +
-                   data['SNID:'][0] + '_samples.dat', 'w')
+                   data['SNID:'][0] + '_' + data['measurement'][0] + '_samples.dat', 'w')
         op1.write('filter    MJD    ')
         xfil = data['filters'][0]
         for j in xrange(len(data['realizations'][xfil])):
@@ -125,7 +125,7 @@ def save_result(data, mean=True, samples=False):
 
     if mean:
         op2 = open(data['samples_dir'][0] + data['file_root'][0] +
-                   data['SNID:'][0] + '_mean.dat', 'w')
+                   data['SNID:'][0] + '_' + data['measurement'][0] + '_mean.dat', 'w')
         op2.write('filter    MJD    GP_fit     GP_std')
         if 'SIM_NON1a:' in data.keys():
                 op2.write('    type\n')
