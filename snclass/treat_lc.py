@@ -307,8 +307,6 @@ class LC(object):
         elif self.user_choices['measurement'][0] == 'mag':
             sign = -1.0
 
-        print sign
-
         my_fig = plt.figure()
         for i in xrange(len(self.user_choices['filters'])):
 
