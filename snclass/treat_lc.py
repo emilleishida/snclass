@@ -299,13 +299,15 @@ class LC(object):
         # set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
 
-        if self.user_choices['measurements'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
+        if self.user_choices['measurement'][0] == 'flux':
             xmin = float(self.user_choices['epoch_predict'][0])
             xmax = float(self.user_choices['epoch_predict'][1])
             sign = 1.0
 
-        elif self.user_choices['measurements'][0] == 'mag':
+        elif self.user_choices['measurement'][0] == 'mag':
             sign = -1.0
+
+        print sign
 
         my_fig = plt.figure()
         for i in xrange(len(self.user_choices['filters'])):
@@ -335,7 +337,7 @@ class LC(object):
             plt.ylabel('normalized flux', fontsize=15)
             plt.xlim(min(self.fitted['xarr_shifted'][fil]) - 1.0,
                      max(self.fitted['xarr_shifted'][fil]) + 1.0)
-            if self.user_choices['measurements'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
+            if self.user_choices['measurement'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
                 plt.vlines(xmin, my_axis.get_ylim()[0], func(xmin), color='black',
                            linestyles='dashed')
                 plt.vlines(xmax, my_axis.get_ylim()[0], func(xmax), color='black',
@@ -401,7 +403,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
 
         if not os.path.isfile(user_choices['samples_dir'][0] + \
                               user_choices['file_root'][0] + \
-                              raw['SNID:'][0] + '_mean.dat'):
+                              raw['SNID:'][0] + '_' + user_choices['measurement'][0] +  '_mean.dat'):
 
             # initiate light curve object
             my_lc = LC(raw, user_choices)
@@ -421,7 +423,9 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
                              screen=bool(int(user_choices['screen'][0])))
 
                 if plot:
-                    my_lc.plot_fitted(file_out='gp-SN' + raw['SNID:'][0] + '.png')
+                    my_lc.normalize()
+                    my_lc.mjd_shift()
+                    my_lc.plot_fitted(file_out=user_choices['path_output_plot'][0] + 'gp-SN' + raw['SNID:'][0] + '_' + user_choices['measurement'][0] + '.png')
 
                 print '\n'
 
