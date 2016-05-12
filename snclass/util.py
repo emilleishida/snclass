@@ -40,19 +40,22 @@ import os
 from snclass.functions import screen
 
 
-def translate_snid(snid):
+def translate_snid(snid, meas):
     """
     Translate a general sn id between SNANA and raw SNID format.
 
     input: snid, str
            name of file or other string containing sind
+ 
+           meas, str
+           type of measurment (e.g. flux, mag, photon)
 
     output: raw snana file name and/or shorten snid
     """
     if 'mean' in snid:
-        name1 = snid[:-len('_mean.dat')]
+        name1 = snid[:-len('_' + meas + '_mean.dat')]
     elif 'samples' in snid:
-        name1 = snid[:-len('_samples.dat')]
+        name1 = snid[:-len('_' + meas + '_samples.dat')]
     elif '.DAT' in snid:
         name1 = snid[:-len('.DAT')]
     else:
@@ -87,6 +90,9 @@ def translate_snid(snid):
                 name3 = '000' + name2
             elif len(name2) == 2:
                 name3 = '0000' + name2
+            else:
+                print snid
+                raise NameError('File name not following convention!')
 
             return 'DES_SN' + name3 + '.DAT', name2
 

@@ -129,7 +129,6 @@ def main(args):
 
     #initiate figure
     f = plt.figure()
-    print 'sign = ' + str(sign)
     for fil in user_input['filters']:
 
         # Plot the samples in data space.

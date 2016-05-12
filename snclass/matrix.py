@@ -76,7 +76,7 @@ class DataMatrix(object):
         screen('Fitting ' + filename, self.user_choices)
 
         # translate identifier
-        self.user_choices['path_to_lc'] = [translate_snid(filename)[0]]
+        self.user_choices['path_to_lc'] = [translate_snid(filename, self.user_choices['measurement'][0])[0]]
 
         # read light curve raw data
         raw = read_snana_lc(self.user_choices)

@@ -311,28 +311,44 @@ class LC(object):
         for i in xrange(len(self.user_choices['filters'])):
 
             fil = self.user_choices['filters'][i]
-            func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
-                                        self.fitted['norm_fit'][fil])
 
             plt.subplot(2, len(self.user_choices['filters']) / 2 +
                         len(self.user_choices['filters']) % 2, i + 1)
             my_axis = plt.gca()
             plt.title('filter = ' + fil)
-            plt.plot(self.fitted['xarr_shifted'][fil],
-                     self.fitted['norm_fit'][fil], color='red')
+
+            if sign == 1.0:
+                func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
+                                        self.fitted['norm_fit'][fil])
+                plt.plot(self.fitted['xarr_shifted'][fil],
+                         self.fitted['norm_fit'][fil], color='red')
+                plt.ylabel('normalized flux', fontsize=15)
+                plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
+                             sign * self.raw[fil][:, 1] / self.fitted['max_flux'],
+                             yerr=self.raw[fil][:, 2] / self.fitted['max_flux'],
+                             color='blue', fmt='o')
+            else:
+                func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
+                                        self.fitted['GP_fit'][fil])
+                plt.plot(self.fitted['xarr_shifted'][fil],
+                         sign * self.fitted['GP_fit'][fil], color='red')
+                plt.ylabel('magnitude', fontsize=15)
+                plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
+                             sign * self.raw[fil][:, 1],
+                             yerr=self.raw[fil][:, 2], color='blue', fmt='o')
 
             # plot samples
-            if samples:
+            if samples and sign == 1.0:
                 for curve in self.fitted['realizations'][fil]:
                     plt.plot(self.fitted['xarr_shifted'][fil],
                              sign * np.array(curve) / self.fitted['max_flux'],
                              color='gray', alpha=0.3)
-            plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
-                         sign * self.raw[fil][:, 1] / self.fitted['max_flux'],
-                         yerr=self.raw[fil][:, 2] / self.fitted['max_flux'],
-                         color='blue', fmt='o')
+            elif samples and sign == -1.0:
+                for curve in self.fitted['realizations'][fil]:
+                    plt.plot(self.fitted['xarr_shifted'][fil],
+                             sign * np.array(curve), color='gray', alpha=0.3)
+                
             plt.xlabel('days since maximum', fontsize=15)
-            plt.ylabel('normalized flux', fontsize=15)
             plt.xlim(min(self.fitted['xarr_shifted'][fil]) - 1.0,
                      max(self.fitted['xarr_shifted'][fil]) + 1.0)
             if self.user_choices['measurement'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
@@ -342,14 +358,14 @@ class LC(object):
                            linestyles='dashed')
 
             if sign == -1.0:
-                plt.ylim(min(sign * self.raw[fil][:, 1]) - 1.5*max(self.raw[fil][:, 2]),max(sign *self.raw[fil][:, 1]) + 1.5*max(self.raw[fil][:, 2]))  
                 ax = plt.gca()
+                plt.ylim(min(sign * self.raw[fil][:, 1]) - 1.5*max(self.raw[fil][:, 2]),max(sign *self.raw[fil][:, 1]) + 1.5*max(self.raw[fil][:, 2]))  
                 ax.invert_yaxis()
 
         my_fig.tight_layout()
 
         if isinstance(file_out, str):
-            plt.savefig(file_out)
+            plt.savefig(self.user_choices['path_output_plot'][0] + file_out)
             plt.close()
         else:
             plt.show()

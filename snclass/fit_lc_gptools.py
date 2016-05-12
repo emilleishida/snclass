@@ -113,7 +113,6 @@ def save_result(data, mean=True, samples=False):
                 op1.write(fil + '    ' +
                           str(data['xarr'][fil][i]) + '    ')
                 if data['measurement'][0] == 'flux':
-                    print data['measurement'][0]
                     for j in xrange(len(data['realizations'][xfil])):
                         op1.write(str(data['realizations'][fil][j][i]) +
                                   '    ')
