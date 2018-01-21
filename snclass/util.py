@@ -329,7 +329,7 @@ def read_snana_lc(params):
     # build measurement list for each filter
     fils = params['filters']
 
-    if params['measurement'][0] == 'mag':
+    if params['photon_flag'][0] == 'mag':
         sign = -1
     else:
         sign = 1
@@ -339,12 +339,12 @@ def read_snana_lc(params):
         l1 = []
         for line in data1:
             if  len(line) > 1 and line[0] == params['epoch_flag'][0] and line[pindx['filter']] == fil and float(line[pindx['quality']]) >= float(params['quality_cut'][0]):
-                if params['measurement'][0] == 'mag' and float(line[pindx['photon']]) < 50.0 and float(line[pindx['photonerr']]) < 50.0:
+                if params['photon_flag'][0] == 'mag' and float(line[pindx['photonerr_flag']]) < 50.0 and float(line[pindx['photonerr']]) < 50.0:
                     l1.append([float(line[pindx['mjd']]),
                                     -float(line[pindx['photon']]),
                                     float(line[pindx['photonerr']]),
                                     float(line[pindx['quality']])])
-                elif params['measurement'][0] == 'flux' and float(line[pindx['photon']]) > 0:
+                elif params['photon_flag'][0] == 'FLUXCAL' and float(line[pindx['photon']]) > 0:
                     l1.append([float(line[pindx['mjd']]),
                                     float(line[pindx['photon']]),
                                     float(line[pindx['photonerr']]),

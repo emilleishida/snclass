@@ -31,6 +31,7 @@ class LC(object):
         - mjd_shift: Determine day of maximum and shift all epochs.
         - check_epoch: Check if all filters satisfy epoch requirements.
         - build_steps: Build lines for the initial data matrix.
+        - plot_raw: Plot raw data.
         - plot_fitted: Plotted light curve as it enters the data matrix.
 
     Attributes:
@@ -80,9 +81,9 @@ class LC(object):
                 pop[fil] = []
                 for line in self.raw[fil]:
                     quality = float(self.user_choices['quality_cut'][0])
-                    if float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'flux':
+                    if float(line[-1]) >= quality and self.user_choices['photon_flag'][0] == 'FLUXCAL':
                         pop[fil].append(line)
-                    elif float(line[-1]) >= quality and self.user_choices['measurement'][0] == 'mag' and float(line[1]) < 50.0 and float(line[2]) < 50.0:
+                    elif float(line[-1]) >= quality and self.user_choices['photon_flag'][0] == 'mag' and float(line[1]) < 50.0 and float(line[2]) < 50.0:
                         pop[fil].append(line)
 
             # check if there are at least 3 epochs in each filter
@@ -130,7 +131,7 @@ class LC(object):
         self.raw.update(self.user_choices)
 
         # fit light curve
-        if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+        if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['photon_flag'][0] == 'FLUXCAL':
             p1 = [int(self.user_choices['epoch_predict'][0]), 
                   int(self.user_choices['epoch_predict'][1])] 
         else:
@@ -216,7 +217,7 @@ class LC(object):
         epoch_flags = []
 
         for fil in self.user_choices['filters']:
-            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['photon_flag'][0] == 'FLUXCAL':
                 epoch_flags.append(True)
 
             elif (min(self.fitted['xarr_shifted'][fil]) <=
@@ -248,10 +249,10 @@ class LC(object):
             func = interpolate.interp1d(xaxis, yaxis)
 
             # create new horizontal axis
-            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'flux':
+            if self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['photon_flag'][0] == 'FLUXCAL':
                 xmin = float(self.user_choices['epoch_predict'][0])
                 xmax = float(self.user_choices['epoch_predict'][1])
-            elif  self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['measurement'][0] == 'mag':
+            elif  self.user_choices['epoch_cut'][0] == '-999' and self.user_choices['photon_flag'][0] == 'mag':
                 xmin = min(xaxis)
                 xmax = max(xaxis)
             else:
@@ -283,6 +284,63 @@ class LC(object):
                     for element in new_grid:
                         line.append(element)
                 self.samples_for_matrix.append(line)
+
+    def plot_raw(self, file_out=None):
+        """
+        Plot raw data.
+
+        input: file_out ->   bool, optional
+                             File name where to store the final plot.
+                             If None shows the plot in the screen.
+                             Default is None.
+
+        output: if file_out is str -> plot wrote to file
+        """
+        # set the number of samples variable according to input
+
+        if self.user_choices['photon_flag'][0] == 'FLUXCAL':
+            xmin = float(self.user_choices['epoch_predict'][0])
+            xmax = float(self.user_choices['epoch_predict'][1])
+            sign = 1.0
+
+        elif self.user_choices['photon_flag'][0] == 'MAG':
+            sign = -1.0
+
+        my_fig = plt.figure(figsize=(10,10))
+        plt.suptitle('SNID ' + self.raw['SNID:'][0])
+        for i in xrange(len(self.user_choices['filters'])):
+
+            fil = self.user_choices['filters'][i]
+
+            plt.subplot(2, len(self.user_choices['filters']) / 2 +
+                        len(self.user_choices['filters']) % 2, i + 1)
+            my_axis = plt.gca()
+            plt.title('filter = ' + fil)
+
+            if sign == 1.0:
+                plt.errorbar(self.raw[fil][:, 0],
+                             sign * self.raw[fil][:, 1],
+                             yerr=self.raw[fil][:, 2],
+                             color='blue', fmt='o')
+            else:
+                plt.errorbar(self.raw[fil][:, 0],
+                             sign * self.raw[fil][:, 1],
+                             yerr=self.raw[fil][:, 2], color='blue', fmt='o')
+
+            plt.xlabel('days since maximum', fontsize=15)
+
+            if sign == -1.0:
+                ax = plt.gca()
+                plt.ylim(min(sign * self.raw[fil][:, 1]) - 1.5*max(self.raw[fil][:, 2]),max(sign *self.raw[fil][:, 1]) + 1.5*max(self.raw[fil][:, 2]))  
+                ax.invert_yaxis()
+
+        my_fig.tight_layout()
+
+        if isinstance(file_out, str):
+            plt.savefig(self.user_choices['path_output_plot'][0] + file_out)
+            plt.close()
+        else:
+            plt.show()
                 
 
     def plot_fitted(self, file_out=None):
@@ -299,15 +357,16 @@ class LC(object):
         # set the number of samples variable according to input
         samples = bool(int(self.user_choices['n_samples'][0]))
 
-        if self.user_choices['measurement'][0] == 'flux':
+        if self.user_choices['photon_flag'][0] == 'FLUXCAL':
             xmin = float(self.user_choices['epoch_predict'][0])
             xmax = float(self.user_choices['epoch_predict'][1])
             sign = 1.0
 
-        elif self.user_choices['measurement'][0] == 'mag':
+        elif self.user_choices['photon_flag'][0] == 'mag':
             sign = -1.0
 
-        my_fig = plt.figure()
+        my_fig = plt.figure(figsize=(10,10))
+        plt.suptitle('SNID ' + self.raw['SNID:'][0])
         for i in xrange(len(self.user_choices['filters'])):
 
             fil = self.user_choices['filters'][i]
@@ -331,7 +390,7 @@ class LC(object):
                 func = interpolate.interp1d(self.fitted['xarr_shifted'][fil],
                                         self.fitted['GP_fit'][fil])
                 plt.plot(self.fitted['xarr_shifted'][fil],
-                         sign * self.fitted['GP_fit'][fil], color='red')
+                         sign * np.array(self.fitted['GP_fit'][fil]), color='red')
                 plt.ylabel('magnitude', fontsize=15)
                 plt.errorbar(self.raw[fil][:, 0] - self.fitted['peak_mjd'],
                              sign * self.raw[fil][:, 1],
@@ -351,7 +410,7 @@ class LC(object):
             plt.xlabel('days since maximum', fontsize=15)
             plt.xlim(min(self.fitted['xarr_shifted'][fil]) - 1.0,
                      max(self.fitted['xarr_shifted'][fil]) + 1.0)
-            if self.user_choices['measurement'][0] == 'flux' and self.user_choices['epoch_cut'][0] != '-999':
+            if self.user_choices['photon_flag'][0] == 'FLUXCAL' and self.user_choices['epoch_cut'][0] != '-999':
                 plt.vlines(xmin, my_axis.get_ylim()[0], func(xmin), color='black',
                            linestyles='dashed')
                 plt.vlines(xmax, my_axis.get_ylim()[0], func(xmax), color='black',
@@ -417,7 +476,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
 
         if not os.path.isfile(user_choices['samples_dir'][0] + \
                               user_choices['file_root'][0] + \
-                              raw['SNID:'][0] + '_' + user_choices['measurement'][0] +  '_mean.dat'):
+                              raw['SNID:'][0] + '_' + user_choices['photon_flag'][0] +  '_mean.dat'):
 
             # initiate light curve object
             my_lc = LC(raw, user_choices)
@@ -439,7 +498,7 @@ def fit_objs(user_choices, plot=False, calc_mean=True, calc_samp=False,
                 if plot:
                     my_lc.normalize()
                     my_lc.mjd_shift()
-                    my_lc.plot_fitted(file_out=user_choices['path_output_plot'][0] + 'gp-SN' + raw['SNID:'][0] + '_' + user_choices['measurement'][0] + '.png')
+                    my_lc.plot_fitted(file_out=user_choices['path_output_plot'][0] + 'gp-SN' + raw['SNID:'][0] + '_' + user_choices['photon_flag'][0] + '.png')
 
                 print '\n'
 

@@ -38,6 +38,7 @@ def imp_gptools(data, fil, mcmc=True, p=None):
     output: data, dict
             updated dictionary with GP results
     """
+
     # format data
     mjd = data[fil][:, 0]
     flux = data[fil][:, 1]
@@ -67,8 +68,15 @@ def imp_gptools(data, fil, mcmc=True, p=None):
                                           thin=int(data['thin'][0]))
 
     else:
-        data['GP_obj'][fil].optimize_hyperparameters()
-        out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=False)
+        try:
+            data['GP_obj'][fil].optimize_hyperparameters()
+            out = data['GP_obj'][fil].predict(data['xarr'][fil], use_MCMC=False)
+            data['fitting_flag'].append(True)
+
+        except ValueError or TypeError:
+            data['fitting_flag'].append(False)
+            out  = [None, None]
+            print 'Failed fitting!'
 
     data['GP_fit'][fil] = out[0]
     data['GP_std'][fil] = out[1]
@@ -96,13 +104,14 @@ def save_result(data, mean=True, samples=False):
            if True, save draws from GP fit
            Default is False
     """
+
     # check if storage directory exsts
     if not os.path.exists(data['samples_dir'][0]):
         os.makedirs(data['samples_dir'][0])
 
     if samples:
         op1 = open(data['samples_dir'][0] + data['file_root'][0] +
-                   data['SNID:'][0] + '_' + data['measurement'][0] + '_samples.dat', 'w')
+                   data['SNID:'][0] + '_' + data['photon_flag'][0] + '_samples.dat', 'w')
         op1.write('filter    MJD    ')
         xfil = data['filters'][0]
         for j in xrange(len(data['realizations'][xfil])):
@@ -112,7 +121,7 @@ def save_result(data, mean=True, samples=False):
             for i in xrange(len(data['xarr'][fil])):
                 op1.write(fil + '    ' +
                           str(data['xarr'][fil][i]) + '    ')
-                if data['measurement'][0] == 'flux':
+                if data['photon_flag'][0] == 'FLUXCAL':
                     for j in xrange(len(data['realizations'][xfil])):
                         op1.write(str(data['realizations'][fil][j][i]) +
                                   '    ')
@@ -123,9 +132,9 @@ def save_result(data, mean=True, samples=False):
                 op1.write('\n')
         op1.close()
 
-    if mean:
+    if mean and False not in data['fitting_flag']:
         op2 = open(data['samples_dir'][0] + data['file_root'][0] +
-                   data['SNID:'][0] + '_' + data['measurement'][0] + '_mean.dat', 'w')
+                   data['SNID:'][0] + '_' + data['photon_flag'][0] + '_mean.dat', 'w')
         op2.write('filter    MJD    GP_fit     GP_std')
         if 'SIM_NON1a:' in data.keys():
                 op2.write('    type\n')
@@ -134,7 +143,7 @@ def save_result(data, mean=True, samples=False):
 
         for fil in data['filters']:
             for k in xrange(len(data['xarr'][fil])):
-                if data['measurement'][0] == 'flux':
+                if data['photon_flag'][0] == 'FLUXCAL':
                     op2.write(fil + '    ' + str(data['xarr'][fil][k]) +
                               '    ' + str(data['GP_fit'][fil][k]) +
                               '    ' + str(data['GP_std'][fil][k]))
@@ -191,7 +200,6 @@ def samp_mcmc(fil, data, screen=False):
 
 
 def run_filters(data, fil, do_mcmc, screen=False, mean=True, samples=False, predict=None):
-
 
     if screen:
         print '... filter: ' + fil
@@ -251,6 +259,8 @@ def fit_lc(data, mean=True, samples=False, screen=False, do_mcmc=True,
                     realizations
     """
     key_list = ['realizations', 'xarr', 'GP_std', 'GP_obj']
+
+    data['fitting_flag'] = []
 
     for name in key_list:
         if name not in data.keys():
