@@ -3,6 +3,10 @@ Created by Emille Ishida in May, 2015.
 
 Miscelaneous functions for supernova classification.
 
+
+- translate_snid:
+    Translate a general sn id between SNANA and raw SNID format.
+
 - check_reduction:
         Check dimensionality reduction function input choices.
 

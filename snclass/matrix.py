@@ -76,7 +76,7 @@ class DataMatrix(object):
         screen('Fitting ' + filename, self.user_choices)
 
         # translate identifier
-        self.user_choices['path_to_lc'] = [translate_snid(filename, self.user_choices['measurement'][0])[0]]
+        self.user_choices['path_to_lc'] = [translate_snid(filename, self.user_choices['photon_flag'][0])[0]]
 
         # read light curve raw data
         raw = read_snana_lc(self.user_choices)
@@ -196,7 +196,7 @@ class DataMatrix(object):
         # correct type parameters if necessary
         types_func = self.user_choices['transform_types_func']
         if types_func is not None:
-            self.sntype = types_func(self.sntype, Ia_flag=self.user_choices['Ia_flag'])
+            self.sntype = types_func(self.sntype, self.user_choices['Ia_flag'][0])
 
         # initialize parameters
         data = self.datam
@@ -283,7 +283,7 @@ class DataMatrix(object):
             snIbc = self.sntype == 'Ibc'
             snII = self.sntype == 'II'
 
-        plt.figure()
+        plt.figure(figsize=(10,10))
         if '0' in self.sntype:
             plt.scatter(xdata[nonIa], ydata[nonIa], color='purple', marker='s',
                         label='spec non-Ia')
@@ -298,10 +298,17 @@ class DataMatrix(object):
                         label='spec Ia')
 
         if test is not None:
-            plt.title('prob_Ia = ' + str(round(test['prob_Ia'], 2)))
-            plt.scatter(test['data'][:,pcs[0]], test['data'][:,pcs[1]],
-                        marker='*', color='red', 
-                        label='test - ' + test['type'])
+            if len(test.samples_for_matrix) > 0:
+                plt.title('prob_Ia = ' + str(round(test['prob_Ia'], 2)))
+
+            if test.raw['SIM_NON1a:'][0] == '0':
+                sntype = 'Ia'
+            else:
+                sntype = 'nonIa'
+
+            plt.scatter([test.test_proj[0][pcs[0]]], [test.test_proj[0][pcs[1]]],
+                        marker='*', color='red', s=75,
+                        label='photo ' + sntype)
         plt.xlabel('kPC' + str(pcs[0] + 1), fontsize=14)
         plt.ylabel('kPC' + str(pcs[1] + 1), fontsize=14)
         plt.legend(fontsize=12)
@@ -310,6 +317,9 @@ class DataMatrix(object):
         if file_out is not None:
             plt.savefig(file_out)
         plt.close()
+
+
+
 
 def main():
     """Print documentation."""

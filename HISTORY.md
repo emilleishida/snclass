@@ -32,5 +32,9 @@ May 26, 2015
 1. Included a separate function for fitting a set of objects. 
 2. Separated the fitting from the matrix building algorithms. 
 3. Improved the output format for the mean and samples.
-
+----------------------------------------------------------------
+January 21, 2018
+1. Fixed name of key for measurement choice
+2. Include workaround to avoid GP fitting mistakes in max
+   likelihood estimator
 

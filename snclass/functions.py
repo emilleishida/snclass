@@ -70,7 +70,7 @@ def kpca(data_matrix, pars, transform=False):
             collumns are projections over different kPCs.
     """
     obj_kpca = KernelPCA(kernel=pars['kernel'], gamma=pars['gamma'],
-                         n_components=pars['ncomp'])
+                         n_components=int(pars['ncomp']))
     x_kpca = obj_kpca.fit_transform(data_matrix)
 
     if transform:
