@@ -87,7 +87,7 @@ class LC(object):
                         pop[fil].append(line)
 
             # check if there are at least 3 epochs in each filter
-            epoch_cut = all(len(pop[fil]) > 2
+            epoch_cut = all(len(pop[fil]) >= int(self.user_choices['nepoch_cut'][0])
                             for fil in self.user_choices['filters'])
 
             if epoch_cut:
@@ -317,19 +317,19 @@ class LC(object):
             my_axis = plt.gca()
             plt.title('filter = ' + fil)
 
-            if sign == 1.0:
+            if sign == 1.0 and len(self.raw[fil][:,0]) > 0:
                 plt.errorbar(self.raw[fil][:, 0],
                              sign * self.raw[fil][:, 1],
                              yerr=self.raw[fil][:, 2],
                              color='blue', fmt='o')
-            else:
+            elif len(self.raw[fil][:,0]) > 0:
                 plt.errorbar(self.raw[fil][:, 0],
                              sign * self.raw[fil][:, 1],
                              yerr=self.raw[fil][:, 2], color='blue', fmt='o')
 
             plt.xlabel('days since maximum', fontsize=15)
 
-            if sign == -1.0:
+            if sign == -1.0 and len(self.raw[fil][:,0]) > 0:
                 ax = plt.gca()
                 plt.ylim(min(sign * self.raw[fil][:, 1]) - 1.5*max(self.raw[fil][:, 2]),max(sign *self.raw[fil][:, 1]) + 1.5*max(self.raw[fil][:, 2]))  
                 ax.invert_yaxis()
