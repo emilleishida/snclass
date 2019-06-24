@@ -1,10 +1,3 @@
-***
-**Warning**
-
-This code is under development!
-***
-
-
 snclass - Supernova Photometric Classifier
 ==========================================
 
